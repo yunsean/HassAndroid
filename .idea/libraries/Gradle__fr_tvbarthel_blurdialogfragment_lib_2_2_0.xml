@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: fr.tvbarthel.blurdialogfragment:lib-2.2.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/lib-2.2.0.aar/ad52416fb3ca598b7dacd9785d631660/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/lib-2.2.0.aar/ad52416fb3ca598b7dacd9785d631660/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/fr.tvbarthel.blurdialogfragment/lib/2.2.0/ce2dbb8cbc11ad680970bf0415470fbe628893f4/lib-2.2.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

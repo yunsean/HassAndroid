@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="#fff5f5f5"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="10dip"
+            android:textColor="#ff777777"
+            android:textSize="13sp"
+            android:text="需要朗读的文字："/>
+        <TextView
+            android:id="@+id/send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:paddingTop="10dip"
+            android:paddingBottom="10dip"
+            android:paddingLeft="20dip"
+            android:paddingRight="10dip"
+            android:textSize="16sp"
+            android:textColor="@color/colorPrimary"
+            android:text="发送"/>
+    </LinearLayout>
+    <EditText
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:layout_marginBottom="10dip"
+        android:gravity="top"
+        android:background="@drawable/shape_round_ffffff_10dip"
+        android:padding="10dip"
+        android:textColor="#ff555555"
+        android:textSize="14sp"
+        android:textColorHint="#ffaaaaaa"
+        android:hint="输入需要朗读的文字内容"/>
+
+</LinearLayout>

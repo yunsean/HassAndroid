@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/view_mine_left_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dip"
+    android:paddingLeft="10dip"
+    android:paddingRight="10dip"
+    android:gravity="center_vertical"
+    android:background="@color/white"
+    android:orientation="horizontal">
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:drawableLeft="@drawable/ic_alarms_blue_24dp"
+        android:drawablePadding="10dip"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:paddingLeft="8dp"
+        android:textColor="#ff555555"
+        android:textSize="14sp"
+        tools:text="TAB 1"/>
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dip"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:textColor="#ff999999"
+        android:textSize="14sp"
+        tools:text="TAB 1"/>
+</LinearLayout>

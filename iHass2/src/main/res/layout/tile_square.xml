@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="1dp"
+    android:layout_marginRight="1dp"
+    app:cardBackgroundColor="#ffffffff"
+    app:cardCornerRadius="1dp"
+    app:cardElevation="2dp"
+    app:cardPreventCornerOverlap="false"
+    app:cardUseCompatPadding="true">
+    <com.zhy.android.percent.support.PercentRelativeLayout
+        android:id="@+id/contentView"
+        android:background="@drawable/selector_ffffff_eeeeee"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_heightPercent="100%w" />
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:paddingBottom="15dip"
+            android:lines="1"
+            android:textColor="@color/color_xiaomi"
+            android:textSize="24sp"
+            android:textStyle="normal"
+            app:autoSizeTextType="none"
+            app:fontFamily="@font/mdi"
+            tools:ignore="MissingPrefix"
+            tools:text="\uf033"/>
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:paddingTop="25dip"
+            android:gravity="center"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="8sp"
+            android:textColor="@color/color_xiaomi"
+            tools:text="@string/app_name"/>
+    </com.zhy.android.percent.support.PercentRelativeLayout>
+</android.support.v7.widget.CardView>

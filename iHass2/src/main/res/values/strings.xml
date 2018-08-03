@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">iHass2</string>
+    <string name="hass_connect_hosturl">基础 URL: (示例: http://192.168.2.1:8123)</string>
+    <string name="hass_connect_password">Hass访问密码（可选）</string>
+    <string name="hass_connect_connect">连接</string>
+    <string name="hass_panel_empty">你的仪表板是空的</string>
+    <string name="hass_panel_edit">编辑面板</string>
+</resources>

@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.yunsean.SharedLibrary:dynuiparts-1.0.3.5">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/dynuiparts-1.0.3.5.aar/770b55476d9a0b1dfe05b042d322fe9c/jars/libs/pinyin4j-2.5.0.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/dynuiparts-1.0.3.5.aar/770b55476d9a0b1dfe05b042d322fe9c/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/dynuiparts-1.0.3.5.aar/770b55476d9a0b1dfe05b042d322fe9c/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,69 @@
+<resources>
+
+    <style name="TitleBarBackground">
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
+    <style name="MyActivityPushAnimate" parent="@android:style/Animation.Translucent">
+        <item name="android:activityOpenEnterAnimation">@anim/push_right_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/push_left_out</item>
+        <item name="android:activityCloseEnterAnimation">@anim/push_left_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/push_right_out</item>
+        <item name="android:taskOpenEnterAnimation">@anim/push_right_in</item>
+        <item name="android:taskOpenExitAnimation">@anim/push_left_out</item>
+        <item name="android:taskCloseEnterAnimation">@anim/push_left_in</item>
+        <item name="android:taskCloseExitAnimation">@anim/push_right_out</item>
+        <item name="android:taskToFrontEnterAnimation">@anim/push_right_in</item>
+        <item name="android:taskToFrontExitAnimation">@anim/push_left_out</item>
+        <item name="android:taskToBackEnterAnimation">@anim/push_left_in</item>
+        <item name="android:taskToBackExitAnimation">@anim/push_right_out</item>
+    </style>
+
+    <style name="BaseTheme" parent="@style/Theme.AppCompat.Light">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowActionBar">true</item>
+        <item name="android:windowAnimationStyle">@style/MyActivityPushAnimate</item>
+        <item name="android:windowTitleSize">@dimen/titlebar_height</item>
+        <item name="android:windowTitleBackgroundStyle">@style/TitleBarBackground</item>
+    </style>
+    <style name="MyAppTheme" parent="@style/BaseTheme">
+    </style>
+    <style name="MyPreviewAppTheme" parent="@style/BaseTheme">
+        <item name="android:windowBackground">@color/gray</item>
+        <item name="android:windowIsTranslucent">false</item>
+    </style>
+
+    <style name="BaseNoTitlebarTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@style/MyActivityPushAnimate</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+    </style>
+    <style name="MyNoTitlebarTheme" parent="@style/BaseNoTitlebarTheme">
+    </style>
+    <style name="MyBlueNoTitlebarTheme" parent="@style/BaseNoTitlebarTheme">
+        <item name="android:windowBackground">@color/colorPrimary</item>
+        <item name="android:windowIsTranslucent">false</item>
+    </style>
+
+    <style name="NoShadeCenterDialog" parent="@style/CenterDialog" >
+        <item name="android:backgroundDimAmount">0.0</item>
+    </style>
+
+
+    <style name="BaseFullscreenTheme" parent="@style/BaseNoTitlebarTheme">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+    <style name="MyFullScreenTheme" parent="@style/BaseFullscreenTheme">
+    </style>
+    <style name="MyBlueFullScreenTheme" parent="@style/BaseFullscreenTheme">
+        <item name="android:windowBackground">@color/colorPrimary</item>
+        <item name="android:windowIsTranslucent">false</item>
+    </style>
+
+</resources>

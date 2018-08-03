@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+  	android:layout_height="wrap_content"
+	android:background="@drawable/shape_round_ffffff_10dip"
+  	android:orientation="vertical">
+	<TextView
+	    android:id="@+id/title"
+		android:layout_width="match_parent"
+  		android:layout_height="30dip"
+  		android:gravity="center"
+		android:visibility="visible"
+		android:textColor="#ff333333"
+		android:textSize="14sp"
+		android:text="添加面板内容" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="5dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/choiceGroup"
+		android:clickable="true"
+		android:layout_width="match_parent"
+		android:layout_height="44dip"
+		android:gravity="center"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp_lb_rb"
+		android:orientation="vertical"
+		android:textSize="16sp"
+		android:textColor="@color/colorPrimary"
+		android:text="分组" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/choiceBlank"
+		android:clickable="true"
+		android:layout_width="match_parent"
+		android:layout_height="44dip"
+		android:gravity="center"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp_lb_rb"
+		android:orientation="vertical"
+		android:textSize="16sp"
+		android:textColor="@color/colorPrimary"
+		android:text="空白" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="3dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/choiceItem"
+		android:clickable="true"
+		android:layout_width="match_parent"
+		android:layout_height="44dip"
+		android:gravity="center"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp_lb_rb"
+		android:orientation="vertical"
+		android:textSize="16sp"
+		android:textColor="@color/colorPrimary"
+		android:text="元素" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="5dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/choiceCancel"
+		android:layout_width="match_parent"
+		android:layout_height="44dip"
+		android:layout_marginBottom="8dip"
+		android:paddingLeft="10dip"
+		android:paddingRight="10dip"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp"
+		android:gravity="center"
+		android:visibility="visible"
+		android:textColor="#ffaaaaaa"
+		android:textSize="16sp"
+		android:text="取消" />
+</LinearLayout>
