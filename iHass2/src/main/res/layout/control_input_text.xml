@@ -26,9 +26,12 @@
             android:layout_width="match_parent"
             android:layout_height="100dip"
             android:background="@drawable/shape_bound_aaaaaa_5dip"
+            android:maxLines="10"
+            android:singleLine="false"
+            android:scrollHorizontally="false"
             android:gravity="top|left"
             android:padding="10dip"
-            android:inputType="text">
+            android:inputType="textMultiLine">
             <requestFocus/>
         </EditText>
     </LinearLayout>

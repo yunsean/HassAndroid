@@ -19,6 +19,10 @@ class SplashActivity : com.dylan.common.application.SplashActivity() {
         setSplashImage(R.drawable.splash)
         setShowSplashTime(1000)
     }
+
+    override fun needCheckNetwork(): Boolean {
+        return false
+    }
     override fun doInBackgroundWhenShowSplash(): Any? {
         return null
     }

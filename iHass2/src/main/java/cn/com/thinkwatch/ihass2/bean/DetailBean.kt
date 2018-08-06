@@ -6,10 +6,7 @@ import android.view.View
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.bus.EntityClicked
 import cn.com.thinkwatch.ihass2.bus.EntityLongClicked
-import cn.com.thinkwatch.ihass2.model.Attribute
-import cn.com.thinkwatch.ihass2.model.AttributeRender
-import cn.com.thinkwatch.ihass2.model.JsonEntity
-import cn.com.thinkwatch.ihass2.model.Metadata
+import cn.com.thinkwatch.ihass2.model.*
 import com.dylan.common.rx.RxBus2
 import kotlinx.android.synthetic.main.tile_detail.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
@@ -19,7 +16,7 @@ class DetailBean(entity: JsonEntity): BaseBean(entity) {
     override fun layoutResId(): Int = R.layout.tile_detail
     override fun bindToView(itemView: View, context: Context) {
         itemView.name.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
-        itemView.icon.text = entity.mdiIcon
+        MDIFont.setIcon(itemView.icon, if (entity.showIcon.isNullOrBlank()) entity.mdiIcon else entity.showIcon)
         itemView.state.text = entity.state
         val sb = StringBuffer()
         try {

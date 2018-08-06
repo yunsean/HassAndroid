@@ -1,7 +1,12 @@
 package cn.com.thinkwatch.ihass2.model;
 
+import android.support.v4.content.res.ResourcesCompat;
+import android.widget.TextView;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import cn.com.thinkwatch.ihass2.R;
 
 public class MDIFont {
     private static final HashMap<String, String> items;
@@ -2056,19 +2061,26 @@ public class MDIFont {
         items.put("zip-box", "\uF5C4");
     }
 
-    public static String getIcon(String code) {
-
+    public static void setIcon(TextView textView, String code) {
+        if (textView == null) return;
+        if (code == null) code = "";
         if (code.startsWith("mdi:")) {
             code = code.substring(4);
+            String mdiUnicode = items.get(code);
+            if (mdiUnicode == null) mdiUnicode = items.get("emoticon-dead");
+            textView.setTypeface(ResourcesCompat.getFont(textView.getContext(), R.font.mdi));
+            textView.setText(mdiUnicode);
+        } else {
+            textView.setTypeface(ResourcesCompat.getFont(textView.getContext(), R.font.dincond));
+            textView.setText(code);
         }
-
+    }
+    public static String getIcon(String code) {
+        if (code.startsWith("mdi:")) code = code.substring(4);
         String mdiUnicode = items.get(code);
-        if (mdiUnicode == null) {
-            mdiUnicode = items.get("emoticon-dead");
-        }
+        if (mdiUnicode == null) mdiUnicode = items.get("emoticon-dead");
         return mdiUnicode;
     }
-
     public static Map<String, String> getIcons() {
         return items;
     }

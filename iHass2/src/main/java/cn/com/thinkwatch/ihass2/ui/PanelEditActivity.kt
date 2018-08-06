@@ -81,12 +81,12 @@ class PanelEditActivity : BaseActivity() {
                 ItemType.entity-> {
                     bgColor = 0xffffffff.toInt()
                     name = if (item.showName.isNullOrBlank()) item.friendlyName else item.showName ?: ""
-                    icon = if (item.showIcon.isNullOrBlank()) item.mdiIcon else MDIFont.getIcon(item.showIcon)
+                    icon = if (item.showIcon.isNullOrBlank()) item.mdiIcon else item.showIcon
                 }
                 ItemType.divider-> {
                     bgColor = 0xfff2f2f2.toInt()
                     name = item.showName ?: "分组"
-                    icon = if (item.showIcon.isNullOrBlank()) MDIFont.getIcon("mdi:google-circles-communities") else item.showIcon
+                    icon = if (item.showIcon.isNullOrBlank()) "mdi:google-circles-communities" else item.showIcon
                 }
                 else-> {
                     bgColor = 0xffffffff.toInt()
@@ -96,14 +96,14 @@ class PanelEditActivity : BaseActivity() {
             }
             view.backgroundColor = bgColor
             view.name.text = name
-            view.icon.text = icon
+            MDIFont.setIcon(view.icon, icon)
             view.icon.visibility = if (icon.isNullOrBlank()) View.INVISIBLE else View.VISIBLE
             view.order.onTouch { v, event ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN) touchHelper.startDrag(holder)
                 false
             }
             view.insert.onClick {
-                doAdd(index)
+                doAdd(item)
             }
             view.delete.onClick {
                 entities.remove(item)
@@ -115,7 +115,7 @@ class PanelEditActivity : BaseActivity() {
                         createDialog(R.layout.dialog_panel_add_entity, object: OnSettingDialogListener {
                             override fun onSettingDialog(dialog: Dialog, contentView: View) {
                                 contentView.entityName.setText(item.showName ?: item.friendlyName)
-                                contentView.entityIcon.setText(if (item.showIcon.isNullOrBlank()) item.mdiIcon else MDIFont.getIcon(item.showIcon))
+                                MDIFont.setIcon(contentView.entityIcon, if (item.showIcon.isNullOrBlank()) item.mdiIcon else item.showIcon)
                                 contentView.entityIcon.tag = item.showIcon
                                 contentView.iconPanel.onClick {
                                     hotEntity = item
@@ -170,7 +170,7 @@ class PanelEditActivity : BaseActivity() {
                                     else-> contentView.groupTypeTile.isChecked = true
                                 }
                                 contentView.groupAdd.onClick {
-                                    contentView.groupColumns.setText(Math.min((contentView.groupColumns.text().toIntOrNull() ?: 0) + 1, 9).toString())
+                                    contentView.groupColumns.setText(Math.min((contentView.groupColumns.text().toIntOrNull() ?: 0) + 1, 99).toString())
                                 }
                                 contentView.groupSub.onClick {
                                     contentView.groupColumns.setText(Math.max((contentView.groupColumns.text().toIntOrNull() ?: 2) - 1, 1).toString())
@@ -199,7 +199,7 @@ class PanelEditActivity : BaseActivity() {
                 }
             }
         }.setOnCreateClicked {
-            doAdd(-1)
+            doAdd(null)
         }
         this.recyclerView.layoutManager = LinearLayoutManager(this)
         this.recyclerView.addOnItemTouchListener(SwipeItemLayout.OnSwipeItemTouchListener(this))
@@ -233,12 +233,13 @@ class PanelEditActivity : BaseActivity() {
     @ActivityResult(requestCode = 106)
     private fun afterChooseIcon(data: Intent) {
         val icon = data.getStringExtra("icon")
-        hotMdiView?.setText(if (icon.isNullOrBlank()) hotEntity?.mdiIcon else MDIFont.getIcon(icon))
+        MDIFont.setIcon(hotMdiView, if (icon.isNullOrBlank()) hotEntity?.mdiIcon else icon)
         hotMdiView?.tag = data.getStringExtra("icon")
         adapter.notifyDataSetChanged()
     }
 
-    private fun doAdd(position: Int) {
+    private fun doAdd(item: JsonEntity?) {
+        val position = if (item == null) -1 else entities.indexOf(item)
         createDialog(R.layout.dialog_panel_add, null,
                 intArrayOf(R.id.choiceBlank, R.id.choiceItem, R.id.choiceGroup, R.id.choiceCancel),
                 object: OnDialogItemClickedListener {
@@ -279,7 +280,7 @@ class PanelEditActivity : BaseActivity() {
         createDialog(R.layout.dialog_panel_add_group, object: OnSettingDialogListener {
             override fun onSettingDialog(dialog: Dialog, contentView: View) {
                 contentView.groupAdd.onClick {
-                    contentView.groupColumns.setText(Math.min((contentView.groupColumns.text().toIntOrNull() ?: 0) + 1, 9).toString())
+                    contentView.groupColumns.setText(Math.min((contentView.groupColumns.text().toIntOrNull() ?: 0) + 1, 99).toString())
                 }
                 contentView.groupSub.onClick {
                     contentView.groupColumns.setText(Math.max((contentView.groupColumns.text().toIntOrNull() ?: 2) - 1, 1).toString())

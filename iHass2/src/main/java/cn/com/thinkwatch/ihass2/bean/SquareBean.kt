@@ -16,7 +16,7 @@ class SquareBean(entity: JsonEntity): BaseBean(entity) {
     override fun layoutResId(): Int = R.layout.tile_square
     override fun bindToView(itemView: View, context: Context) {
         itemView.icon.setTextSize(if (entity.showIcon.isNullOrBlank()) 16f else 30f)
-        itemView.icon.setText(if (entity.showIcon.isNullOrBlank()) entity.friendlyStateRow else MDIFont.getIcon(entity.showIcon))
+        MDIFont.setIcon(itemView.icon, if (entity.showIcon.isNullOrBlank()) entity.friendlyStateRow else entity.showIcon)
         itemView.name.setText(if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName)
         itemView.icon.isActivated = entity.isActivated
         itemView.name.isActivated = entity.isActivated

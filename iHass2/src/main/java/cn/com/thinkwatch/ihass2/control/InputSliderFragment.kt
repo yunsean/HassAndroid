@@ -56,6 +56,7 @@ class InputSliderFragment : ControlFragment() {
             discrete_data.setOnProgressChangeListener(object : DiscreteSeekBar.OnProgressChangeListener {
                 override fun onProgressChanged(seekBar: DiscreteSeekBar, value: Int, fromUser: Boolean) {
                     val finalValue = BigDecimal(seekBar.progress).multiply(entity?.attributes?.step).add(entity?.attributes?.min)
+                    if (Math.abs(seekBar.progress - originalValue) < 5) return
                     text_data.setText(String.format(Locale.ENGLISH, "%." + getNumberOfDecimalPlaces(entity?.attributes?.step) + "f", finalValue))
                     if ("input_number" == entity?.domain) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_value", entity?.entityId, value = String.format(Locale.ENGLISH, "%." + getNumberOfDecimalPlaces(entity?.attributes?.step) + "f", finalValue)))
                 }

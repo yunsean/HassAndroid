@@ -15,7 +15,7 @@ import org.jetbrains.anko.sdk25.coroutines.onLongClick
 class CircleBean(entity: JsonEntity): BaseBean(entity) {
     override fun layoutResId(): Int = R.layout.tile_circle
     override fun bindToView(itemView: View, context: Context) {
-        itemView.icon.setText(if (entity.showIcon.isNullOrBlank()) entity.iconState else MDIFont.getIcon(entity.showIcon))
+        MDIFont.setIcon(itemView.icon, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)
         itemView.name.setText(if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName)
         itemView.contentView.onClick { RxBus2.getDefault().post(EntityClicked(entity)) }
         itemView.contentView.onLongClick {

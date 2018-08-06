@@ -23,6 +23,8 @@ data class JsonEntity (@SerializedName("entity_id") var entityId: String = "",
     val domain: String
         get() = if (entityId.contains("\\.".toRegex())) entityId.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] else ""
 
+    val icon: String?
+        get() = if (showIcon.isNullOrBlank()) friendlyStateRow else showIcon
     val domainRanking: Int
         get() = if (isSun) 0 else if (isDeviceTracker) 1 else if (isSensor) 2 else if (isAnySensors) 3 else domain[0].toInt()
     val isHidden: Boolean
@@ -98,54 +100,54 @@ data class JsonEntity (@SerializedName("entity_id") var entityId: String = "",
         else if (domain.length > 1) domain.substring(0, 1).toUpperCase() + domain.substring(1)
         else null
     val iconState: String?
-        get() = if (hasMdiIcon && !isInputBoolean && !isInputSelect && !isInputSlider) MDIFont.getIcon(attributes?.icon)
+        get() = if (hasMdiIcon && !isInputBoolean && !isInputSelect && !isInputSlider) attributes?.icon
         else if (isAlarmControlPanel) when (state) {
-            "armed_away" -> MDIFont.getIcon("mdi:pine-tree")
-            "disarmed" -> MDIFont.getIcon("mdi:bell-outline")
-            "armed_home" -> MDIFont.getIcon("mdi:home")
-            "pending" -> MDIFont.getIcon("mdi:alarm")
-            else -> MDIFont.getIcon("mdi:alarm")
+            "armed_away" -> "mdi:pine-tree"
+            "disarmed" -> "mdi:bell-outline"
+            "armed_home" -> "mdi:home"
+            "pending" -> "mdi:alarm"
+            else -> "mdi:alarm"
         }
-        else if (isScene) MDIFont.getIcon("mdi:format-paint")
-        else if (isFan) MDIFont.getIcon("mdi:fan")
-        else if (isCover) MDIFont.getIcon("mdi:window-closed")
-        else if (isGroup) MDIFont.getIcon("mdi:google-circles-communities")
-        else if (isLight) MDIFont.getIcon(if (state?.toUpperCase() == "ON") "mdi:lightbulb" else "mdi:lightbulb-outline")
-        else if (isSun) MDIFont.getIcon(if (state?.toUpperCase() == "ABOVE_HORIZON") "mdi:white-balance-sunny" else "mdi:brightness-3")
-        else if (isSwitch) MDIFont.getIcon(if (state?.toUpperCase() == "ON") "mdi:toggle-switch" else "mdi:toggle-switch-off")
-        else if (isScript) MDIFont.getIcon("mdi:code-braces")
-        else if (isCamera) MDIFont.getIcon("mdi:camera")
-        else if (isMediaPlayer) MDIFont.getIcon("mdi:cast")
-        else if (isDeviceTracker) MDIFont.getIcon("mdi:face")
-        else if (isAutomation) MDIFont.getIcon("playlist-play")
-        else if (isBinarySensor) if (hasMdiIcon) MDIFont.getIcon(attributes?.icon) else MDIFont.getIcon("numeric-1-box-outline")
-        else if (isInputBoolean && hasMdiIcon) MDIFont.getIcon(attributes?.icon)
+        else if (isScene) "mdi:format-paint"
+        else if (isFan) "mdi:fan"
+        else if (isCover) "mdi:window-closed"
+        else if (isGroup) "mdi:google-circles-communities"
+        else if (isLight) if (state?.toUpperCase() == "ON") "mdi:lightbulb" else "mdi:lightbulb-outline"
+        else if (isSun) if (state?.toUpperCase() == "ABOVE_HORIZON") "mdi:white-balance-sunny" else "mdi:brightness-3"
+        else if (isSwitch) if (state?.toUpperCase() == "ON") "mdi:toggle-switch" else "mdi:toggle-switch-off"
+        else if (isScript) "mdi:code-braces"
+        else if (isCamera) "mdi:camera"
+        else if (isMediaPlayer) "mdi:cast"
+        else if (isDeviceTracker) "mdi:face"
+        else if (isAutomation) "playlist-play"
+        else if (isBinarySensor) if (hasMdiIcon) attributes?.icon else "numeric-1-box-outline"
+        else if (isInputBoolean && hasMdiIcon) attributes?.icon
         else friendlyState
     val mdiIcon: String
-        get() = if (hasMdiIcon) MDIFont.getIcon(attributes?.icon)
+        get() = if (hasMdiIcon) attributes?.icon ?: ""
         else if (isAlarmControlPanel) when (state) {
-            "armed_away" -> MDIFont.getIcon("mdi:pine-tree")
-            "disarmed" -> MDIFont.getIcon("mdi:bell-outline")
-            "armed_home" -> MDIFont.getIcon("mdi:home")
-            "pending" -> MDIFont.getIcon("mdi:alarm")
-            else -> MDIFont.getIcon("mdi:alarm")
+            "armed_away" -> "mdi:pine-tree"
+            "disarmed" -> "mdi:bell-outline"
+            "armed_home" -> "mdi:home"
+            "pending" -> "mdi:alarm"
+            else -> "mdi:alarm"
         }
-        else if (isScene) MDIFont.getIcon("mdi:format-paint")
-        else if (isFan) MDIFont.getIcon("mdi:fan")
-        else if (isCover) MDIFont.getIcon("mdi:window-closed")
-        else if (isGroup) MDIFont.getIcon("mdi:google-circles-communities")
-        else if (isLight) MDIFont.getIcon(if (state?.toUpperCase() == "ON") "mdi:lightbulb" else "mdi:lightbulb-outline")
-        else if (isSun) MDIFont.getIcon(if (state?.toUpperCase() == "ABOVE_HORIZON") "mdi:white-balance-sunny" else "mdi:brightness-3")
-        else if (isSwitch) MDIFont.getIcon(if (state?.toUpperCase() == "ON") "mdi:toggle-switch" else "mdi:toggle-switch-off")
-        else if (isScript) MDIFont.getIcon("mdi:code-braces")
-        else if (isCamera) MDIFont.getIcon("mdi:camera")
-        else if (isMediaPlayer) MDIFont.getIcon("mdi:cast")
-        else if (isAutomation) MDIFont.getIcon("playlist-play")
-        else if (isInputText) MDIFont.getIcon("textbox")
-        else if (isInputDateTime) MDIFont.getIcon("calendar-clock")
-        else if (isAnySensors) MDIFont.getIcon("eye")
-        else if ("homeassistant" == domain) MDIFont.getIcon("home")
-        else MDIFont.getIcon("mdi:information-outline")
+        else if (isScene) "mdi:format-paint"
+        else if (isFan) "mdi:fan"
+        else if (isCover) "mdi:window-closed"
+        else if (isGroup) "mdi:google-circles-communities"
+        else if (isLight) if (state?.toUpperCase() == "ON") "mdi:lightbulb" else "mdi:lightbulb-outline"
+        else if (isSun) if (state?.toUpperCase() == "ABOVE_HORIZON") "mdi:white-balance-sunny" else "mdi:brightness-3"
+        else if (isSwitch) if (state?.toUpperCase() == "ON") "mdi:toggle-switch" else "mdi:toggle-switch-off"
+        else if (isScript) "mdi:code-braces"
+        else if (isCamera) "mdi:camera"
+        else if (isMediaPlayer) "mdi:cast"
+        else if (isAutomation) "playlist-play"
+        else if (isInputText) "textbox"
+        else if (isInputDateTime) "calendar-clock"
+        else if (isAnySensors) "eye"
+        else if ("homeassistant" == domain) "home"
+        else "mdi:information-outline"
     val deviceClassState: String?
         get() = when (attributes?.deviceClass) {
             "cold" -> if (!isCurrentStateActive) "Off" else "Cold"

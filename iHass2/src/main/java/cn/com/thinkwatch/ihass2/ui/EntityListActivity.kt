@@ -10,6 +10,7 @@ import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.model.JsonEntity
+import cn.com.thinkwatch.ihass2.model.MDIFont
 import com.dylan.common.utils.Utility
 import com.dylan.uiparts.recyclerview.RecyclerViewDivider
 import com.yunsean.dynkotlins.extensions.*
@@ -54,7 +55,7 @@ class EntityListActivity : BaseActivity() {
         this.adapter = RecyclerAdapter(R.layout.listitem_entity_item, showEntities) {
             view, index, item ->
             view.name.text = item.friendlyName
-            view.icon.text = item.mdiIcon
+            MDIFont.setIcon(view.icon, item.mdiIcon)
             view.value.text = item.friendlyState
             view.checked.visibility = if (checkedEntities.contains(item)) View.VISIBLE else View.GONE
             view.onClick {

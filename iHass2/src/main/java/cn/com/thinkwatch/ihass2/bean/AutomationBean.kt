@@ -7,6 +7,7 @@ import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.bus.EntityClicked
 import cn.com.thinkwatch.ihass2.bus.EntityLongClicked
 import cn.com.thinkwatch.ihass2.model.JsonEntity
+import cn.com.thinkwatch.ihass2.model.MDIFont
 import com.dylan.common.rx.RxBus2
 import com.yunsean.dynkotlins.extensions.ktime
 import kotlinx.android.synthetic.main.tile_normal.view.*
@@ -20,7 +21,7 @@ class AutomationBean(entity: JsonEntity): BaseBean(entity) {
         itemView.friendlyName.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
         itemView.group.text = try { SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ").parse(entity.attributes?.lastTriggered)?.ktime() } catch (_: Exception) { entity.attributes?.lastTriggered } ?: "无"
         itemView.state.typeface = ResourcesCompat.getFont(context, if (entity.hasStateIcon) R.font.mdi else R.font.dincond)
-        itemView.state.text = entity.iconState
+        MDIFont.setIcon(itemView.state, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)
         itemView.indicator.visibility = if (entity.hasIndicator) View.VISIBLE else View.INVISIBLE
         itemView.isActivated = entity.isActivated
         itemView.state.isActivated = entity.isActivated

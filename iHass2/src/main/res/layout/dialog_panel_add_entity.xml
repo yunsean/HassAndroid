@@ -18,7 +18,6 @@
 		android:background="@null"
 		android:inputType="text"
 		android:lines="1"
-		android:maxLength="5"
 		android:textSize="14sp"
 		android:textColor="#ff555555"
 		android:textColorHint="#ff999999"

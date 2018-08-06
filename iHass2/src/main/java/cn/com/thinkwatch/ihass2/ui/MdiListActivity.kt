@@ -1,18 +1,20 @@
 package cn.com.thinkwatch.ihass2.ui
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.GridLayoutManager
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.model.MDIFont
 import com.dylan.common.utils.Utility
-import com.yunsean.dynkotlins.extensions.onChanged
-import com.yunsean.dynkotlins.extensions.text
+import com.yunsean.dynkotlins.extensions.*
 import com.yunsean.dynkotlins.ui.RecyclerAdapter
 import kotlinx.android.synthetic.main.activity_hass_mdi_list.*
+import kotlinx.android.synthetic.main.dialog_mdi_text.view.*
 import kotlinx.android.synthetic.main.listitem_hass_mdi.view.*
 import org.jetbrains.anko.act
 import org.jetbrains.anko.ctx
@@ -28,6 +30,7 @@ class MdiListActivity : BaseActivity() {
         setAutoHideSoftInput(AutoHideSoftInputMode.WhenClick)
 
         mdis.add("")
+        mdis.add("T")
         mdis.addAll(MDIFont.getIcons().keys)
         ui()
     }
@@ -42,11 +45,26 @@ class MdiListActivity : BaseActivity() {
         val colCount = Utility.getScreenWidth(ctx) / dip(64)
         this.adapter = RecyclerAdapter(R.layout.listitem_hass_mdi, mdis) {
             view, index, key ->
-            view.icon.text = if (key.isNotBlank()) MDIFont.getIcon(key) else key
+            MDIFont.setIcon(view.icon, if ("T".equals(key)) "文字" else "mdi:${key}")
             view.name.text = key
             view.onClick {
-                setResult(Activity.RESULT_OK, Intent().putExtra("icon", if (key.isNotBlank())"mdi:${key}" else ""))
-                finish()
+                if ("T".equals(key)) {
+                    createDialog(R.layout.dialog_mdi_text, null,
+                            intArrayOf(R.id.ok, R.id.cancel), object : OnDialogItemClickedListener {
+                        override fun onClick(dialog: Dialog, contentView: View, clickedView: View) {
+                            if (clickedView.id == R.id.ok) {
+                                val text = contentView.text.text().trim()
+                                if (text.isBlank()) return toastex("请输入1-2个字符作为标签！")
+                                setResult(Activity.RESULT_OK, Intent().putExtra("icon", text))
+                                finish()
+                            }
+                            dialog.dismiss()
+                        }
+                    }).show()
+                } else {
+                    setResult(Activity.RESULT_OK, Intent().putExtra("icon", if (key.isNotBlank()) "mdi:${key}" else ""))
+                    finish()
+                }
             }
         }
         this.recyclerView.adapter = adapter

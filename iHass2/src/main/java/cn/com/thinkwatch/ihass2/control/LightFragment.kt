@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import cn.com.thinkwatch.ihass2.R
+import cn.com.thinkwatch.ihass2.R.id.*
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.MDIFont
 import com.dylan.common.rx.RxBus2
@@ -56,8 +57,7 @@ class LightFragment : ControlFragment() {
     }
     private fun refreshUi() {
         fragment?.apply {
-            if (entity?.isActivated ?: false) text_light.text = MDIFont.getIcon("mdi:lightbulb")
-            else text_light.text = MDIFont.getIcon("mdi:lightbulb-outline")
+            MDIFont.setIcon(text_light,  if (entity?.isActivated ?: false) "mdi:lightbulb" else "mdi:lightbulb-outline")
             if (entity?.attributes?.brightness != null) {
                 layout_brightness.visibility = View.VISIBLE
                 seekbar_brightness.progress = entity?.attributes?.brightness?.toInt() ?: 0

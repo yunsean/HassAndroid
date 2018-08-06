@@ -35,6 +35,7 @@ class InputTextFragment : ControlFragment() {
             button_set.onClick {
                 val text = edit_item.text()
                 RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_value", entity?.entityId, value = text))
+                dismiss()
             }
             edit_item.onChanged {
                 val inputString = it.toString()

@@ -47,13 +47,13 @@ class ClimateFragment : ControlFragment() {
         fragment?.apply {
             button_close.onClick { dismiss() }
             spinner(fan_speed, entity?.attributes?.fanList ?: listOf(), entity?.attributes?.fanSpeed) {
-                RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_fan_speed", entity?.entityId, fanSpeed = it))
+                if (it != entity?.attributes?.fanMode) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_fan_mode", entity?.entityId, fanMode = it))
             }
             spinner(work_mode, entity?.attributes?.operationList ?: listOf(), entity?.attributes?.operationMode) {
-                RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_operation_mode", entity?.entityId, operationMode = it))
+                if (it != entity?.attributes?.operationMode) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_operation_mode", entity?.entityId, operationMode = it))
             }
             spinner(swing_mode, entity?.attributes?.swingList ?: listOf(), entity?.attributes?.swingMode) {
-                RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_swing_mode", entity?.entityId, swingMode = it))
+                if (it != entity?.attributes?.swingMode) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_swing_mode", entity?.entityId, swingMode = it))
             }
             text_minus.onClick {
                 temperature = temperature - 1

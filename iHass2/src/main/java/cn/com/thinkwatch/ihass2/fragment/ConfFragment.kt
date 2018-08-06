@@ -4,9 +4,14 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.Dialog
+import android.content.ContentUris
 import android.content.Intent
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.DocumentsContract
+import android.provider.MediaStore
 import android.text.InputType
 import android.view.MotionEvent
 import android.view.View
@@ -37,6 +42,7 @@ import org.jetbrains.anko.sdk25.coroutines.onEditorAction
 import org.jetbrains.anko.sdk25.coroutines.onTouch
 import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.ctx
+
 
 class ConfFragment : BaseFragment() {
     override val layoutResId: Int = R.layout.fragment_hass_conf
@@ -91,19 +97,83 @@ class ConfFragment : BaseFragment() {
 
     private fun getPath(uri: Uri): String? {
         if ("content".equals(uri.scheme, false)) {
-            try {
-                val projection = arrayOf("_data")
-                val cursor = ctx.contentResolver.query(uri, projection, null, null, null)
-                val columnIndex = cursor.getColumnIndexOrThrow("_data");
-                if (cursor.moveToFirst()) return cursor.getString(columnIndex)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                return null
+            if (DocumentsContract.isDocumentUri(context, uri)) {
+                val docId = DocumentsContract.getDocumentId(uri)
+                if ("com.android.providers.media.documents" == uri.authority) {
+                    val id = docId.split(":".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()[1]
+                    val selection = MediaStore.Images.Media._ID + "=" + id
+                    val type = docId.split(":".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()[0]
+                    var contentUri: Uri? = null
+                    if (type.equals("image", ignoreCase = true)) {
+                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    } else if (type.equals("audio", ignoreCase = true)) {
+                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                    } else if (type.equals("video", ignoreCase = true)) {
+                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    }
+                    return getImagePath(contentUri, selection)
+                } else if ("com.android.providers.media.downloads.documents" == uri.authority) {
+                    val contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(docId))
+                    return getImagePath(contentUri, null)
+                } else if ("content" == uri.authority) {
+                    if ("com.google.android.apps.photos.content" == uri.authority) {
+                        return uri.getLastPathSegment()
+                    }
+                    return getDataColumn(uri, null, null)
+                } else if ("com.android.externalstorage.documents" == uri.authority) {
+                    val docId = DocumentsContract.getDocumentId(uri)
+                    val split = docId.split(":")
+                    val type = split[0]
+				    if ("primary" == type) {
+                        return Environment.getExternalStorageDirectory().absolutePath + "/" + split[1]
+				    }
+                } else if ("com.android.providers.downloads.documents" == uri.authority) {
+                    val id = DocumentsContract.getDocumentId(uri)
+                    val contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), id.toLongOrNull() ?: 0L)
+				    return getDataColumn(contentUri, null, null)
+                } else if ("file" == uri.authority) {
+                    return uri.path
+                }
+            } else {
+                try {
+                    val projection = arrayOf("_data")
+                    val cursor = ctx.contentResolver.query(uri, projection, null, null, null)
+                    val columnIndex = cursor.getColumnIndexOrThrow("_data");
+                    if (cursor.moveToFirst()) return cursor.getString(columnIndex)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    return null
+                }
             }
         } else if ("file".equals(uri.scheme, true)) {
             return uri.path
         }
         return null
+    }
+    private fun getDataColumn(uri: Uri?, selection: String?, selectionArgs: Array<String>?): String? {
+        var cursor: Cursor? = null
+        val projection = arrayOf(MediaStore.Images.Media.DATA)
+        try {
+            cursor = ctx.getContentResolver().query(uri, projection, selection, selectionArgs, null)
+            if (cursor != null && cursor.moveToFirst()) {
+                val index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                return cursor.getString(index)
+            }
+        } finally {
+            cursor?.close()
+        }
+        return null
+    }
+    private fun getImagePath(uri: Uri?, selection: String?): String? {
+        var path: String? = null
+        val cursor = ctx.getContentResolver().query(uri, null, selection, null, null)
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA))
+            }
+            cursor.close()
+        }
+        return path
     }
 
     @ActivityResult(requestCode = 108)

@@ -7,6 +7,7 @@ import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.bus.EntityClicked
 import cn.com.thinkwatch.ihass2.bus.EntityLongClicked
 import cn.com.thinkwatch.ihass2.model.JsonEntity
+import cn.com.thinkwatch.ihass2.model.MDIFont
 import com.dylan.common.rx.RxBus2
 import kotlinx.android.synthetic.main.tile_normal.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
@@ -17,8 +18,7 @@ class NormalBean(entity: JsonEntity): BaseBean(entity) {
     override fun bindToView(itemView: View, context: Context) {
         itemView.friendlyName.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
         itemView.group.text = entity.groupName
-        itemView.state.typeface = ResourcesCompat.getFont(context, if (entity.hasStateIcon) R.font.mdi else R.font.dincond)
-        itemView.state.text = entity.iconState
+        MDIFont.setIcon(itemView.state, if (entity.showIcon.isNullOrBlank()) entity.state else entity.showIcon)
         itemView.indicator.visibility = if (entity.hasIndicator) View.VISIBLE else View.INVISIBLE
         itemView.isActivated = entity.isActivated
         itemView.state.isActivated = entity.isActivated

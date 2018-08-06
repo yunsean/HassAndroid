@@ -9,10 +9,7 @@ import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.bean.NormalBean
 import cn.com.thinkwatch.ihass2.enums.ItemType
 import cn.com.thinkwatch.ihass2.enums.TileType
-import cn.com.thinkwatch.ihass2.model.Dashboard
-import cn.com.thinkwatch.ihass2.model.DbEntity
-import cn.com.thinkwatch.ihass2.model.JsonEntity
-import cn.com.thinkwatch.ihass2.model.Panel
+import cn.com.thinkwatch.ihass2.model.*
 import com.google.gson.*
 import com.google.gson.annotations.Expose
 import com.yunsean.dynkotlins.extensions.isSubClassOf
@@ -196,6 +193,16 @@ class LocalStorage(dbDir: String? = null) {
         entities.forEach { dbManager.save(Dashboard(panelId, it.entityId, it.displayOrder, it.showName, it.showIcon, it.columnCount, it.itemType, it.tileType)) }
     }
     fun listDashborad(panelId: Long): List<Dashboard> = try { dbManager.selector(Dashboard::class.java).where("PANEL_ID", "=", panelId).findAll() } catch (_:Exception) { listOf() }
+
+    fun addWidget(widget: Widget): Long {
+        dbManager.save(widget)
+        return autoGenId()
+    }
+    fun getWidget(widgetId: Long): JsonEntity? {
+        val widget = try { dbManager.findById(Widget::class.java, widgetId) } catch (_: Exception) { null }
+        if (widget == null) return null
+        return getEntity(widget.entityId)
+    }
 
     fun <T> async(entry: () -> T): Observable<T> {
         return Observable.create<T> {

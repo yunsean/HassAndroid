@@ -35,7 +35,7 @@ class PanelListActivity : BaseActivity() {
         ui()
         data()
         disposable = RxBus2.getDefault().register(PanelChanged::class.java, {
-            if (it.panelId == 0L) data()
+            data()
         }, disposable)
     }
     override fun doRight() {
