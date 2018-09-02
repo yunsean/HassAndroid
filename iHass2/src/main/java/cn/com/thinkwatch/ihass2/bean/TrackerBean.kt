@@ -12,14 +12,13 @@ import com.bumptech.glide.Glide
 import com.dylan.common.rx.RxBus2
 import kotlinx.android.synthetic.main.tile_tracker.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
-import org.jetbrains.anko.sdk25.coroutines.onLongClick
 
 class TrackerBean(entity: JsonEntity): BaseBean(entity) {
     override fun layoutResId(): Int = R.layout.tile_tracker
     override fun bindToView(itemView: View, context: Context) {
         itemView.friendlyName.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
         if (entity.attributes?.entityPicture.isNullOrBlank()) {
-            MDIFont.setIcon(itemView.state, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)
+            MDIFont.get().setIcon(itemView.state, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)
             itemView.state.visibility = View.VISIBLE
             itemView.image.visibility = View.GONE
         } else {
@@ -31,10 +30,12 @@ class TrackerBean(entity: JsonEntity): BaseBean(entity) {
         itemView.indicator.visibility = if (entity.isScript || entity.isInputSelect) View.INVISIBLE else View.VISIBLE
         itemView.cardView.setCardBackgroundColor(ResourcesCompat.getColor(context.getResources(), if (entity.isActivated) R.color.md_white_1000 else R.color.md_light_blue_400, null))
         itemView.contentView.onClick { RxBus2.getDefault().post(EntityClicked(entity)) }
-        itemView.contentView.onLongClick {
-            RxBus2.getDefault().post(EntityLongClicked(entity))
-            true
-        }
+        itemView.contentView.setOnLongClickListener(object: View.OnLongClickListener {
+            override fun onLongClick(p0: View?): Boolean {
+                RxBus2.getDefault().post(EntityLongClicked(entity))
+                return true
+            }
+        })
         itemView.contentView.setOnTouchListener(getTouchListener(itemView.contentView))
     }
 }

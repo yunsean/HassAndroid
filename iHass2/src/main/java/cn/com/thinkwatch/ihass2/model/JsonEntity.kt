@@ -1,90 +1,133 @@
 package cn.com.thinkwatch.ihass2.model
 
+import android.os.Parcel
+import android.os.Parcelable
+import cn.com.thinkwatch.ihass2.HassApplication
+import cn.com.thinkwatch.ihass2.db.LocalStorage
 import cn.com.thinkwatch.ihass2.enums.ItemType
 import cn.com.thinkwatch.ihass2.enums.TileType
 import com.dylan.common.data.GpsUtil
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import java.util.*
 
-data class JsonEntity (@SerializedName("entity_id") var entityId: String = "",
-                       @SerializedName("state") var state: String? = null,
-                       @SerializedName("last_updated") var lastUpdated: String? = null,
-                       @SerializedName("last_changed") var lastChanged: String? = null,
-                       @SerializedName("attributes") var attributes: Attribute? = null,
-                       var displayOrder: Int = 0,
-                       var showIcon: String? = null,
-                       var showName: String? = null,
-                       var itemType: ItemType = ItemType.entity,
-                       var tileType: TileType = TileType.inherit,
-                       var columnCount: Int = 1,
-                       var id: Long = 0) {
+data class JsonEntity(@SerializedName("entity_id") var entityId: String = "",
+                      @SerializedName("state") var state: String? = null,
+                      @SerializedName("last_updated") var lastUpdated: String? = null,
+                      @SerializedName("last_changed") var lastChanged: String? = null,
+                      @SerializedName("attributes") var attributes: Attribute? = null,
+                      var displayOrder: Int = 0,
+                      var showIcon: String? = null,
+                      var showName: String? = null,
+                      var itemType: ItemType = ItemType.entity,
+                      var tileType: TileType = TileType.inherit,
+                      var columnCount: Int = 1) : Parcelable {
     val friendlyName: String
         get() = attributes?.friendlyName ?: ""
+
     val domain: String
         get() = if (entityId.contains("\\.".toRegex())) entityId.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] else ""
 
     val icon: String?
         get() = if (showIcon.isNullOrBlank()) friendlyStateRow else showIcon
+
     val domainRanking: Int
         get() = if (isSun) 0 else if (isDeviceTracker) 1 else if (isSensor) 2 else if (isAnySensors) 3 else domain[0].toInt()
+
     val isHidden: Boolean
         get() = attributes?.hidden ?: false
+
     val isSupported: Boolean
         get() = friendlyState != null && entityId != "" && friendlyName != ""
+
     val isDisplayTile: Boolean
         get() = attributes?.unitOfMeasurement != null
+
     val isSwitch: Boolean
         get() = entityId.startsWith("switch.")
+
     val isLight: Boolean
         get() = entityId.startsWith("light.")
+
     val isFan: Boolean
         get() = entityId.startsWith("fan.")
+
     val isCover: Boolean
         get() = entityId.startsWith("cover.")
+
     val isVacuum: Boolean
         get() = entityId.startsWith("vacuum.")
+
     val isMediaPlayer: Boolean
         get() = entityId.startsWith("media_player.")
+
     val isDeviceTracker: Boolean
         get() = entityId.startsWith("device_tracker.")
+
     val isZone: Boolean
         get() = entityId.startsWith("zone.")
+
     val isSun: Boolean
         get() = entityId.startsWith("sun.")
+
     val isSensor: Boolean
         get() = entityId.startsWith("sensor.")
+
     val isClimate: Boolean
         get() = entityId.startsWith("climate.")
+
     val isCamera: Boolean
         get() = entityId.startsWith("camera.")
+
     val isAnySensors: Boolean
         get() = entityId.contains("sensor.")
+
     val isGroup: Boolean
         get() = entityId.startsWith("group.")
+
     val isAutomation: Boolean
         get() = entityId.startsWith("automation.")
+
     val isScript: Boolean
         get() = entityId.startsWith("script.")
+
     val isInputSelect: Boolean
         get() = entityId.startsWith("input_select.")
+
     val isInputSlider: Boolean
         get() = entityId.startsWith("input_slider.") || entityId.startsWith("input_number.")
+
     val isAlarmControlPanel: Boolean
         get() = entityId.startsWith("alarm_control_panel.")
+
     val isScene: Boolean
         get() = entityId.startsWith("scene.")
+
     val isInputBoolean: Boolean
         get() = entityId.startsWith("input_boolean.")
+
     val isInputText: Boolean
         get() = entityId.startsWith("input_text.")
+
     val isInputDateTime: Boolean
         get() = entityId.startsWith("input_datetime.")
+
     val isPersistentNotification: Boolean
         get() = entityId.startsWith("persistent_notification.")
+
     val isBinarySensor: Boolean
         get() = entityId.startsWith("binary_sensor.")
+
+    val isMiioGateway: Boolean
+        get() = entityId.startsWith("miio_acpartner.")
+
+    val isBroadcast: Boolean
+        get() = entityId.startsWith("broadcast.")
+
     val groupName: String?
-        get() = if (hasMdiIcon) friendlyStateRow else (if (isSensor && attributes?.unitOfMeasurement != null) (if (hasMdiIcon) state + " " else "") + attributes?.unitOfMeasurement else friendlyDomainName) ?: state
+        get() = if (hasMdiIcon) friendlyStateRow else (if (isSensor && attributes?.unitOfMeasurement != null) (if (hasMdiIcon) state + " " else "") + attributes?.unitOfMeasurement else friendlyDomainName)
+                ?: state
+
     val friendlyDomainName: String?
         get() = if (isInputSelect) "Input Select"
         else if (isInputSlider) "Input Number"
@@ -94,11 +137,17 @@ data class JsonEntity (@SerializedName("entity_id") var entityId: String = "",
         else if (isMediaPlayer) "Media Player"
         else if (isBinarySensor) if (state == "off") "离线" else "在线"
         else if (isSun) if (state == "above_horizon") "Above Horizon" else "Below Horizon"
-        else if (isDeviceTracker) if (state == "home") "在家" else "外出"
+        else if (isDeviceTracker) if (state == "home") "在家" else if (state == "not_home") "外出" else state
         else if (isAlarmControlPanel) state
         else if (isPersistentNotification) "Notification"
+        else if (isMiioGateway) HassApplication.application.xmlyChannels.get(attributes?.channel
+                ?: 0)?.name ?: "radio"
+        else if (isBroadcast && isActivated) LocalStorage.instance.getXmlyCached(attributes?.url
+                ?: "")?.name ?: "未知电台"
+        else if (isBroadcast) "Stopped"
         else if (domain.length > 1) domain.substring(0, 1).toUpperCase() + domain.substring(1)
         else null
+
     val iconState: String?
         get() = if (hasMdiIcon && !isInputBoolean && !isInputSelect && !isInputSlider) attributes?.icon
         else if (isAlarmControlPanel) when (state) {
@@ -119,10 +168,15 @@ data class JsonEntity (@SerializedName("entity_id") var entityId: String = "",
         else if (isCamera) "mdi:camera"
         else if (isMediaPlayer) "mdi:cast"
         else if (isDeviceTracker) "mdi:face"
-        else if (isAutomation) "playlist-play"
-        else if (isBinarySensor) if (hasMdiIcon) attributes?.icon else "numeric-1-box-outline"
+        else if (isAutomation) "mdi:playlist-play"
+        else if (isBinarySensor) if (hasMdiIcon) attributes?.icon else "mdi:numeric-1-box-outline"
         else if (isInputBoolean && hasMdiIcon) attributes?.icon
+        else if (isMiioGateway && state == "on") "mdi:play"
+        else if (isMiioGateway) "mdi:stop"
+        else if (isBroadcast && state == "on") "mdi:play"
+        else if (isBroadcast) "mdi:stop"
         else friendlyState
+
     val mdiIcon: String
         get() = if (hasMdiIcon) attributes?.icon ?: ""
         else if (isAlarmControlPanel) when (state) {
@@ -148,6 +202,7 @@ data class JsonEntity (@SerializedName("entity_id") var entityId: String = "",
         else if (isAnySensors) "eye"
         else if ("homeassistant" == domain) "home"
         else "mdi:information-outline"
+
     val deviceClassState: String?
         get() = when (attributes?.deviceClass) {
             "cold" -> if (!isCurrentStateActive) "Off" else "Cold"
@@ -168,6 +223,7 @@ data class JsonEntity (@SerializedName("entity_id") var entityId: String = "",
             "vibration" -> if (!isCurrentStateActive) "No Vibration" else "Vibration Detected"
             else -> null
         }
+
     val friendlyState: String?
         get() = if (isAlarmControlPanel) when (state) {
             "armed_away" -> "Armed Away"
@@ -179,29 +235,40 @@ data class JsonEntity (@SerializedName("entity_id") var entityId: String = "",
         else if (isSwitch || isLight || isAutomation || isScript || isInputBoolean || isMediaPlayer || isGroup) state?.toUpperCase()
         else if (isBinarySensor) if (state == "off") "离线" else "在线"
         else if (isSun) if (state == "above_horizon") "日出" else "日落"
-        else if (isDeviceTracker) if (state == "home") "在家" else "外出"
+        else if (isDeviceTracker) if (state == "home") "在家" else if (state == "not_home") "外出" else state
         else if (deviceClassState != null) deviceClassState
         else state
+
     val isStateful: Boolean
         get() = attributes?.isStateful ?: true
+
     val isCurrentStateActive: Boolean
         get() = state?.toUpperCase() == "ON"
+
     val friendlyStateRow: String
         get() = if (isAnySensors && attributes?.unitOfMeasurement != null) String.format(Locale.ENGLISH, "%s %s", state, attributes?.unitOfMeasurement) else friendlyState ?: ""
+
     val isActivated: Boolean
-        get() = if (isMediaPlayer) state?.toUpperCase() != "OFF" else if (isSun) false else if (isDeviceTracker) state?.toUpperCase() == "HOME" else state?.toUpperCase() == "ON"
+        get() = if (isMediaPlayer || isClimate) state?.toUpperCase() != "OFF" else if (isSun) false else if (isDeviceTracker) state?.toUpperCase() == "HOME" else state?.toUpperCase() == "ON"
+
     val nextState: String
         get() = "turn_" + if (isCurrentStateActive) "off" else "on"
+
     val isToggleable: Boolean
         get() = isSwitch || isLight || isAutomation || isScript || isInputBoolean || isGroup || isFan || isVacuum
+
     val isCircle: Boolean
         get() = isSensor || isSun || isAnySensors || isDeviceTracker || isAlarmControlPanel
+
     val location: GpsUtil.LatLng?
         get() = if ((isDeviceTracker || isZone) && attributes?.latitude != null && attributes?.longitude != null) GpsUtil.LatLng(attributes!!.latitude!!.toDouble(), attributes!!.longitude!!.toDouble()) else null
+
     val hasIndicator: Boolean
         get() = isToggleable && !isGroup
+
     val hasMdiIcon: Boolean
         get() = attributes?.icon?.startsWith("mdi:") ?: false
+
     val hasStateIcon: Boolean
         get() = if (isLight || isSwitch || isScript || isAutomation || isCamera || isMediaPlayer || isGroup || isDeviceTracker || isSun || isFan || isCover) true
         else if (isBinarySensor || isAlarmControlPanel || isScene) true
@@ -209,4 +276,42 @@ data class JsonEntity (@SerializedName("entity_id") var entityId: String = "",
         else if (hasMdiIcon && !isAnySensors && !isInputBoolean && !isInputSelect && !isInputSlider) true
         else if (isSensor && hasMdiIcon) true
         else false
+
+    constructor(source: Parcel) : this(
+            source.readString(),
+            source.readString(),
+            source.readString(),
+            source.readString(),
+            source.readString()?.let { Gson().fromJson(it, Attribute::class.java) },
+            source.readInt(),
+            source.readString(),
+            source.readString(),
+            ItemType.values()[source.readInt()],
+            TileType.values()[source.readInt()],
+            source.readInt()
+    )
+
+    override fun describeContents() = 0
+
+    override fun writeToParcel(dest: Parcel, flags: Int) = with(dest) {
+        writeString(entityId)
+        writeString(state)
+        writeString(lastUpdated)
+        writeString(lastChanged)
+        writeString(attributes?.let { Gson().toJson(it) })
+        writeInt(displayOrder)
+        writeString(showIcon)
+        writeString(showName)
+        writeInt(itemType.ordinal)
+        writeInt(tileType.ordinal)
+        writeInt(columnCount)
+    }
+
+    companion object {
+        @JvmField
+        val CREATOR: Parcelable.Creator<JsonEntity> = object : Parcelable.Creator<JsonEntity> {
+            override fun createFromParcel(source: Parcel): JsonEntity = JsonEntity(source)
+            override fun newArray(size: Int): Array<JsonEntity?> = arrayOfNulls(size)
+        }
+    }
 }

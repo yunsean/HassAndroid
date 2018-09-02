@@ -8,11 +8,10 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.R.id.*
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.MDIFont
 import com.dylan.common.rx.RxBus2
-import kotlinx.android.synthetic.main.control_light.*
+import kotlinx.android.synthetic.main.control_light.view.*
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
 import org.jetbrains.anko.sdk25.coroutines.onClick
 
@@ -23,9 +22,9 @@ class LightFragment : ControlFragment() {
     private var fragment: View? = null
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(activity)
-        fragment = activity?.layoutInflater?.inflate(R.layout.control_switch, null)
+        fragment = activity?.layoutInflater?.inflate(R.layout.control_light, null)
         builder.setView(fragment)
-        builder.setTitle(entity?.friendlyName)
+        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     override fun onResume() {
@@ -57,7 +56,7 @@ class LightFragment : ControlFragment() {
     }
     private fun refreshUi() {
         fragment?.apply {
-            MDIFont.setIcon(text_light,  if (entity?.isActivated ?: false) "mdi:lightbulb" else "mdi:lightbulb-outline")
+            MDIFont.get().setIcon(text_light,  if (entity?.isActivated ?: false) "mdi:lightbulb" else "mdi:lightbulb-outline")
             if (entity?.attributes?.brightness != null) {
                 layout_brightness.visibility = View.VISIBLE
                 seekbar_brightness.progress = entity?.attributes?.brightness?.toInt() ?: 0

@@ -9,7 +9,11 @@ import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.bean.NormalBean
 import cn.com.thinkwatch.ihass2.enums.ItemType
 import cn.com.thinkwatch.ihass2.enums.TileType
+import cn.com.thinkwatch.ihass2.enums.WidgetType
 import cn.com.thinkwatch.ihass2.model.*
+import cn.com.thinkwatch.ihass2.model.broadcast.Cached
+import cn.com.thinkwatch.ihass2.model.broadcast.Favorite
+import cn.com.thinkwatch.ihass2.model.deprecated.V3DbEntity
 import com.google.gson.*
 import com.google.gson.annotations.Expose
 import com.yunsean.dynkotlins.extensions.isSubClassOf
@@ -30,47 +34,64 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.util.*
 
-class LocalStorage(dbDir: String? = null) {
+open class LocalStorage(dbDir: String? = null) {
 
-    private val entityLock = Any()
-    private val gson = Gson()
+    protected val entityLock = Any()
+    protected val gson = Gson()
     var dbManager: DbManager
     init {
         registerType()
         val daoConfig = DbManager.DaoConfig()
                 .setDbName("hass")
-                .setDbVersion(3)
+                .setDbVersion(5)
                 .setAllowTransaction(false)
                 .setDbUpgradeListener { db, oldVersion, newVersion ->
+                    if (oldVersion < 4) {
+                        db.dropTable(Favorite::class.java)
+                        val entities = db.findAll(V3DbEntity::class.java)
+                        db.dropTable(V3DbEntity::class.java)
+                        entities.forEach { db.save(DbEntity(it.entityId, it.rawJson)) }
+                    }
+                    if (oldVersion < 5) {
+                        db.dropTable(Widget::class.java)
+                    }
                 }
         if (dbDir != null) daoConfig.setDbDir(File(dbDir))
         dbManager = x.getDb(daoConfig)
     }
 
-    fun initEntities(entities: List<JsonEntity>) {
+    fun setConfig(key: String, value: String) = dbManager.saveOrUpdate(ConfigItem(key, value))
+    fun getConfig(key: String): String? = try { dbManager.findById(ConfigItem::class.java, key).value } catch (_: Exception) { null }
+    fun allConfigs(): List<ConfigItem> = try { dbManager.findAll(ConfigItem::class.java) } catch (_: Exception) { listOf() }
+
+    fun initEntities(entities: List<JsonEntity>, reset: Boolean) {
         try { dbManager.delete(DbEntity::class.java) } catch (_: Exception) {}
-        try { dbManager.delete(Panel::class.java) } catch (_: Exception) {}
-        try { dbManager.delete(Dashboard::class.java) } catch (_: Exception) {}
         val gson = Gson()
         entities.forEach { dbManager.save(DbEntity(it.entityId, gson.toJson(it))) }
-        val map = entities.associateBy(JsonEntity::entityId)
-        val panels = entities.filter { it.isGroup &&it.attributes?.entityIds?.find { !(map.get(it)?.isGroup ?: true) } != null }
-        panels.forEachIndexed { index, panel ->
-            dbManager.save(Panel(panel.friendlyName, index))
-            val panelId = autoGenId()
-            panel.attributes?.entityIds?.forEachIndexed { index, it ->
-                dbManager.save(Dashboard(panelId, it, index))
+        if (reset) {
+            try { dbManager.delete(Panel::class.java) } catch (_: Exception) {}
+            try { dbManager.delete(Dashboard::class.java) } catch (_: Exception) {}
+            val map = entities.associateBy(JsonEntity::entityId)
+            val panels = entities.filter { it.isGroup && it.attributes?.entityIds?.find { !(map.get(it)?.isGroup ?: true) } != null }
+            panels.forEachIndexed { index, panel ->
+                dbManager.save(Panel(panel.friendlyName, index))
+                val panelId = autoGenId()
+                panel.attributes?.entityIds?.forEachIndexed { index, it ->
+                    dbManager.save(Dashboard(panelId, it, index))
+                }
             }
         }
     }
     fun saveEntities(entities: JSONArray) {
-        synchronized(entityLock) {
-            try { dbManager.delete(DbEntity::class.java) } catch (ex: Exception) {ex.printStackTrace()}
-            for (i in 0 until entities.length()) {
-                val entity = entities.getJSONObject(i)
-                dbManager.save(DbEntity(entity.optString("entity_id"), entity.toString()))
-            }
+        dbManager.database.beginTransaction()
+        dbManager.delete(DbEntity::class.java)
+        val version = System.currentTimeMillis()
+        for (i in 0 until entities.length()) {
+            val entity = entities.getJSONObject(i)
+            dbManager.save(DbEntity(entity.optString("entity_id"), entity.toString(), version))
         }
+        dbManager.database.setTransactionSuccessful()
+        dbManager.database.endTransaction()
     }
     fun saveEntity(new: JsonEntity) {
         try {
@@ -81,34 +102,32 @@ class LocalStorage(dbDir: String? = null) {
             ex.printStackTrace()
         }
     }
-    fun listEntity(): List<JsonEntity> {
-        synchronized(entityLock) {
-            return try {
-                val models = dbManager.findDbModelAll(SqlInfo("select e.* from HASS_ENTITIES e"))
-                if (models == null || models.size < 1) return listOf()
-                val gson = Gson()
-                models.map { model ->
-                    try {
-                        val entity = gson.fromJson<JsonEntity>(model.getString("RAW_JSON"), JsonEntity::class.java)
-                        entity.entityId = model.getString("ENTITY_ID")
-                        entity.id = model.getLong("ID")
-                        entity
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                        null
-                    }
-                }.filterNotNull().filter { !it.isGroup }.distinctBy { it.entityId }
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                listOf()
-            }
+    fun listEntity(entityIdPattern: String? = null): List<JsonEntity> {
+        return try {
+            val sql = StringBuffer("select e.* from HASS_ENTITIES e")
+            if (!entityIdPattern.isNullOrBlank()) sql.append(" where e.ENTITY_ID like '${entityIdPattern}'")
+            val models = dbManager.findDbModelAll(SqlInfo(sql.toString()))
+            if (models == null || models.size < 1) return listOf()
+            val gson = Gson()
+            models.map { model ->
+                try {
+                    val entity = gson.fromJson<JsonEntity>(model.getString("RAW_JSON"), JsonEntity::class.java)
+                    entity.entityId = model.getString("ENTITY_ID")
+                    entity
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                    null
+                }
+            }.filterNotNull().filter { !it.isGroup }.distinctBy { it.entityId }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            listOf()
         }
     }
     fun getEntity(entityId: String): JsonEntity? {
         val entity = try { dbManager.selector(DbEntity::class.java).where("ENTITY_ID", "=", entityId).findFirst() } catch (_: Exception) { null }
         if (entity == null) return null
         val value = gson.fromJson(entity.rawJson, JsonEntity::class.java)
-        value.id = entity.id
         value.entityId = entity.entityId
         return value
     }
@@ -194,15 +213,84 @@ class LocalStorage(dbDir: String? = null) {
     }
     fun listDashborad(panelId: Long): List<Dashboard> = try { dbManager.selector(Dashboard::class.java).where("PANEL_ID", "=", panelId).findAll() } catch (_:Exception) { listOf() }
 
-    fun addWidget(widget: Widget): Long {
-        dbManager.save(widget)
-        return autoGenId()
+    fun addWidget(widgetId: Int, widgetType: WidgetType, backColor: Int = 0, normalColor: Int = 0xff656565.toInt(),
+                  activeColor: Int = 0xff0288D1.toInt(), textSize: Int = 12, imageSize: Int = 30,
+                  entities: List<JsonEntity>) {
+        dbManager.database.beginTransaction()
+        try {
+            dbManager.deleteById(Widget::class.java, widgetId)
+            dbManager.delete(WidgetEntity::class.java, WhereBuilder.b("WIDGET_ID", "=", widgetId))
+            dbManager.save(Widget(widgetId, widgetType, backColor, normalColor, activeColor, textSize, imageSize))
+            entities.forEachIndexed{ index, it ->  dbManager.save(WidgetEntity(widgetId, it.entityId, index, it.showName, it.showIcon)) }
+            dbManager.database.setTransactionSuccessful()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        } finally {
+            dbManager.database.endTransaction()
+        }
     }
-    fun getWidget(widgetId: Long): JsonEntity? {
-        val widget = try { dbManager.findById(Widget::class.java, widgetId) } catch (_: Exception) { null }
-        if (widget == null) return null
-        return getEntity(widget.entityId)
+    fun getWidgetEntity(widgetId: Int): List<JsonEntity> {
+        return try {
+            val sql = "select w.*, e.RAW_JSON from HASS_WIDGET_ENTITIES w inner join HASS_ENTITIES e on e.ENTITY_ID = w.ENTITY_ID where w.WIDGET_ID = ${widgetId} ORDER BY w.DISPLAY_ORDER"
+            val models = dbManager.findDbModelAll(SqlInfo(sql))
+            if (models == null || models.size < 1) return listOf()
+            models.map { model ->
+                try {
+                    val entity = try { gson.fromJson<JsonEntity>(model.getString("RAW_JSON"), JsonEntity::class.java) } catch (_: Exception) { null }
+                    entity?.entityId = model.getString("ENTITY_ID")
+                    entity?.displayOrder = model.getInt("DISPLAY_ORDER")
+                    entity?.showIcon = model.getString("SHOW_ICON")
+                    entity?.showName = model.getString("SHOW_NAME")
+                    entity
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                    null
+                }
+            }.filterNotNull()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            listOf()
+        }
     }
+    fun getWidget(widgetId: Int) = try { dbManager.findById(Widget::class.java, widgetId) } catch (_: Exception) { null }
+    fun delWidget(widgetId: Int) {
+        dbManager.database.beginTransaction()
+        try {
+            dbManager.deleteById(Widget::class.java, widgetId)
+            dbManager.delete(WidgetEntity::class.java, WhereBuilder.b("WIDGET_ID", "=", widgetId))
+            dbManager.database.setTransactionSuccessful()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        } finally {
+            dbManager.database.endTransaction()
+        }
+    }
+    fun getWidgets(): List<Widget> = try { dbManager.findAll(Widget::class.java) } catch (_: Exception) { listOf() }
+    fun getWidgets(entityId: String): List<Widget> {
+        return try {
+            val sql = "select w.* from HASS_WIDGET_ENTITIES we inner join HASS_WIDGETS w on w.WIDGET_ID = we.WIDGET_ID where we.ENTITY_ID = '${entityId}'"
+            val models = dbManager.findDbModelAll(SqlInfo(sql))
+            if (models == null || models.size < 1) return listOf()
+            val widgets = mutableListOf<Widget>()
+            models.forEach {
+                val widgetId = it.getInt("WIDGET_ID")
+                if (widgets.find { it.widgetId == widgetId } != null) return@forEach
+                widgets.add(Widget(widgetId, it.getString("WIDGET_TYPE").let { WidgetType.valueOf(it) },
+                        it.getInt("BACK_COLOR"), it.getInt("NORMAL_COLOR"), it.getInt("ACTIVE_COLOR")))
+            }
+            widgets
+        } catch (ex: Exception) {
+            listOf()
+        }
+    }
+    fun getWidgets(type: WidgetType): List<Widget> = try { dbManager.selector(Widget::class.java).where("WIDGET_TYPE", "=", type.toString()).findAll() } catch (_: Exception) { listOf() }
+
+    fun addXmlyFavorite(favorite: Favorite) = try { dbManager.saveOrUpdate(favorite) } catch (ex: Exception) { ex.printStackTrace() }
+    fun delXmlyFavorite(id: Int) = try { dbManager.deleteById(Favorite::class.java, id) } catch (_: Exception) {}
+    fun getXmlyFavorite(entityId: String): List<Favorite> = try { dbManager.selector(Favorite::class.java).where("ENTITY_ID", "=", entityId).findAll() } catch (_: Exception) { listOf() }
+
+    fun addXmlyCached(cached: Cached) = try { dbManager.saveOrUpdate(cached) } catch (ex: Exception) { ex.printStackTrace() }
+    fun getXmlyCached(url: String): Cached? = try { dbManager.selector(Cached::class.java).where("PLAY_URL", "=", url).findFirst() } catch (_: Exception) { null }
 
     fun <T> async(entry: () -> T): Observable<T> {
         return Observable.create<T> {
@@ -232,6 +320,7 @@ class LocalStorage(dbDir: String? = null) {
     private fun registerType() {
         registerEnum(ItemType::class.java)
         registerEnum(TileType::class.java)
+        registerEnum(WidgetType::class.java)
     }
     private fun <T> modelConvert(model: DbModel, clazz: Class<T>): T? {
         try {
@@ -331,6 +420,7 @@ class LocalStorage(dbDir: String? = null) {
         }
     }
     fun import(config: HassConfig) {
+        dbManager.database.beginTransaction()
         try { dbManager.delete(Dashboard::class.java) } catch (ex: Exception) { }
         try { dbManager.delete(Panel::class.java) } catch (ex: Exception) { }
         config.panels.forEach {
@@ -341,6 +431,8 @@ class LocalStorage(dbDir: String? = null) {
                 dbManager.save(it)
             }
         }
+        dbManager.database.setTransactionSuccessful()
+        dbManager.database.endTransaction()
     }
 
     private object Holder {

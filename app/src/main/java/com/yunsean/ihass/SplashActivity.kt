@@ -5,25 +5,38 @@ import android.content.Intent
 import android.os.Bundle
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.db.db
+import cn.com.thinkwatch.ihass2.model.MDIFont
 import cn.com.thinkwatch.ihass2.ui.ConfActivity
 import com.dylan.common.sketch.Dialogs
+import com.dylan.common.utils.Utility
 import com.dylan.uiparts.activity.ActivityResult
 import com.dylan.uiparts.activity.ActivityResultDispatch
 import com.dylan.uiparts.activity.RequestPermissionResult
 import com.dylan.uiparts.activity.RequestPermissionResultDispatch
 import com.yunsean.dynkotlins.extensions.activity
+import com.yunsean.dynkotlins.extensions.loges
+import kotlinx.android.synthetic.main.activity_app_splash.*
 
 class SplashActivity : com.dylan.common.application.SplashActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSplashImage(R.drawable.splash)
         setShowSplashTime(1000)
+        version.text = "iHass v" + Utility.getVerName(this)
+
+        val lhs = "3.0".toBigDecimal()
+        val rhs = "2.9".toBigDecimal()
+        val result = lhs - rhs
+        loges("$result")
     }
 
     override fun needCheckNetwork(): Boolean {
         return false
     }
     override fun doInBackgroundWhenShowSplash(): Any? {
+        val begin = System.currentTimeMillis()
+        val icons = MDIFont.get().icons
+        loges("load ${icons.size} mdies consumed: ${System.currentTimeMillis() - begin} ms")
         return null
     }
     override fun shouldGoHomeAfterSplash(resultOfInBackground: Any?) {

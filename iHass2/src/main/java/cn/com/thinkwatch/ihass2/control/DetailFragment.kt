@@ -3,9 +3,14 @@ package cn.com.thinkwatch.ihass2.control
 import android.annotation.TargetApi
 import android.app.AlertDialog
 import android.app.Dialog
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.AbsoluteSizeSpan
+import android.text.style.ForegroundColorSpan
 import android.view.View
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.model.Attribute
@@ -15,6 +20,7 @@ import com.yunsean.dynkotlins.ui.RecyclerAdapter
 import kotlinx.android.synthetic.main.control_detail.view.*
 import kotlinx.android.synthetic.main.listitem_sensor_attribute.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.sp
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 class DetailFragment : ControlFragment() {
@@ -24,7 +30,7 @@ class DetailFragment : ControlFragment() {
         val builder = AlertDialog.Builder(activity)
         fragment = activity?.layoutInflater?.inflate(R.layout.control_detail, null)
         builder.setView(fragment)
-        builder.setTitle(entity?.friendlyName)
+        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     private var adatper: RecyclerAdapter<AttributeItem>? = null
@@ -33,8 +39,14 @@ class DetailFragment : ControlFragment() {
         fragment?.apply {
             adatper = RecyclerAdapter(R.layout.listitem_sensor_attribute, null) {
                 view, index, item ->
-                view.name.text = item.name
-                view.value.text = item.value
+                val spannableString = SpannableStringBuilder()
+                spannableString.append(item.name);
+                spannableString.append("：")
+                spannableString.append(item.value)
+                spannableString.setSpan(ForegroundColorSpan(Color.parseColor("#ff333333")), 0, item.name.length + 1, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                spannableString.setSpan(ForegroundColorSpan(Color.parseColor("#ff777777")), item.name.length + 1, item.name.length + 1 + item.value.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                spannableString.setSpan(AbsoluteSizeSpan(sp(14), false), 0, item.name.length + 1 + item.value.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                view.value.setText(spannableString)
             }
             recyclerView.adapter = adatper
             recyclerView.layoutManager = LinearLayoutManager(context)
@@ -64,7 +76,7 @@ class DetailFragment : ControlFragment() {
                                     if (obj is AttributeRender) value = obj.render(value)
                                 }
                             }
-                            items.add(AttributeItem(metadata.name, value.toString()))
+                            items.add(AttributeItem(metadata.name, value.toString() + metadata.unit))
                         }
                     }
                 } catch (ex: Exception) {

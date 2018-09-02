@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.zhy.android.percent.support.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.zhy.android.percent.support.PercentRelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/contentView"
@@ -18,34 +19,30 @@
         android:background="@drawable/hass_camera_ptz_bg"
         android:contentDescription="@null"
         app:siv_image_aspect="1"/>
-    <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:paddingBottom="15dip"
-        android:lines="1"
-        android:textColor="@color/color_xiaomi"
-        android:textSize="24sp"
-        android:textStyle="normal"
-        app:autoSizeMaxTextSize="30sp"
-        app:autoSizeTextType="uniform"
-        app:fontFamily="@font/mdi"
-        tools:ignore="MissingPrefix"
-        tools:text="\uf033"/>
-    <TextView
-        android:id="@+id/name"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:paddingTop="25dip"
+        android:layout_height="match_parent"
+        android:layout_alignTop="@id/button"
+        android:layout_alignBottom="@id/button"
         android:gravity="center"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textSize="8sp"
-        android:textColor="#ff777777"
-        tools:text="@string/app_name"/>
+        android:padding="5dip"
+        android:orientation="vertical">
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="1dip"
+            android:lines="1"
+            android:textColor="@color/color_xiaomi"
+            android:textSize="30sp"
+            android:textStyle="normal"
+            app:autoSizeMinTextSize="14sp"
+            app:autoSizeMaxTextSize="36sp"
+            app:autoSizeTextType="uniform"
+            app:fontFamily="@font/mdi"
+            tools:ignore="MissingPrefix"
+            tools:text="\uf033"/>
+    </LinearLayout>
 
 </com.zhy.android.percent.support.PercentRelativeLayout>

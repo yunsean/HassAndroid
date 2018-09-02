@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:thiz="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="#ffffffff">
+
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dip"
+        android:layout_marginBottom="10dip"
+        android:fontFamily="@font/dincond"
+        android:textColor="#ff999999"
+        android:textSize="14sp"
+        android:text="扫码下载iHass"/>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:scaleType="centerInside"
+        android:src="@drawable/qrcode"
+        android:contentDescription="@null"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:gravity="center"
+        android:orientation="horizontal">
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#ff999999"
+            android:fontFamily="@font/dincond"
+            android:text="https://www.pgyer.com/ihass"/>
+        <TextView
+            android:id="@+id/copy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dip"
+            android:textSize="14sp"
+            android:textColor="@color/primary"
+            android:text="复制"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="15dip"
+            android:textSize="12sp"
+            android:textColor="#ffaaaaaa"
+            android:text="        如果您觉得这个APP能够帮到您，或者觉得有点意思，可以截图分享给您的朋友，或者直接点击上边的“复制”将下载地址复制后粘贴到微信等输入窗口！"/>
+        <View
+            android:layout_width="1dip"
+            android:layout_height="0dip"
+            android:layout_weight="1" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="15dip"
+            android:textSize="12sp"
+            android:textColor="#ffaaaaaa"
+            android:text="        如果您使用过程中遇到任何问题，或者有更多的想法和建议，请点击下方的企鹅图标加入Hass App使用QQ群！"/>
+        <ImageButton
+            android:id="@+id/qqGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="44dip"
+            android:layout_marginBottom="20dip"
+            android:background="@drawable/shape_clear"
+            android:src="@drawable/qq_group"
+            android:contentDescription="@null"/>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -16,7 +16,8 @@
     <FrameLayout
         android:id="@+id/contentView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
         <com.zhy.android.percent.support.PercentLinearLayout
             android:id="@+id/stateful"
             android:layout_width="match_parent"

@@ -15,9 +15,9 @@
     app:cardUseCompatPadding="true">
     <com.zhy.android.percent.support.PercentRelativeLayout
         android:id="@+id/contentView"
-        android:background="@drawable/selector_ffffff_eeeeee"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
         <View
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

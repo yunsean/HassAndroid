@@ -96,7 +96,7 @@ class PanelEditActivity : BaseActivity() {
             }
             view.backgroundColor = bgColor
             view.name.text = name
-            MDIFont.setIcon(view.icon, icon)
+            MDIFont.get().setIcon(view.icon, icon)
             view.icon.visibility = if (icon.isNullOrBlank()) View.INVISIBLE else View.VISIBLE
             view.order.onTouch { v, event ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN) touchHelper.startDrag(holder)
@@ -115,12 +115,14 @@ class PanelEditActivity : BaseActivity() {
                         createDialog(R.layout.dialog_panel_add_entity, object: OnSettingDialogListener {
                             override fun onSettingDialog(dialog: Dialog, contentView: View) {
                                 contentView.entityName.setText(item.showName ?: item.friendlyName)
-                                MDIFont.setIcon(contentView.entityIcon, if (item.showIcon.isNullOrBlank()) item.mdiIcon else item.showIcon)
+                                MDIFont.get().setIcon(contentView.entityIcon, if (item.showIcon.isNullOrBlank()) item.mdiIcon else item.showIcon)
                                 contentView.entityIcon.tag = item.showIcon
                                 contentView.iconPanel.onClick {
                                     hotEntity = item
                                     hotMdiView = contentView.entityIcon
-                                    activity(MdiListActivity::class.java, 106)
+                                    Intent(act, MdiListActivity::class.java)
+                                            .putExtra("icon", item.state)
+                                            .start(act, 106)
                                 }
                                 contentView.entityType.clearCheck()
                                 when (item.tileType) {
@@ -233,7 +235,7 @@ class PanelEditActivity : BaseActivity() {
     @ActivityResult(requestCode = 106)
     private fun afterChooseIcon(data: Intent) {
         val icon = data.getStringExtra("icon")
-        MDIFont.setIcon(hotMdiView, if (icon.isNullOrBlank()) hotEntity?.mdiIcon else icon)
+        MDIFont.get().setIcon(hotMdiView, if (icon.isNullOrBlank()) hotEntity?.mdiIcon else icon)
         hotMdiView?.tag = data.getStringExtra("icon")
         adapter.notifyDataSetChanged()
     }

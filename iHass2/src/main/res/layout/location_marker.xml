@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+	<ImageView
+		android:layout_width="30dip"
+		android:layout_height="36dip"
+		android:src="@drawable/tracker_bg"
+		android:contentDescription="@null"
+		android:scaleType="centerInside"/>
+	<android.support.v7.widget.AppCompatTextView
+		android:id="@+id/icon"
+		android:layout_width="24dip"
+		android:layout_height="24dip"
+		android:layout_marginTop="2dip"
+		android:layout_gravity="center_horizontal|top"
+		android:gravity="center"
+		android:padding="0dp"
+		android:text="\uF43B"
+		android:textColor="@color/colorPrimary"
+		android:textSize="24dip"
+		app:fontFamily="@font/mdi"
+		tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
+	<com.dylan.uiparts.imageview.CircleImageView
+		android:id="@+id/picture"
+		android:layout_width="24dip"
+		android:layout_height="24dip"
+		android:layout_marginTop="2dip"
+		android:layout_gravity="center_horizontal|top"
+		android:contentDescription="@null"
+		android:scaleType="centerInside"/>
+	<TextView
+		android:id="@+id/neighbor"
+		android:layout_width="12dip"
+		android:layout_height="12dip"
+		android:layout_gravity="right|top"
+		android:background="@drawable/shape_red_dot"
+		android:gravity="center"
+		android:textSize="10dip"
+		android:textColor="#ffffffff"
+		android:text="9"/>
+</FrameLayout>

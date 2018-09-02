@@ -26,7 +26,7 @@ class InputSliderFragment : ControlFragment() {
         val builder = AlertDialog.Builder(getActivity())
         fragment = act.getLayoutInflater().inflate(R.layout.control_input_slider, null)
         builder.setView(fragment)
-        builder.setTitle(entity?.friendlyName)
+        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     override fun onResume() {

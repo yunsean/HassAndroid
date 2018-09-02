@@ -19,7 +19,7 @@ class SwitchBean(entity: JsonEntity): BaseBean(entity) {
             itemView.stateless.visibility = View.GONE
             itemView.friendlyName.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
             itemView.group.text = entity.groupName
-            MDIFont.setIcon(itemView.state, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)
+            MDIFont.get().setIcon(itemView.state, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)
             itemView.isActivated = entity.isActivated
             itemView.state.isActivated = entity.isActivated
             itemView.group.isActivated = entity.isActivated
@@ -29,6 +29,7 @@ class SwitchBean(entity: JsonEntity): BaseBean(entity) {
                 RxBus2.getDefault().post(EntityLongClicked(entity))
                 true
             }
+            itemView.contentView.setOnTouchListener(getTouchListener(itemView.stateful))
         } else {
             itemView.stateful.visibility = View.GONE
             itemView.stateless.visibility = View.VISIBLE
@@ -48,7 +49,7 @@ class SwitchBean(entity: JsonEntity): BaseBean(entity) {
                 RxBus2.getDefault().post(EntityLongClicked(entity))
                 true
             }
+            itemView.contentView.setOnTouchListener(getTouchListener(itemView.stateless))
         }
-        itemView.contentView.setOnTouchListener(getTouchListener(itemView.contentView))
     }
 }

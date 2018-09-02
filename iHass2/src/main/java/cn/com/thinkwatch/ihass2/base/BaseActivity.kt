@@ -2,6 +2,7 @@ package cn.com.thinkwatch.ihass2.base
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
@@ -17,6 +18,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import cn.com.thinkwatch.ihass2.R
+import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.global.GlobalConfig
 
 import com.dylan.common.application.SwipeToBackActivity
@@ -70,14 +72,21 @@ open class BaseActivity : SwipeToBackActivity() {
     }
     fun setContentView(layoutResID: Int, titlebarResId: Int) {
         super.setContentView(layoutResID)
-        val actionBar = supportActionBar
-        actionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
-        actionBar.setCustomView(titlebarResId)
-        initTitlebarAction(actionBar.customView)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.colorPrimary))
+        }
+        supportActionBar?.apply {
+            displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
+            setCustomView(titlebarResId)
+            initTitlebarAction(customView)
+        }
     }
     fun setContentViewNoTitlebar(layoutResID: Int) {
         super.setContentView(layoutResID)
         initTitlebarAction(rootView!!)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.colorPrimary))
+        }
         if (Utility.isLollipopOrLater()) {
             val window = window
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)

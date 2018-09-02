@@ -4,6 +4,6 @@ import org.xutils.db.annotation.Column
 import org.xutils.db.annotation.Table
 
 @Table(name = "HASS_ENTITIES")
-data class DbEntity (@Column(name = "ENTITY_ID") var entityId: String = "",
+data class DbEntity (@Column(name = "ENTITY_ID", isId = true, autoGen = false) var entityId: String = "",
                      @Column(name = "RAW_JSON") var rawJson: String = "",
-                     @Column(name = "ID", isId = true, autoGen = true) var id: Long = 0)
+                     @Column(name = "VERSION") var version: Long = 0)

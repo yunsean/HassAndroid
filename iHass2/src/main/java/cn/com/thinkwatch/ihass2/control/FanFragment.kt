@@ -25,7 +25,7 @@ class FanFragment : ControlFragment(), AdapterView.OnItemSelectedListener {
         val builder = AlertDialog.Builder(activity)
         fragment = activity?.layoutInflater?.inflate(R.layout.control_fan, null)
         builder.setView(fragment)
-        builder.setTitle(entity?.friendlyName)
+        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     override fun onResume() {

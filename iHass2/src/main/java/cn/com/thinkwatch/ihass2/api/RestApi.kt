@@ -26,7 +26,7 @@ interface RestApi {
     fun getServices(@Header("x-ha-access") password: String): Observable<ArrayList<Domain>>
 
     @GET("/api/states/{entityId}")
-    fun getState(@Header("x-ha-access") password: String, @Path("entityId") entityId: String): Observable<JsonEntity>
+    fun getState(@Header("x-ha-access") password: String?, @Path("entityId") entityId: String): Observable<JsonEntity>
 
     @POST("/api/services/{domain}/{service}")
     fun callService(@Header("x-ha-access") password: String?, @Path("domain") domain: String?, @Path("service") service: String?, @Body json: ServiceRequest): Observable<ArrayList<JsonEntity>>
@@ -35,15 +35,15 @@ interface RestApi {
     fun setState(@Header("x-ha-access") password: String?, @Path("entityId") entityId: String?, @Body json: JsonEntity): Observable<JsonEntity?>
 
     @GET("/api/history/period/{timestamp}")
-    fun getHistory(@Header("x-ha-access") password: String, @Path("timestamp") timestamp: String?, @Query("filter_entity_id") entityId: String? = null): Observable<ArrayList<ArrayList<Period>>>
-//
-//    @GET("/api/logbook/{timestamp}")
-//    fun getLogbook(@Header("x-ha-access") password: String, @Path("timestamp") domain: String): Call<ArrayList<LogSheet>>
+    fun getHistory(@Header("x-ha-access") password: String, @Path("timestamp") timestamp: String?, @Query("filter_entity_id") entityId: String? = null, @Query("end_time") endTime: String? = null): Observable<ArrayList<ArrayList<Period>>>
+
+    @GET("/api/gpslogger")
+    fun gpsLogger(@Header("x-ha-access") password: String?, @Query("latitude") latitude: Double, @Query("longitude") longitude: Double, @Query("device") device: String, @Query("accuracy") accuracy: String, @Query("provider") provider: String, @Query("api_password") gpsPassword: String? = null): Observable<JsonEntity?>
 
     companion object {
         var jsonApi: RestApi? = null
         get() {
-            if (field == null) field = BaseApi.api(HassApplication.application.haHostUrl)
+            if (field == null) field = BaseApi.api(HassApplication.application.haHostUrl, RestApi::class.java)
             return field
         }
     }

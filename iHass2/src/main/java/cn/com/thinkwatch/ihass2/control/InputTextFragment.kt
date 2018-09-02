@@ -21,7 +21,7 @@ class InputTextFragment : ControlFragment() {
         val builder = AlertDialog.Builder(activity)
         fragment = activity?.layoutInflater?.inflate(R.layout.control_input_text, null)
         builder.setView(fragment)
-        builder.setTitle(entity?.friendlyName)
+        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     override fun onResume() {

@@ -1,27 +1,19 @@
 package cn.com.thinkwatch.ihass2.ui
 
-import android.content.Context
 import android.content.Intent
-import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
-import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.R.id.*
-import cn.com.thinkwatch.ihass2.api.hassApi
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.fragment.CameraPtzFragment
 import cn.com.thinkwatch.ihass2.fragment.CameraTtsFragment
-import cn.com.thinkwatch.ihass2.fragment.PanelFragment
 import cn.com.thinkwatch.ihass2.model.JsonEntity
-import cn.com.thinkwatch.ihass2.model.Panel
-import cn.com.thinkwatch.ihass2.model.service.Fields
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -29,21 +21,14 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
-import com.dylan.common.sketch.Drawables.overlay
 import com.dylan.medias.player.MxPlayerView
 import com.dylan.medias.stream.MxStreamReader
 import com.google.gson.Gson
-import com.yunsean.dynkotlins.extensions.nextOnMain
-import com.yunsean.dynkotlins.extensions.toastex
 import kotlinx.android.synthetic.main.activity_hass_camera_view.*
-import kotlinx.android.synthetic.main.activity_hass_camera_view.view.*
-import kotlinx.android.synthetic.main.tile_switch.view.*
 import org.jetbrains.anko.dip
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk25.coroutines.onClick
-import org.jetbrains.anko.support.v4.dip
-import org.jetbrains.anko.support.v4.viewPager
 
 class CameraViewActivity : BaseActivity() {
 
@@ -63,7 +48,7 @@ class CameraViewActivity : BaseActivity() {
     }
     override fun onPause() {
         super.onPause()
-        stop()
+        finish()
     }
     override fun onDestroy() {
         stop()

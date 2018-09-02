@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.R.id.*
 import cn.com.thinkwatch.ihass2.api.hassApi
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.model.Period
@@ -35,7 +34,7 @@ class BinaryFragment : ControlFragment() {
         val builder = AlertDialog.Builder(activity)
         fragment = activity?.layoutInflater?.inflate(R.layout.control_tracker, null)
         builder.setView(fragment)
-        builder.setTitle(entity?.friendlyName)
+        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     private lateinit var adatper: RecyclerAdapter<Period>
@@ -46,10 +45,9 @@ class BinaryFragment : ControlFragment() {
     }
     private fun ui() {
         fragment?.apply {
-            useRatio.usedColor = 0xFF06AE5A.toInt()
-            useRatio.freeColor = 0xFFFF4081.toInt()
-            useRatio.usedText = "在线"
-            useRatio.freeText = "离线"
+            showMap.visibility = View.GONE
+            useRatio.colorMap = mapOf("off" to R.color.deviceOffline, "on" to R.color.deviceOnline)
+            useRatio.textMap = mapOf("off" to "离线", "on" to "在线")
             adatper = RecyclerAdapter(R.layout.listitem_entity_period, null) {
                 view, index, item ->
                 view.time.text = item.lastChanged.ktime()
@@ -68,7 +66,6 @@ class BinaryFragment : ControlFragment() {
             btnClose.onClick {
                 dismiss()
             }
-            refreshUi()
         }
     }
     private fun refreshUi() {
@@ -84,21 +81,27 @@ class BinaryFragment : ControlFragment() {
                             val segments = mutableListOf<UseRatioView.Segment>()
                             val dayOfBegin = calendar.timeInMillis
                             val maxMicroSec = 24 * 3600 * 1000
-                            it.get(0).forEach {
+                            val datas = mutableListOf<Period>()
+                            val raws = it.get(0).sortedBy { it.lastChanged }
+                            raws.forEachIndexed { index, period ->
+                                if (datas.size > 0 && period.state == datas.get(datas.size - 1).state) return@forEachIndexed
+                                if (index < raws.size - 1 && isSimilarDate(period.lastChanged, raws[index + 1].lastChanged)) return@forEachIndexed
+                                datas.add(period)
+                            }
+                            datas.forEach {
                                 if (it.lastChanged == null) return@forEach
                                 val offset = it.lastChanged!!.time - dayOfBegin
                                 if (offset > maxMicroSec || offset < 0) return@forEach
-                                segments.add(UseRatioView.Segment((offset * 100 / maxMicroSec).toInt(), it.state == "on"))
+                                segments.add(UseRatioView.Segment((offset * 100 / maxMicroSec).toInt(), it.state))
                             }
-                            it.get(0).lastOrNull()?.let {
+                            datas.lastOrNull()?.let {
                                 var end = dayOfBegin + maxMicroSec
                                 if (Calendar.getInstance().timeInMillis < end) end = Calendar.getInstance().timeInMillis
                                 val offset = end - dayOfBegin
-                                segments.add(UseRatioView.Segment((offset * 100 / maxMicroSec).toInt(), it.state == "on"))
+                                segments.add(UseRatioView.Segment((offset * 100 / maxMicroSec).toInt(), it.state))
                             }
                             useRatio.segments = segments
-                            adatper.items = it.get(0)
-
+                            adatper.items = datas
                         } else {
                             useRatio.segments = listOf()
                             adatper.items = listOf()

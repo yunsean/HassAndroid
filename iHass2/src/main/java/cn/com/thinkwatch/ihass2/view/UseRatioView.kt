@@ -5,12 +5,14 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.support.v4.content.ContextCompat
 import android.text.Layout
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
+import cn.com.thinkwatch.ihass2.R
 import org.jetbrains.anko.sp
-
+import java.util.*
 
 
 class UseRatioView(context: Context, attr: AttributeSet?): View(context, attr) {
@@ -18,11 +20,13 @@ class UseRatioView(context: Context, attr: AttributeSet?): View(context, attr) {
     private val paint: Paint
     private val textPaint: TextPaint
     var segments = listOf<Segment>()
-        set
-    var freeColor = 0xFF8C46E2.toInt()
-    var usedColor = 0xFF46D5F5.toInt()
-    var freeText = "外出"
-    var usedText = "在家"
+        set(value) {
+            field = value
+            invalidate()
+        }
+    var colorMap: Map<String, Int> = mapOf("home" to R.color.trackerInhome, "not_home" to R.color.trackerOutter)
+    var textMap: Map<String, String> = mapOf("home" to "在家", "not_home" to "外出")
+    var defaultText: String? = null
     init {
         paint = Paint()
         textPaint = TextPaint()
@@ -35,29 +39,44 @@ class UseRatioView(context: Context, attr: AttributeSet?): View(context, attr) {
     }
 
     data class Segment(val position: Int,
-                       val used: Boolean)
+                       val status: String?)
 
+    private val stateColors = mutableMapOf<String, Int>()
+    private fun colorForState(state: String): Int {
+        var color = stateColors.get(state)
+        if (color != null) return color
+        if (state.isBlank()) {
+            color = Random(System.currentTimeMillis()).nextInt()
+        } else {
+            color = 0
+            val scale = Math.pow(0xffffff.toDouble(), 1.0 / state.length).toInt()
+            state.forEach { color = (color!! * scale) + (it.toInt() * scale / 128) }
+        }
+        color = (0xff000000 + (color!! and 0x00ffffff)).toInt()
+        stateColors.put(state, color!!)
+        return color!!
+    }
     override fun draw(canvas: Canvas?) {
         super.draw(canvas)
         val width = this.width
         val height = this.height
-        var prevState = false
+        var prevState: String? = null
         var prevBegin = 0
         paint.color = 0xfff2f2f2.toInt()
         canvas?.drawRect(0F, 0F, width.toFloat(), height.toFloat(), paint)
         segments.forEachIndexed { index, segment ->
-            if (index == 0) prevState = !segment.used
             var end = segment.position * width / 100
             if (end != 0 && end - prevBegin < 1) end++
-            paint.color = if (prevState) usedColor else freeColor
+            paint.color = colorMap.get(prevState)?.let { ContextCompat.getColor(context, it) } ?: colorForState(prevState ?: "")
             val rect = Rect(prevBegin, 0, end, height)
             canvas?.drawRect( rect, paint)
-            drawText(canvas, rect, if (prevState) usedText else freeText)
+            drawText(canvas, rect, textMap.get(prevState) ?: defaultText ?: prevState)
             prevBegin = end
-            prevState = segment.used
+            prevState = segment.status
         }
     }
-    private fun drawText(canvas: Canvas?, rect: Rect, text: String) {
+    private fun drawText(canvas: Canvas?, rect: Rect, text: String?) {
+        if (text.isNullOrBlank()) return
         var width = Layout.getDesiredWidth(text, textPaint).toInt()
         if (width * 3 / 2 > rect.width()) return
         val fontMetrics = textPaint.fontMetrics

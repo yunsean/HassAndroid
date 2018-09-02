@@ -11,12 +11,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:name">
-        <activity android:name=".SplashActivity" android:theme="@style/MyBlueFullScreenTheme">
+
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="dnzcg5graREwgEFIUk8aGpf9QV9wIyDA" >
+        </meta-data>
+
+        <activity android:name=".SplashActivity" android:screenOrientation="portrait" android:theme="@style/MyBlueFullScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" android:screenOrientation="portrait" android:theme="@style/MyNoTitlebarTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="portrait" android:launchMode="singleTask" android:theme="@style/MyNoTitlebarTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".MoreActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ShareActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ShortcutEditActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
     </application>
 </manifest>

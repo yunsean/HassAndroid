@@ -6,51 +6,39 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.FragmentManager
+import cn.com.thinkwatch.ihass2.bus.ControlDismissed
 import cn.com.thinkwatch.ihass2.bus.EntityChanged
 import cn.com.thinkwatch.ihass2.model.JsonEntity
 import com.dylan.common.rx.RxBus2
 import com.google.gson.Gson
-import fr.tvbarthel.lib.blurdialogfragment.BlurDialogEngine
-import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.CompositeDisposable
+import java.util.*
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 abstract open class ControlFragment : DialogFragment() {
     protected var entity: JsonEntity? = null
-    private var blurEngine: BlurDialogEngine? = null
-    private var disposable: Disposable? = null
+    protected var disposable: CompositeDisposable? = null
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        blurEngine = BlurDialogEngine(activity)
-        blurEngine?.apply {
-            setBlurRadius(5)
-            setDownScaleFactor(6f)
-            debug(false)
-            setBlurActionBar(false)
-            setUseRenderScript(true)
-        }
-        disposable = RxBus2.getDefault().register(EntityChanged::class.java) {
+        disposable = RxBus2.getDefault().register(EntityChanged::class.java, {
             if (it.entity.entityId.equals(entity?.entityId)) {
                 entity = it.entity
                 onChange()
             }
-        }
+        }, disposable)
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         entity = try { Gson().fromJson(arguments?.getString("entity"), JsonEntity::class.java) } catch (_: Exception) { null }
     }
-    override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
-        blurEngine?.onDismiss()
-    }
-    override fun onResume() {
-        super.onResume()
-        blurEngine?.onResume(retainInstance)
-    }
     override fun onDestroy() {
         super.onDestroy()
         disposable?.dispose()
-        blurEngine?.onDetach()
+    }
+
+    override fun onDismiss(dialog: DialogInterface?) {
+        super.onDismiss(dialog)
+        RxBus2.getDefault().post(ControlDismissed())
     }
     override fun onDestroyView() {
         dialog?.setDismissMessage(null)
@@ -58,9 +46,17 @@ abstract open class ControlFragment : DialogFragment() {
     }
     abstract fun onChange()
     fun show(manager: FragmentManager) {
-        super.show(manager, "detail")
+        val transaction = manager.beginTransaction()
+        transaction.add(this, tag)
+        transaction.commitAllowingStateLoss()
     }
 
+    protected fun isSimilarDate(lhs: Date?, rhs: Date?): Boolean {
+        if (lhs == null && rhs == null) return true
+        if (lhs == null || rhs == null) return false
+        if (Math.abs(lhs.time - rhs.time) < 10_000) return true
+        else return false
+    }
     companion object {
         fun <T: ControlFragment> newInstance(entity: JsonEntity, clazz: Class<T>): T {
             val fragment = clazz.newInstance()

@@ -4,33 +4,29 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.Dialog
-import android.content.ContentUris
 import android.content.Intent
-import android.database.Cursor
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.provider.DocumentsContract
-import android.provider.MediaStore
 import android.text.InputType
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.OvershootInterpolator
 import android.view.inputmethod.EditorInfo
-import android.widget.Toast
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.api.BaseApi
+import cn.com.thinkwatch.ihass2.api.RestApi
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseFragment
-import cn.com.thinkwatch.ihass2.bus.ConfigChanged
 import cn.com.thinkwatch.ihass2.bus.HassConfiged
 import cn.com.thinkwatch.ihass2.db.LocalStorage
 import cn.com.thinkwatch.ihass2.db.db
+import cn.com.thinkwatch.ihass2.ui.CertificateActivity
+import cn.com.thinkwatch.ihass2.ui.ChoiceFileActivity
+import cn.com.thinkwatch.ihass2.utils.HassConfig
+import cn.com.thinkwatch.ihass2.utils.cfg
 import com.dylan.common.rx.RxBus2
+import com.dylan.common.sketch.Sketch
 import com.dylan.common.utils.Utility
 import com.dylan.uiparts.activity.ActivityResult
-import com.dylan.uiparts.activity.RequestPermissionResult
-import com.dylan.uiparts.activity.RequestPermissionResultDispatch
 import com.yunsean.dynkotlins.extensions.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -79,106 +75,17 @@ class ConfFragment : BaseFragment() {
         }
         this.progressBar.visibility = View.INVISIBLE
         this.progressText.visibility = View.INVISIBLE
-        this.output.onClick {
-            RequestPermissionResultDispatch.requestPermissions(this@ConfFragment, 107, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE))
-        }
         this.input.onClick {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "*/*"
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
-            startActivityForResult(intent, 108)
+            startActivityForResult(Intent(ctx, ChoiceFileActivity::class.java), 108)
         }
-        this.pullRefresh.isChecked = ctx.readPref("pullRefresh")?.toBoolean() ?: false
-        this.pullRefresh.onCheckedChange { buttonView, isChecked ->
-            ctx.savePref("pullRefresh", isChecked)
-            RxBus2.getDefault().post(ConfigChanged())
+        this.certifacte.onClick {
+            startActivity(Intent(ctx, CertificateActivity::class.java))
         }
-    }
-
-    private fun getPath(uri: Uri): String? {
-        if ("content".equals(uri.scheme, false)) {
-            if (DocumentsContract.isDocumentUri(context, uri)) {
-                val docId = DocumentsContract.getDocumentId(uri)
-                if ("com.android.providers.media.documents" == uri.authority) {
-                    val id = docId.split(":".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()[1]
-                    val selection = MediaStore.Images.Media._ID + "=" + id
-                    val type = docId.split(":".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()[0]
-                    var contentUri: Uri? = null
-                    if (type.equals("image", ignoreCase = true)) {
-                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    } else if (type.equals("audio", ignoreCase = true)) {
-                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-                    } else if (type.equals("video", ignoreCase = true)) {
-                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                    }
-                    return getImagePath(contentUri, selection)
-                } else if ("com.android.providers.media.downloads.documents" == uri.authority) {
-                    val contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(docId))
-                    return getImagePath(contentUri, null)
-                } else if ("content" == uri.authority) {
-                    if ("com.google.android.apps.photos.content" == uri.authority) {
-                        return uri.getLastPathSegment()
-                    }
-                    return getDataColumn(uri, null, null)
-                } else if ("com.android.externalstorage.documents" == uri.authority) {
-                    val docId = DocumentsContract.getDocumentId(uri)
-                    val split = docId.split(":")
-                    val type = split[0]
-				    if ("primary" == type) {
-                        return Environment.getExternalStorageDirectory().absolutePath + "/" + split[1]
-				    }
-                } else if ("com.android.providers.downloads.documents" == uri.authority) {
-                    val id = DocumentsContract.getDocumentId(uri)
-                    val contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), id.toLongOrNull() ?: 0L)
-				    return getDataColumn(contentUri, null, null)
-                } else if ("file" == uri.authority) {
-                    return uri.path
-                }
-            } else {
-                try {
-                    val projection = arrayOf("_data")
-                    val cursor = ctx.contentResolver.query(uri, projection, null, null, null)
-                    val columnIndex = cursor.getColumnIndexOrThrow("_data");
-                    if (cursor.moveToFirst()) return cursor.getString(columnIndex)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    return null
-                }
-            }
-        } else if ("file".equals(uri.scheme, true)) {
-            return uri.path
-        }
-        return null
-    }
-    private fun getDataColumn(uri: Uri?, selection: String?, selectionArgs: Array<String>?): String? {
-        var cursor: Cursor? = null
-        val projection = arrayOf(MediaStore.Images.Media.DATA)
-        try {
-            cursor = ctx.getContentResolver().query(uri, projection, selection, selectionArgs, null)
-            if (cursor != null && cursor.moveToFirst()) {
-                val index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                return cursor.getString(index)
-            }
-        } finally {
-            cursor?.close()
-        }
-        return null
-    }
-    private fun getImagePath(uri: Uri?, selection: String?): String? {
-        var path: String? = null
-        val cursor = ctx.getContentResolver().query(uri, null, selection, null, null)
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA))
-            }
-            cursor.close()
-        }
-        return path
     }
 
     @ActivityResult(requestCode = 108)
     private fun afterPickFile(data: Intent) {
-        val path = getPath(data.data)
+        val path = data.getStringExtra("path")
         if (path == null) return showError("导入配置文件失败！")
         val config = db.import(path)
         if (config == null) return showError("读取配置文件失败！")
@@ -211,9 +118,10 @@ class ConfFragment : BaseFragment() {
         this.progressBar.visibility = View.VISIBLE
         this.progressText.visibility = View.VISIBLE
         disposable?.dispose()
-        BaseApi.api(config.server.hostUrl ?: "").getStates(config.server.password ?: "")
+        BaseApi.api(config.server.hostUrl ?: "", RestApi::class.java)
+                .getStates(config.server.password ?: "")
                 .flatMap {
-                    db.initEntities(it)
+                    db.initEntities(it, true)
                     Observable.just(it)
                 }
                 .flatMap {
@@ -222,9 +130,9 @@ class ConfFragment : BaseFragment() {
                 }
                 .nextOnMain {
                     disposable = null
-                    app.haHostUrl = config.server.hostUrl ?: ""
-                    app.haPassword = config.server.password ?: ""
-                    RxBus2.getDefault().post(HassConfiged())
+                    cfg.set(HassConfig.Hass_HostUrl, config.server.hostUrl ?: "")
+                    cfg.set(HassConfig.Hass_Password, config.server.password ?: "")
+                    RxBus2.getDefault().post(HassConfiged(config.server.hostUrl ?: "", config.server.password ?: ""))
                     act.setResult(Activity.RESULT_OK)
                     act.finish()
                 }
@@ -243,13 +151,6 @@ class ConfFragment : BaseFragment() {
                 }
     }
 
-    @RequestPermissionResult(requestCode = 107)
-    private fun afterPermission() {
-        val file = db.export(ctx)
-        if (file == null) showError("导出配置文件到外部存储失败！")
-        else ctx.toastex("导出配置成功：${file}", Toast.LENGTH_LONG)
-    }
-
     private fun attemptLogin() {
         hideError()
         Utility.hideSoftKeyboard(act)
@@ -261,6 +162,27 @@ class ConfFragment : BaseFragment() {
         }
         if (hostUrl.isBlank()) return showError("请输入Hass服务器地址")
         if (!(hostUrl.startsWith("http://") || hostUrl.startsWith("https://"))) return showError("Hass服务器地址错误")
+        if (db.listPanel().size > 0) {
+            ctx.showDialog(R.layout.dialog_hass_confirm, object : OnSettingDialogListener {
+                override fun onSettingDialog(dialog: Dialog, contentView: View) {
+                    Sketch.set_tv(contentView, R.id.title, "配置迁移")
+                    Sketch.set_tv(contentView, R.id.content, "当前存在面板配置，是否清除所有面板信息？")
+                    Sketch.set_tv(contentView, R.id.cancel, "保留")
+                    Sketch.set_tv(contentView, R.id.ok, "清除")
+                }
+            }, intArrayOf(R.id.ok, R.id.cancel), object : OnDialogItemClickedListener {
+                override fun onClick(dialog: Dialog, contentView: View, clickedView: View) {
+                    dialog.dismiss()
+                    if (clickedView.id == R.id.ok) doLogin(hostUrl, password, true)
+                    else doLogin(hostUrl, password, false)
+                }
+            })
+        } else {
+            doLogin(hostUrl, password, true)
+        }
+    }
+
+    private fun doLogin(hostUrl: String, password: String, reset: Boolean) {
         this.connect.setText("正在连接中…")
         this.hostUrl.isEnabled = false
         this.password.isEnabled = false
@@ -268,16 +190,17 @@ class ConfFragment : BaseFragment() {
         this.progressBar.visibility = View.VISIBLE
         this.progressText.visibility = View.VISIBLE
         disposable?.dispose()
-        BaseApi.api(hostUrl).getStates(password)
+        BaseApi.api(hostUrl, RestApi::class.java)
+                .getStates(password)
                 .flatMap {
-                    db.initEntities(it)
+                    db.initEntities(it, reset)
                     Observable.just(it)
                 }
                 .nextOnMain {
                     disposable = null
-                    app.haHostUrl = hostUrl
-                    app.haPassword = password
-                    RxBus2.getDefault().post(HassConfiged())
+                    cfg.set(HassConfig.Hass_HostUrl, hostUrl)
+                    cfg.set(HassConfig.Hass_Password, password)
+                    RxBus2.getDefault().post(HassConfiged(hostUrl, password))
                     act.setResult(Activity.RESULT_OK)
                     act.finish()
                 }

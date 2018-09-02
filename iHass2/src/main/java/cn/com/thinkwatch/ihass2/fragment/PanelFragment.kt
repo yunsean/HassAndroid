@@ -7,6 +7,7 @@ import android.view.View
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.adapter.PanelAdapter
 import cn.com.thinkwatch.ihass2.adapter.PanelGroup
+import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.bean.*
 import cn.com.thinkwatch.ihass2.bus.EntityChanged
@@ -19,6 +20,7 @@ import cn.com.thinkwatch.ihass2.model.JsonEntity
 import cn.com.thinkwatch.ihass2.ui.PanelEditActivity
 import com.dylan.common.rx.RxBus2
 import com.truizlop.sectionedrecyclerview.SectionedSpanSizeLookup
+import com.yunsean.dynkotlins.extensions.ktime
 import com.yunsean.dynkotlins.extensions.start
 import com.yunsean.dynkotlins.extensions.withNext
 import io.reactivex.disposables.CompositeDisposable
@@ -42,6 +44,7 @@ class PanelFragment : BaseFragment() {
         }, RxBus2.getDefault().register(PanelChanged::class.java, {
             if (it.panelId == panelId) data()
         }, RxBus2.getDefault().register(EntityChanged::class.java, { event->
+            refreshTime.text = "状态更新于：${app.refreshAt.ktime()}"
             groups?.forEach {
                 it.entities.forEach {
                     if (it.entity.entityId.equals(event.entity.entityId)) {
@@ -73,6 +76,7 @@ class PanelFragment : BaseFragment() {
         }
     }
     private fun data() {
+        refreshTime.text = "状态更新于：${app.refreshAt.ktime()}"
         db.async {
             val entities = db.readPanel(panelId)
             val groups = mutableListOf<PanelGroup>()
@@ -135,7 +139,6 @@ class PanelFragment : BaseFragment() {
         this.recyclerView?.layoutManager = layoutManager
         groups = beans
         adapter.groups = groups
-        loading?.visibility = View.GONE
         fragment.emptyView?.visibility = if (adapter.groups?.size ?: 0 > 0) View.GONE else View.VISIBLE
     }
 

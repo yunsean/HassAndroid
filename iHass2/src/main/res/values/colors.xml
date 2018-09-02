@@ -43,6 +43,11 @@
     <color name="colorSecondaryText">#757575</color>
     <color name="colorDivider">#BDBDBD</color>
 
+    <color name="refreshBlue">#4285F4</color>
+    <color name="refreshRed">#EA4335</color>
+    <color name="refreshGreen">#34A853</color>
+    <color name="refreshYellow">#FBBC05</color>
+
     <color name="xiaomiDivider">#CED3D7</color>
     <color name="xiaomiPrimaryTextSelected">#28A8E5</color>
     <color name="xiaomiPrimaryText">#656565</color>
@@ -68,4 +73,21 @@
     <color name="colorDrawerIconDisabled">@color/md_grey_400</color>
     
     <drawable name="drawableWhite">#ffffffff</drawable>
+
+    <color name="trackerNoData">#ffeeeeee</color>
+    <color name="trackerOutter">#FF8C46E2</color>
+    <color name="trackerInhome">#FF46D5F5</color>
+    <color name="switchOff">#FF06AE5A</color>
+    <color name="switchOn">#FFFF4081</color>
+    <color name="deviceOffline">#FF8C46E2</color>
+    <color name="deviceOnline">#FF06AE5A</color>
+    <color name="climateUnvaliable">#FF777777</color>
+    <color name="climateOff">#FF06AE5A</color>
+    <color name="climateCool">#48f2de</color>
+    <color name="climateHeat">#ce2950</color>
+    <color name="climateDehumidify">#3b6fd7</color>
+    <color name="climateVentilate">#dee13f</color>
+    <color name="vacuumUnvaliable">#FF777777</color>
+    <color name="vacuumOff">#33324ae6</color>
+    <color name="vacuumOn">#FFFF4081</color>
 </resources>

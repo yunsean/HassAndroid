@@ -70,7 +70,13 @@ abstract class BaseFragment : Fragment() {
 
     private var snackbar: Snackbar? = null
     protected fun showError(message: String, actionLabel: String? = null, action: (() -> Unit)? = null) {
-        val warningIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_warning_white_18dp, null)
+        showSnackbar(message, actionLabel, action, ResourcesCompat.getColor(getResources(), R.color.md_red_200, null))
+    }
+    protected fun showInfo(message: String, actionLabel: String? = null, action: (() -> Unit)? = null) {
+        showSnackbar(message, actionLabel, action, 0xff039BE5.toInt(), icon = R.drawable.ic_info_white_18dp)
+    }
+    protected fun showSnackbar(message: String, actionLabel: String? = null, action: (() -> Unit)? = null, color: Int = 0xffFF5252.toInt(), icon: Int = R.drawable.ic_warning_white_18dp) {
+        val warningIcon = ResourcesCompat.getDrawable(getResources(), icon, null)
         val builder = SpannableStringBuilder()
         builder.append(message)
         snackbar = Snackbar.make(fragment, builder, Snackbar.LENGTH_LONG)
@@ -80,7 +86,7 @@ abstract class BaseFragment : Fragment() {
             setCompoundDrawablesWithIntrinsicBounds(warningIcon, null, null, null)
             compoundDrawablePadding = getResources().getDimensionPixelOffset(R.dimen.icon_8dp)
         }
-        snackbar?.view?.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.md_red_A200, null))
+        snackbar?.view?.setBackgroundColor(color)
         snackbar?.show()
     }
     protected fun hideError(){

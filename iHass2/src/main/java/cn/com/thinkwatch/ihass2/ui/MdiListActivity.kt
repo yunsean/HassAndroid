@@ -31,7 +31,7 @@ class MdiListActivity : BaseActivity() {
 
         mdis.add("")
         mdis.add("T")
-        mdis.addAll(MDIFont.getIcons().keys)
+        mdis.addAll(MDIFont.get().icons.keys)
         ui()
     }
 
@@ -45,7 +45,7 @@ class MdiListActivity : BaseActivity() {
         val colCount = Utility.getScreenWidth(ctx) / dip(64)
         this.adapter = RecyclerAdapter(R.layout.listitem_hass_mdi, mdis) {
             view, index, key ->
-            MDIFont.setIcon(view.icon, if ("T".equals(key)) "文字" else "mdi:${key}")
+            MDIFont.get().setIcon(view.icon, if ("T".equals(key)) "文字" else if ("".equals(key)) "" else "mdi:${key}")
             view.name.text = key
             view.onClick {
                 if ("T".equals(key)) {

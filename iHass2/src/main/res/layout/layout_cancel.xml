@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Button
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cancel"
+    android:layout_width="match_parent"
+    android:layout_height="44dip"
+    android:background="@drawable/selector_ffffff_eeeeee_round_10dp"
+    android:gravity="center"
+    android:textSize="16sp"
+    android:textColor="#ff007aff"
+    android:text="取消"/>

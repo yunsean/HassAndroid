@@ -106,49 +106,29 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dip"
-            android:gravity="center|end"
             android:orientation="horizontal">
             <TextView
+                android:id="@+id/certifacte"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:textColor="#ff777777"
-                android:text="下拉刷新"/>
-            <com.dylan.uiparts.checkbox.SwitchButton
-                android:id="@+id/pullRefresh"
+                android:visibility="gone"
+                android:padding="10dip"
+                android:textColor="@color/color_export"
+                android:textSize="14sp"
+                android:text="导入证书"/>
+            <View
+                android:layout_width="0dip"
+                android:layout_height="1dip"
+                android:layout_weight="1" />
+            <TextView
+                android:id="@+id/input"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dip"
-                app:sb_flip="true"/>
+                android:padding="10dip"
+                android:textColor="@color/color_export"
+                android:textSize="14sp"
+                android:text="导入配置"/>
         </LinearLayout>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dip"
-        android:gravity="bottom"
-        android:orientation="horizontal">
-        <TextView
-            android:id="@+id/output"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="10dip"
-            android:textColor="@color/color_export"
-            android:textSize="14sp"
-            android:text="导出配置"/>
-        <View
-            android:layout_width="0dip"
-            android:layout_height="1dip"
-            android:layout_weight="1" />
-        <TextView
-            android:id="@+id/input"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="10dip"
-            android:textColor="@color/color_export"
-            android:textSize="14sp"
-            android:text="导入配置"/>
     </LinearLayout>
 
 </LinearLayout>

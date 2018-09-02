@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/contentView"
+    android:layout_width="50dip"
+    android:layout_height="47dip"
+    android:paddingLeft="5dip"
+    android:paddingRight="5dip"
+    android:paddingTop="3dip"
+    android:paddingBottom="4dip"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="@null">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@null"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_more_horiz_edit_24dp"
+        android:contentDescription="@null"/>
+
+</RelativeLayout>

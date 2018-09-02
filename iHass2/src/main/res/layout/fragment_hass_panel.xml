@@ -8,6 +8,15 @@
     android:orientation="vertical"
     android:background="#fff5f5f5">
 
+    <TextView
+        android:id="@+id/refreshTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:textSize="10sp"
+        android:textColor="#ffaaaaaa"
+        android:text="状态更新于："/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
@@ -45,20 +54,4 @@
             android:text="@string/hass_panel_edit"
             android:textColor="@color/md_blue_500"/>
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/loading"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical">
-        <me.zhanghai.android.materialprogressbar.MaterialProgressBar
-            style="@style/Widget.MaterialProgressBar.ProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:paddingBottom="40dp"
-            app:mpb_progressStyle="circular"/>
-    </LinearLayout>
-
 </FrameLayout>

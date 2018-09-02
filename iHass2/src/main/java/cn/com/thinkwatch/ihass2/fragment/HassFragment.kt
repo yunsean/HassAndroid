@@ -1,21 +1,15 @@
 package cn.com.thinkwatch.ihass2.fragment
 
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
 import android.provider.Settings
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.view.View
 import android.view.animation.Animation
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.api.BaseApi
-import cn.com.thinkwatch.ihass2.api.hassRawApi
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.bus.*
@@ -24,18 +18,18 @@ import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.JsonEntity
 import cn.com.thinkwatch.ihass2.model.Panel
-import cn.com.thinkwatch.ihass2.service.DataSyncService
 import cn.com.thinkwatch.ihass2.ui.CameraViewActivity
+import cn.com.thinkwatch.ihass2.ui.MapActivity
+import cn.com.thinkwatch.ihass2.utils.HassConfig
+import cn.com.thinkwatch.ihass2.utils.cfg
 import cn.com.thinkwatch.ihass2.view.FloatWindow
 import com.dylan.common.rx.RxBus2
 import com.dylan.common.sketch.Animations
 import com.dylan.uiparts.activity.ActivityResult
 import com.google.gson.Gson
-import com.yunsean.dynkotlins.extensions.nextOnMain
-import com.yunsean.dynkotlins.extensions.readPref
 import com.yunsean.dynkotlins.extensions.start
 import com.yunsean.dynkotlins.extensions.toastex
-import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.fragment_hass_main.*
 import kotlinx.android.synthetic.main.fragment_hass_main.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
@@ -43,12 +37,12 @@ import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.dip
 import org.jetbrains.anko.support.v4.onRefresh
-import org.json.JSONArray
 
 
 class HassFragment : BaseFragment() {
 
     private var panelsFragment: ControlFragment? = null
+    private var dataDisposable: Disposable? = null
     override val layoutResId: Int = R.layout.fragment_hass_main
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -62,19 +56,21 @@ class HassFragment : BaseFragment() {
                 panels = db.listPanel()
                 adapter.notifyDataSetChanged()
             }
-        }, RxBus2.getDefault().register(ServiceRequest::class.java, {
-            callService(it)
         }, RxBus2.getDefault().register(HassConfiged::class.java, {
             panels = db.listPanel()
             adapter.notifyDataSetChanged()
-        }, RxBus2.getDefault().register(EntityClicked::class.java, {
-            onClicked(it.entity)
         }, RxBus2.getDefault().register(ConfigChanged::class.java, {
-            swipeRefresh.isEnabled = ctx.readPref("pullRefresh")?.toBoolean() ?: false
+            swipeRefresh.isEnabled = cfg.getBoolean(HassConfig.Ui_PullRefresh)
         }, RxBus2.getDefault().register(EntityLongClicked::class.java, {
             onLongClicked(it.entity)
+        }, RxBus2.getDefault().register(EntityClicked::class.java, {
+            onClicked(it.entity)
         }, RxBus2.getDefault().register(RefreshEvent::class.java, {
             data()
+        }, RxBus2.getDefault().register(NetBusyEvent::class.java, {
+            this.networkBusy.visibility = if (it.busy) View.VISIBLE else View.GONE
+        }, RxBus2.getDefault().register(HassErrorEvent::class.java, {
+            showError(it.message)
         }, RxBus2.getDefault().register(ChoosePanel::class.java, { event->
             if (event.panel == null) {
                 if (panelsFragment == null) panelsFragment = ControlFragment.newInstance(JsonEntity(), PanelsFragment::class.java)
@@ -83,76 +79,84 @@ class HassFragment : BaseFragment() {
                 val index = panels.indexOfFirst { it.id == event.panel.id }
                 if (index >= 0) viewPager.setCurrentItem(index, true)
             }
-        }, disposable))))))))
+        }, disposable)))))))))
     }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val intent = Intent(ctx, DataSyncService::class.java)
-        ctx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+    override fun onResume() {
+        super.onResume()
+        data()
     }
     override fun onPause() {
         floatWindow?.hideFloatWindow()
         super.onPause()
     }
     override fun onDestroy() {
-        if (serviceBound) ctx.unbindService(serviceConnection)
-        serviceBound = false
+        dataDisposable?.dispose()
         super.onDestroy()
     }
-    private fun onLongClicked(entity: JsonEntity) {
-        val fragmentManager = childFragmentManager
-        if (entity.isSwitch) {
-            ControlFragment.newInstance(entity, SwitchFragment::class.java).show(fragmentManager)
-        } else if (entity.isVacuum) {
-            ControlFragment.newInstance(entity, VacuumFragment::class.java).show(fragmentManager)
-        } else if (entity.isAutomation) {
-            ControlFragment.newInstance(entity, AutomationFragment::class.java).show(fragmentManager)
-        } else if (entity.isClimate) {
-            ControlFragment.newInstance(entity, ClimateFragment::class.java).show(fragmentManager)
-        } else if (entity.isScript) {
-            callService(ServiceRequest("homeassistant", "turn_on", entity.entityId))
-        } else if (entity.isCamera) {
-            showCameraOverlay(entity)
-        } else if (entity.isLight) {
-            ControlFragment.newInstance(entity, LightFragment::class.java).show(fragmentManager)
-        }
-    }
+
     private fun onClicked(entity: JsonEntity) {
         val fragmentManager = childFragmentManager
         if (entity.isSwitch) {
-            ControlFragment.newInstance(entity, SwitchFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, SwitchFragment::class.java).show(fragmentManager)
         } else if (entity.isVacuum) {
-            ControlFragment.newInstance(entity, VacuumFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, VacuumFragment::class.java).show(fragmentManager)
         } else if (entity.isAutomation) {
-            ControlFragment.newInstance(entity, AutomationFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, AutomationFragment::class.java).show(fragmentManager)
         } else if (entity.isClimate) {
-            ControlFragment.newInstance(entity, ClimateFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, ClimateFragment::class.java).show(fragmentManager)
         } else if (entity.isDeviceTracker) {
-            ControlFragment.newInstance(entity, TrackerFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, TrackerFragment::class.java).show(fragmentManager)
         } else if (entity.isBinarySensor) {
-            ControlFragment.newInstance(entity, BinaryFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, BinaryFragment::class.java).show(fragmentManager)
         } else if (entity.isSensor && entity.attributes?.unitOfMeasurement != null) {
-            ControlFragment.newInstance(entity, ChartFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, ChartFragment::class.java).show(fragmentManager)
         } else if (entity.isSensor || entity.isSun) {
-            ControlFragment.newInstance(entity, DetailFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, DetailFragment::class.java).show(fragmentManager)
         } else if (entity.isScript) {
-            callService(ServiceRequest("homeassistant", "turn_on", entity.entityId))
+            app.callService(ServiceRequest("homeassistant", "turn_on", entity.entityId))
         } else if (entity.isInputSelect) {
-            ControlFragment.newInstance(entity, InputSelectFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, InputSelectFragment::class.java).show(fragmentManager)
         } else if (entity.isInputText) {
-            ControlFragment.newInstance(entity, InputTextFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, InputTextFragment::class.java).show(fragmentManager)
+        } else if (entity.isMiioGateway) {
+            return ControlFragment.newInstance(entity, RadioFragment::class.java).show(fragmentManager)
+        } else if (entity.isBroadcast) {
+            return ControlFragment.newInstance(entity, BroadcastFragment::class.java).show(fragmentManager)
         } else if (entity.isInputSlider) {
-            ControlFragment.newInstance(entity, InputSliderFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, InputSliderFragment::class.java).show(fragmentManager)
         } else if (entity.isCover) {
-            ControlFragment.newInstance(entity, CoverFragment::class.java).show(fragmentManager)
+            return ControlFragment.newInstance(entity, CoverFragment::class.java).show(fragmentManager)
         } else if (entity.isLight) {
-            callService(ServiceRequest("homeassistant", entity.nextState, entity.entityId))
+            app.callService(ServiceRequest("homeassistant", entity.nextState, entity.entityId))
         } else if (entity.isCamera) {
             Intent(ctx, CameraViewActivity::class.java)
                     .putExtra("entity", Gson().toJson(entity))
                     .start(ctx)
         }
     }
+    private fun onLongClicked(entity: JsonEntity) {
+        val fragmentManager = childFragmentManager
+        if (entity.isSwitch) {
+            return ControlFragment.newInstance(entity, SwitchFragment::class.java).show(fragmentManager)
+        } else if (entity.isVacuum) {
+            return ControlFragment.newInstance(entity, DetailFragment::class.java).show(fragmentManager)
+        } else if (entity.isAutomation) {
+            return ControlFragment.newInstance(entity, AutomationFragment::class.java).show(fragmentManager)
+        } else if (entity.isClimate || entity.isMiioGateway) {
+            return ControlFragment.newInstance(entity, DetailFragment::class.java).show(fragmentManager)
+        } else if (entity.isLight) {
+            return ControlFragment.newInstance(entity, LightFragment::class.java).show(fragmentManager)
+        } else if (entity.isDeviceTracker && entity.attributes?.latitude != null && entity.attributes?.longitude != null) {
+            Intent(ctx, MapActivity::class.java)
+                    .putExtra("entityId", entity?.entityId)
+                    .start(ctx)
+        } else if (entity.isCamera) {
+            showCameraOverlay(entity)
+        } else {
+            return ControlFragment.newInstance(entity, DetailFragment::class.java).show(fragmentManager)
+        }
+    }
+
     private var floatWindow: FloatWindow? = null
     private fun showCameraOverlay(entity: JsonEntity) {
         val url = entity.attributes?.previewUrl
@@ -174,27 +178,6 @@ class HassFragment : BaseFragment() {
             }
         }
     }
-    private fun callService(request: ServiceRequest) {
-        syncService?.let {
-            if (it.isWebSocketRunning && it.callService(request.domain, request.service, request))
-                return
-        }
-        this.networkBusy.visibility = View.VISIBLE
-        BaseApi.api(app.haHostUrl).callService(app.haPassword, request.domain, request.service, request)
-                .flatMap {
-                    it.forEach { db.saveEntity(it) }
-                    Observable.just(it)
-                }
-                .nextOnMain {
-                    networkBusy.visibility = View.GONE
-                    if (request.domain in arrayOf("script", "automation", "scene", "trigger")) showError("已执行")
-                    it.forEach { RxBus2.getDefault().post(it) }
-                }
-                .error {
-                    networkBusy.visibility = View.GONE
-                    showError(it.message ?: "访问HA出现错误")
-                }
-    }
 
     private lateinit var panels: List<Panel>
     private lateinit var adapter: FragmentStatePagerAdapter
@@ -213,11 +196,10 @@ class HassFragment : BaseFragment() {
     private fun ui() {
         this.swipeRefresh.onRefresh { data() }
         this.swipeRefresh.setSwipeableChildren(this.viewPager)
-        this.swipeRefresh.isEnabled = ctx.readPref("pullRefresh")?.toBoolean() ?: false
+        this.swipeRefresh.isEnabled = cfg.getBoolean(HassConfig.Ui_PullRefresh)
         this.refresh.onClick { data()  }
     }
     private fun data() {
-        if (app.haHostUrl.isNullOrBlank()) return
         this.swipeRefresh.isRefreshing = false
         this.networkBusy.visibility = View.VISIBLE
         this.swipeRefresh.isEnabled = false
@@ -225,39 +207,13 @@ class HassFragment : BaseFragment() {
                 .duration(1000)
                 .repeatCount(1000)
                 .start()
-        hassRawApi.rawStates(app.haPassword)
-                .flatMap {
-                    val entities = JSONArray(it)
-                    db.saveEntities(entities)
-                    Observable.just(it)
-                }
-                .nextOnMain {
-                    this.swipeRefresh.isEnabled = ctx.readPref("pullRefresh")?.toBoolean() ?: false
-                    fragment.refresh.clearAnimation()
-                    fragment.networkBusy.visibility = View.GONE
-                    RxBus2.getDefault().post(EntityUpdated())
-                }
-                .error {
-                    it.printStackTrace()
-                    this.swipeRefresh.isEnabled = ctx.readPref("pullRefresh")?.toBoolean() ?: false
-                    fragment.refresh.clearAnimation()
-                    fragment.networkBusy.visibility = View.GONE
-                    showError(it.message ?: "未知错误", "重试") { data() }
-                }
-    }
-
-
-    private var syncService: DataSyncService? = null
-    private var serviceBound: Boolean = false
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val binder = service as DataSyncService.LocalBinder
-            syncService = binder.service
-            serviceBound = true
-            syncService?.startWebSocket()
-        }
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            serviceBound = false
+        app.refreshState {
+            fragment?.apply {
+                swipeRefresh?.isEnabled = cfg.getBoolean(HassConfig.Ui_PullRefresh)
+                refresh?.clearAnimation()
+                networkBusy?.visibility = View.GONE
+                if (it != null) showError(it, "重试") { data() }
+            }
         }
     }
 }

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+  	android:layout_height="wrap_content"
+	android:paddingLeft="10dip"
+	android:paddingRight="10dip"
+	android:background="@drawable/balloon_overlay_unfocused"
+  	android:orientation="vertical">
+	<TextView
+	    android:id="@+id/title"
+		android:layout_width="match_parent"
+  		android:layout_height="wrap_content"
+		android:paddingTop="5dip"
+		android:gravity="center_vertical"
+		android:drawableRight="@drawable/ic_locate_type"
+		android:drawablePadding="20dip"
+		android:visibility="visible"
+		android:textColor="#ff333333"
+		android:textStyle="bold"
+		android:textSize="18sp"
+		android:text="@string/app_name" />
+	<TextView
+		android:id="@+id/address"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingTop="5dip"
+		android:paddingBottom="5dip"
+		android:visibility="visible"
+		android:textColor="#ff555555"
+		android:textSize="13sp"
+		android:text="@string/app_name" />
+	<TextView
+		android:id="@+id/updateAt"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingBottom="5dip"
+		android:visibility="visible"
+		android:textColor="#ff555555"
+		android:textSize="13sp"
+		android:text="@string/app_name" />
+	<TextView
+		android:id="@+id/distance"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingBottom="5dip"
+		android:visibility="visible"
+		android:textColor="#ff555555"
+		android:textSize="13sp"
+		android:text="@string/app_name" />
+	<TextView
+		android:id="@+id/toHome"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingBottom="5dip"
+		android:visibility="visible"
+		android:textColor="#ff555555"
+		android:textSize="13sp"
+		android:text="@string/app_name" />
+</LinearLayout>

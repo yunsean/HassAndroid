@@ -1,0 +1,4 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_activated="true" android:drawable="@drawable/tracker_bg_actived" />
+    <item android:drawable="@drawable/tracker_bg_inactive" />
+</selector>

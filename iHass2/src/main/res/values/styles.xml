@@ -36,6 +36,8 @@
     </style>
 
     <style name="BaseNoTitlebarTheme" parent="@style/Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:windowBackground">@color/white</item>
         <item name="android:windowIsTranslucent">false</item>
         <item name="android:windowAnimationStyle">@style/MyActivityPushAnimate</item>
@@ -82,6 +84,18 @@
     </style>
     <style name="MyFullScreenTheme" parent="@style/BaseFullscreenTheme">
     </style>
+    <style name="EmptyTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@android:color/transparent</item>
+        <item name="colorPrimaryDark">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
     <style name="MyBlueFullScreenTheme" parent="@style/BaseFullscreenTheme">
         <item name="android:windowBackground">@color/colorPrimary</item>
         <item name="android:windowIsTranslucent">false</item>
@@ -92,6 +106,33 @@
     </style>
     <style name="BlueTheme">
         <item name="colorAccent">#ff0072b5</item>
+    </style>
+
+    <style name="RowWidgetIconStyle">
+        <item name="android:layout_width">60dip</item>
+        <item name="android:layout_height">30dip</item>
+        <item name="android:background">@null</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:src">@drawable/ic_xmly_favor</item>
+        <item name="android:contentDescription">@null</item>
+    </style>
+    <style name="RowWidgetNameStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">5dip</item>
+        <item name="android:gravity">center</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/color_xiaomi</item>
+        <item name="android:text">@string/app_name</item>
+    </style>
+    <style name="RowWidgetStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
     </style>
 
 </resources>

@@ -55,7 +55,7 @@ class EntityListActivity : BaseActivity() {
         this.adapter = RecyclerAdapter(R.layout.listitem_entity_item, showEntities) {
             view, index, item ->
             view.name.text = item.friendlyName
-            MDIFont.setIcon(view.icon, item.mdiIcon)
+            MDIFont.get().setIcon(view.icon, item.mdiIcon)
             view.value.text = item.friendlyState
             view.checked.visibility = if (checkedEntities.contains(item)) View.VISIBLE else View.GONE
             view.onClick {
@@ -87,7 +87,7 @@ class EntityListActivity : BaseActivity() {
         showEntities.clear()
         showEntities.addAll(checkedEntities)
         allEntities?.filter {
-            (keyword.isBlank() or it.friendlyName.contains(keyword) or (it.state?.contains(keyword) ?: false)) and !checkedEntities.contains(it)
+            (keyword.isBlank() or it.entityId.contains(keyword, true) or it.friendlyName.contains(keyword, true) or (it.state?.contains(keyword) ?: false)) and !checkedEntities.contains(it)
         }?.let {
             showEntities.addAll(it)
         }

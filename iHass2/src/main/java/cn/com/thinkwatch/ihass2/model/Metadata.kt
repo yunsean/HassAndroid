@@ -9,4 +9,5 @@ import java.lang.annotation.RetentionPolicy
 @Retention(RetentionPolicy.RUNTIME)
 annotation class Metadata(val name: String,
                           val order: Int = 0,
-                          val display: String = "")
+                          val display: String = "",
+                          val unit: String = "")

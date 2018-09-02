@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cn.com.thinkwatch.ihass2.pullable.LoadMoreFooter
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/pullable_loadmore_footer_height"
+    android:background="@android:color/transparent"
+    android:orientation="vertical">
+    <ImageView
+        android:id="@+id/loadmore_view"
+        android:layout_width="@dimen/pullable_loadmore_drawable_size"
+        android:layout_height="@dimen/pullable_loadmore_drawable_size"
+        android:layout_gravity="center"
+        android:background="@drawable/pullable_circle_back" />
+</cn.com.thinkwatch.ihass2.pullable.LoadMoreFooter>

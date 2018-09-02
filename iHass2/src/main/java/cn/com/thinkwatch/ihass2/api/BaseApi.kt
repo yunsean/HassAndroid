@@ -107,7 +107,7 @@ object BaseApi {
 
     val dfLong = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ", Locale.ENGLISH)
     val dfShort = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZZZ", Locale.ENGLISH)
-    fun api(baseUrl: String): RestApi = build(RestApi::class.java, baseUrl, GsonConverterFactory.create(GsonBuilder()
+    fun <T> api(baseUrl: String, clazz: Class<T>): T = build(clazz, baseUrl, GsonConverterFactory.create(GsonBuilder()
             .registerTypeAdapter(Date::class.java, object : JsonDeserializer<Date> {
                 override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Date? {
                     try {
@@ -150,5 +150,6 @@ object BaseApi {
                 }
             })
             .create()))
+
     fun rawApi(baseUrl: String): RawApi = build(RawApi::class.java, baseUrl, ScalarsConverterFactory.create())
 }

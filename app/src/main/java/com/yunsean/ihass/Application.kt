@@ -6,6 +6,6 @@ import com.tencent.bugly.Bugly
 class Application: HassApplication() {
     override fun onCreate() {
         super.onCreate()
-        Bugly.init(getApplicationContext(), "3217dc351d", true)
+        Bugly.init(getApplicationContext(), "3217dc351d", false)
     }
 }

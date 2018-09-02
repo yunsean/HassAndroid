@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/contentView"
+    android:layout_width="50dip"
+    android:layout_height="47dip"
+    android:paddingLeft="5dip"
+    android:paddingRight="5dip"
+    android:paddingTop="3dip"
+    android:paddingBottom="4dip"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="@null">
+
+    <com.dylan.uiparts.imageview.SuperImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:scaleType="centerInside"
+        android:background="@drawable/hass_camera_ptz_bg"
+        android:contentDescription="@null"
+        app:siv_image_aspect="1"/>
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/icon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:padding="2dip"
+        android:gravity="center"
+        android:lines="1"
+        android:textColor="@color/color_xiaomi"
+        android:textSize="24sp"
+        android:textStyle="normal"
+        app:autoSizeMinTextSize="4dip"
+        app:autoSizeMaxTextSize="24sp"
+        app:autoSizeTextType="uniform"
+        app:fontFamily="@font/mdi"
+        tools:ignore="MissingPrefix"
+        tools:text="\uf034"/>
+
+</RelativeLayout>
