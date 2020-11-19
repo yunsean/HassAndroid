@@ -8,12 +8,14 @@ import android.support.v4.app.FragmentStatePagerAdapter
 import android.view.View
 import android.view.WindowManager
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.fragment.CameraPtzFragment
 import cn.com.thinkwatch.ihass2.fragment.CameraTtsFragment
 import cn.com.thinkwatch.ihass2.model.JsonEntity
+import cn.com.thinkwatch.ihass2.utils.Gsons
+import cn.com.thinkwatch.ihass2.utils.HassConfig
+import cn.com.thinkwatch.ihass2.utils.cfg
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -23,11 +25,9 @@ import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.dylan.medias.player.MxPlayerView
 import com.dylan.medias.stream.MxStreamReader
-import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_hass_camera_view.*
 import org.jetbrains.anko.dip
 import org.jetbrains.anko.imageResource
-import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk25.coroutines.onClick
 
 class CameraViewActivity : BaseActivity() {
@@ -37,7 +37,7 @@ class CameraViewActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         window.setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContentView(R.layout.activity_hass_camera_view)
-        val entity = try { Gson().fromJson<JsonEntity>(intent.getStringExtra("entity"), JsonEntity::class.java) } catch (_: Exception) { null }
+        val entity = try { Gsons.gson.fromJson<JsonEntity>(intent.getStringExtra("entity"), JsonEntity::class.java) } catch (_: Exception) { null }
         if (entity == null) return finish()
         this.entity = entity
         setTitle(this.entity.friendlyName, true)
@@ -72,7 +72,7 @@ class CameraViewActivity : BaseActivity() {
         }
         this.refresh.onClick { refresh() }
         this.play.onClick { if (playerView.isPlaying) stop() else play() }
-        this.mute.onCheckedChange { buttonView, isChecked -> playerView.setMuted(isChecked) }
+        this.mute.setOnCheckedChangeListener { buttonView, isChecked -> playerView.setMuted(isChecked) }
         this.full.onClick {  }
     }
     private fun stop() {
@@ -110,7 +110,7 @@ class CameraViewActivity : BaseActivity() {
     private fun refresh() {
         this.progressbar.visibility = View.VISIBLE
         Glide.with(this)
-                .load(entity.attributes?.entityPicture?.let { app.haHostUrl + it + "&time=${System.currentTimeMillis()}" } ?: "")
+                .load(entity.attributes?.entityPicture?.let { cfg.getString(HassConfig.Hass_HostUrl, "") + it + "&time=${System.currentTimeMillis()}" } ?: "")
                 .apply(RequestOptions()
                         .timeout(60_000)
                         .dontAnimate()

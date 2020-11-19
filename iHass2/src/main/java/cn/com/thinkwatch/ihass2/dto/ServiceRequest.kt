@@ -11,8 +11,9 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
                           @SerializedName("option") var option: String? = null,
                           @SerializedName("value") var value: String? = null,
                           @SerializedName("code") var code: String? = null,
-                          @SerializedName("rgb_color") var rgbColor: Array<Int>? = null,
+                          @SerializedName("rgb_color") var rgbColor: IntArray? = null,
                           @SerializedName("volume_level") var volumeLevel: BigDecimal? = null,
+                          @SerializedName("white_value") var whiteValue: Int? = null,
                           @SerializedName("brightness") var brightness: Int? = null,
                           @SerializedName("color_temp") var colorTemp: Int? = null,
                           @SerializedName("temperature") var temperature: BigDecimal? = null,
@@ -21,7 +22,7 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
                           @SerializedName("speed") var speed: String? = null,
                           @SerializedName("fan_speed") var fanSpeed: String? = null,
                           @SerializedName("fan_mode") var fanMode: String? = null,
-                          @SerializedName("operation_mode") var operationMode: String? = null,
+                          @SerializedName("hvac_mode") var hvacMode: String? = null,
                           @SerializedName("swing_mode") var swingMode: String? = null,
                           @SerializedName("time") var time: String? = null,
                           @SerializedName("volume") var volume: Int? = null,
@@ -31,7 +32,20 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
                           @SerializedName("url") var url: String? = null,
                           @SerializedName("program_id") val programId: Int? = null,
                           @SerializedName("ringtone_id") val ringtoneId: Int? = null,
-                          @SerializedName("zoom") var zoom: String? = null) : Parcelable {
+                          @SerializedName("zoom") var zoom: String? = null,
+                          @SerializedName("aux_heat") var auxHeat: Boolean? = null,
+                          @SerializedName("away_mode") var awayMode: Boolean? = null,
+                          @SerializedName("oscillating") var oscillating: Boolean? = null,
+                          @SerializedName("direction") var direction: String? = null,
+                          @SerializedName("position") var position: String? = null,
+                          @SerializedName("source") var source: String? = null,
+                          @SerializedName("sound_mode") var soundMode: String? = null,
+                          @SerializedName("media_content_id") var mediaContentId: String? = null,
+                          @SerializedName("media_content_type") var mediaContentType: String? = null,
+                          @SerializedName("shuffle") var shuffle: Boolean? = null,
+                          @SerializedName("tilt_position") var tiltPosition: String? = null,
+                          @SerializedName("effect") var effect: String? = null,
+                          @SerializedName("mode") var mode: String? = null) : Parcelable {
     constructor(source: Parcel) : this(
             source.readString(),
             source.readString(),
@@ -39,8 +53,9 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
             source.readString(),
             source.readString(),
             source.readString(),
-            source.createIntArray()?.toTypedArray(),
+            source.createIntArray(),
             source.readSerializable() as BigDecimal?,
+            source.readValue(Int::class.java.classLoader) as Int?,
             source.readValue(Int::class.java.classLoader) as Int?,
             source.readValue(Int::class.java.classLoader) as Int?,
             source.readSerializable() as BigDecimal?,
@@ -59,6 +74,19 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
             source.readString(),
             source.readValue(Int::class.java.classLoader) as Int?,
             source.readValue(Int::class.java.classLoader) as Int?,
+            source.readString(),
+            source.readString()?.toBoolean(),
+            source.readString()?.toBoolean(),
+            source.readString()?.toBoolean(),
+            source.readString(),
+            source.readString(),
+            source.readString(),
+            source.readString(),
+            source.readString(),
+            source.readString(),
+            source.readString()?.toBoolean(),
+            source.readString(),
+            source.readString(),
             source.readString()
     )
 
@@ -71,8 +99,9 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
         writeString(option)
         writeString(value)
         writeString(code)
-        writeIntArray(rgbColor?.toIntArray())
+        writeIntArray(rgbColor)
         writeSerializable(volumeLevel)
+        writeValue(whiteValue)
         writeValue(brightness)
         writeValue(colorTemp)
         writeSerializable(temperature)
@@ -81,7 +110,7 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
         writeString(speed)
         writeString(fanSpeed)
         writeString(fanMode)
-        writeString(operationMode)
+        writeString(hvacMode)
         writeString(swingMode)
         writeString(time)
         writeValue(volume)
@@ -92,6 +121,19 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
         writeValue(programId)
         writeValue(ringtoneId)
         writeString(zoom)
+        writeString(auxHeat?.toString())
+        writeString(awayMode?.toString())
+        writeString(oscillating?.toString())
+        writeString(direction)
+        writeString(position)
+        writeString(source)
+        writeString(soundMode)
+        writeString(mediaContentId)
+        writeString(mediaContentType)
+        writeString(shuffle?.toString())
+        writeString(tiltPosition)
+        writeString(effect)
+        writeString(mode)
     }
 
     companion object {

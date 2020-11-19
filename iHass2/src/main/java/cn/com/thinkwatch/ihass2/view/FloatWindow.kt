@@ -17,20 +17,19 @@ import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.JsonEntity
 import cn.com.thinkwatch.ihass2.ui.CameraViewActivity
+import cn.com.thinkwatch.ihass2.utils.Gsons
 import com.dylan.common.rx.RxBus2
 import com.dylan.common.sketch.Animations
 import com.dylan.common.utils.Utility
 import com.dylan.medias.player.MxPlayerView
 import com.dylan.medias.stream.MxStreamReader
-import com.google.gson.Gson
 import com.yunsean.dynkotlins.extensions.loges
 import com.yunsean.dynkotlins.extensions.start
 import com.yunsean.dynkotlins.extensions.toastex
-import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk25.coroutines.onClick
-import org.jetbrains.anko.sdk25.coroutines.onTouch
 
 class FloatWindow(val act: Activity) : View.OnTouchListener {
+
     private var windowParams: WindowManager.LayoutParams
     private var windowManager: WindowManager
     private var floatLayout: View
@@ -117,29 +116,33 @@ class FloatWindow(val act: Activity) : View.OnTouchListener {
         floatLayout.findViewById<RadioButton>(R.id.subStream1).onClick { play(url) }
         floatLayout.findViewById<RadioButton>(R.id.subStream2).onClick { play(url) }
         floatLayout.findViewById<RadioButton>(R.id.subStream3).onClick { play(url) }
-        mute.onCheckedChange { _, isChecked -> playerView.setMuted(isChecked) }
+        mute.setOnCheckedChangeListener { _, isChecked -> playerView.setMuted(isChecked) }
         floatLayout.findViewById<RadioButton>(R.id.full).onClick {
             Intent(act, CameraViewActivity::class.java)
-                    .putExtra("entity", Gson().toJson(entity))
+                    .putExtra("entity", Gsons.gson.toJson(entity))
                     .start(act)
         }
-        ptz.onCheckedChange { _, isChecked->  floatLayout.findViewById<View>(R.id.ptzPanel).visibility = if (isChecked) View.VISIBLE else View.GONE }
+        ptz.setOnCheckedChangeListener { _, isChecked->  floatLayout.findViewById<View>(R.id.ptzPanel).visibility = if (isChecked) View.VISIBLE else View.GONE }
         floatLayout.findViewById<RadioButton>(R.id.close).onClick { hideFloatWindow() }
-        floatLayout.findViewById<View>(R.id.left).onTouch { _, event ->
+        floatLayout.findViewById<View>(R.id.left).setOnTouchListener { _, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) callService(entity.entityId, "LEFT")
             else if (event.actionMasked == MotionEvent.ACTION_CANCEL || event.actionMasked == MotionEvent.ACTION_UP) callService(entity.entityId)
+            true
         }
-        floatLayout.findViewById<View>(R.id.right).onTouch { _, event ->
+        floatLayout.findViewById<View>(R.id.right).setOnTouchListener { _, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) callService(entity.entityId, "RIGHT")
             else if (event.actionMasked == MotionEvent.ACTION_CANCEL || event.actionMasked == MotionEvent.ACTION_UP) callService(entity.entityId)
+            true
         }
-        floatLayout.findViewById<View>(R.id.up).onTouch { _, event ->
+        floatLayout.findViewById<View>(R.id.up).setOnTouchListener { _, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) callService(entity.entityId, null, "UP")
             else if (event.actionMasked == MotionEvent.ACTION_CANCEL || event.actionMasked == MotionEvent.ACTION_UP) callService(entity.entityId)
+            true
         }
-        floatLayout.findViewById<View>(R.id.down).onTouch { _, event ->
+        floatLayout.findViewById<View>(R.id.down).setOnTouchListener { _, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) callService(entity.entityId, null, "DOWN")
             else if (event.actionMasked == MotionEvent.ACTION_CANCEL || event.actionMasked == MotionEvent.ACTION_UP) callService(entity.entityId)
+            true
         }
         play(url)
     }

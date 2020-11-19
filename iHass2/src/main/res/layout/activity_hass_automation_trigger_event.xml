@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffffff">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:textColor="#ff111111"
+            android:textSize="14sp"
+            android:text="触发事件"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="10dip"
+            android:paddingLeft="30dip"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/event"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="text"
+                android:padding="10dip"
+                android:textSize="14sp"
+                android:textColor="#ff555555"
+                android:hint="请输入或者选择事件"/>
+            <ImageView
+                android:id="@+id/pickEvent"
+                android:layout_width="44dip"
+                android:layout_height="44dip"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_more_horiz_blue_24dp"
+                android:contentDescription="@null"/>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dip"
+            android:background="#fff2f2f2" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:textColor="#ff111111"
+            android:textSize="14sp"
+            android:text="过滤参数"/>
+        <com.dylan.uiparts.recyclerview.InnerRecyclerView
+            android:id="@+id/datasView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dip"
+            android:background="#fff2f2f2" />
+    </LinearLayout>
+
+</ScrollView>

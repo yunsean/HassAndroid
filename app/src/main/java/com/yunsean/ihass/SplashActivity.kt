@@ -3,10 +3,10 @@ package com.yunsean.ihass
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.model.MDIFont
 import cn.com.thinkwatch.ihass2.ui.ConfActivity
+import cn.com.thinkwatch.ihass2.utils.cfg
 import com.dylan.common.sketch.Dialogs
 import com.dylan.common.utils.Utility
 import com.dylan.uiparts.activity.ActivityResult
@@ -23,11 +23,6 @@ class SplashActivity : com.dylan.common.application.SplashActivity() {
         setSplashImage(R.drawable.splash)
         setShowSplashTime(1000)
         version.text = "iHass v" + Utility.getVerName(this)
-
-        val lhs = "3.0".toBigDecimal()
-        val rhs = "2.9".toBigDecimal()
-        val result = lhs - rhs
-        loges("$result")
     }
 
     override fun needCheckNetwork(): Boolean {
@@ -55,11 +50,13 @@ class SplashActivity : com.dylan.common.application.SplashActivity() {
     @RequestPermissionResult(requestCode = 100)
     private fun afterPermission(result: Boolean) {
         if (!result) {
-            Dialogs.showMessage(this, "需要权限", "需要读写外部存储的权限才能正确运行，请选择允许！", "重新选择", "退出程序", { dialog, which ->
+            Dialogs.showMessage(this, "需要权限", "需要读写外部存储的权限才能正确运行，请选择允许！", "重新选择", "退出程序", { _, _ ->
                 shouldGoHomeAfterSplash(null)
-            }) { dialog, which -> finish() }
+            }) { _, _ ->
+                finish()
+            }
         } else {
-            if (app.haHostUrl == null || app.haHostUrl.length < 1 || !db.isInited()) {
+            if (!cfg.isInited() || !db.isInited()) {
                 activity(ConfActivity::class.java, 100)
             } else {
                 activity(MainActivity::class.java)

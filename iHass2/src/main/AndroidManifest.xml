@@ -39,6 +39,13 @@
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
 
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false"/>
 
@@ -76,19 +83,57 @@
                 <action android:name="cn.com.thinkwatch.ihass2.action.CLICK9" />
             </intent-filter>
         </receiver>
-        <service android:name=".service.DataSyncService" android:process=":datasync"/>
+        <service android:name=".service.DataSyncService" android:process=":datasync" android:exported="true">
+            <intent-filter>
+                <action android:name="cn.com.thinkwatch.ihass2.service.DataSyncService" />
+            </intent-filter>
+        </service>
+        <receiver android:name=".service.AdminReceiver" android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data android:name="android.app.device_admin" android:resource="@xml/admin_lock" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
 
+        <activity android:name=".ui.CallServiceActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustResize|stateAlwaysHidden"/>
+        <activity android:name=".ui.TemplateEditActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustResize|stateAlwaysHidden"/>
+        <activity android:name=".ui.EntityConfigActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustResize|stateAlwaysHidden"/>
+        <activity android:name=".ui.TextEditActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.NotificationInputActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.AttributeListActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.ConfActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.MainActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.AutomationActivity" android:screenOrientation="portrait" android:theme="@style/MyNoTitlebarTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.ScriptsActivity" android:screenOrientation="portrait" android:theme="@style/MyNoTitlebarTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.EntitiesActivity" android:screenOrientation="portrait" android:theme="@style/MyNoTitlebarTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.SettingActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
-        <activity android:name=".ui.BroadcastActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.SettingVoiceActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.QtfmBroadcastActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.XmlyBroadcastActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.PanelListActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.PanelEditActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.EntityListActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.ServiceListActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.TriggerActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.TriggerEditActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.NotificationEditActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.TriggerHistoryActivity" android:launchMode="singleInstance" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.BluetoothActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.WifiActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.NfcPickActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.GpsPickActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.InterceptGuideActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.ServiceInterceptActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.PoiSearchActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysVisible"/>
         <activity android:name=".ui.MdiListActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.CameraViewActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.ChoiceFileActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
-        <activity android:name=".ui.EmptyActivity" android:launchMode="singleInstance" android:noHistory="true" android:theme="@style/EmptyTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden" />
+        <activity android:name=".ui.MusicListActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.NeteasyMusicActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.ObservedActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.ObservedEditActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.EmptyActivity" android:launchMode="singleInstance" android:excludeFromRecents="true" android:noHistory="true" android:theme="@style/EmptyTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden" />
+        <activity android:name=".ui.LauncherActivity" android:launchMode="singleInstance" android:excludeFromRecents="true" android:noHistory="true" android:theme="@style/EmptyTheme" android:exported="true" />
         <activity android:name=".ui.NfcReadActivity" android:launchMode="singleInstance" android:noHistory="true" android:theme="@style/EmptyTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.nfc.action.TECH_DISCOVERED"/>
@@ -118,6 +163,40 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>
         </activity>
+
+        <activity android:name=".ui.QrScannerActivity" android:screenOrientation="portrait" android:theme="@style/MyNoTitlebarTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.VoiceHelpActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.VoiceHistoryActivity" android:launchMode="singleTask" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.VoiceActivity" android:screenOrientation="portrait" android:launchMode="singleInstance" android:excludeFromRecents="true" android:theme="@style/VoiceControlTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+
+        <activity android:name=".ui.ScriptEditActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+
+        <activity android:name=".ui.AutomationEditActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerEventActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerHassActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerMqttActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerNumbericActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerSunActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerTemplateActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerTimeActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerPatternActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerWebHookActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerZoneActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.trigger.TriggerStateActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+
+        <activity android:name=".ui.automation.condition.ConditionOrActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.condition.ConditionAndActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.condition.ConditionNumbericActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.condition.ConditionStateActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.condition.ConditionSunActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.condition.ConditionTemplateActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.condition.ConditionTimeActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.condition.ConditionZoneActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+
+        <activity android:name=".ui.automation.action.ActionServiceActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.action.ActionDelayActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.action.ActionWaitActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.automation.action.ActionFireEventActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
 
     </application>
 </manifest>

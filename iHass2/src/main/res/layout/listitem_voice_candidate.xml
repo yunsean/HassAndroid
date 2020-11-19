@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/entity"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/selector_ffffff_eeeeee"
+    android:gravity="center"
+    android:padding="7dip"
+    android:textSize="13sp"
+    android:textColor="#ff777777"
+    tools:text="Item Text"/>

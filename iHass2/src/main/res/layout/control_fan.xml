@@ -5,52 +5,142 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center"
     android:orientation="vertical">
+    <cn.com.thinkwatch.ihass2.view.UseRatioView
+        android:id="@+id/useRatio"
+        android:layout_width="match_parent"
+        android:layout_height="36dip"
+        android:layout_marginTop="10dip"/>
+    <LinearLayout
+        android:id="@+id/useRatioDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dip"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/beginDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:textColor="#ff999999"
+            tools:text="2018-01-01" />
+        <TextView
+            android:id="@+id/endDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:textSize="10sp"
+            android:textColor="#ff999999"
+            tools:text="2018-01-01"/>
+    </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="horizontal"
         android:paddingBottom="8dp"
-        android:paddingTop="24dp">
-        <android.support.v7.widget.AppCompatTextView
+        android:paddingTop="10dp">
+        <ImageButton
             android:id="@+id/text_off"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="44dip"
+            android:layout_height="44dip"
             android:layout_gravity="center"
-            android:layout_margin="4dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:padding="4dp"
-            android:text="\uF243"
-            android:textColor="@color/md_blue_grey_500"
-            android:textSize="40dp"
-            app:fontFamily="@font/mdi"
-            tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
-        <android.support.v7.widget.AppCompatTextView
+            android:background="@null"
+            android:src="@drawable/ic_fan_stop"
+            android:contentDescription="@null"/>
+        <ImageButton
             android:id="@+id/text_on"
-            android:layout_width="wrap_content"
+            android:layout_width="44dip"
+            android:layout_height="44dip"
+            android:layout_marginLeft="20dip"
+            android:layout_gravity="center"
+            android:background="@null"
+            android:src="@drawable/ic_fan_work"
+            android:contentDescription="@null"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/speed_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:gravity="center"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginRight="4sp"
+            android:text="风速："/>
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/spinner_speed"
+            android:layout_width="150dip"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="4dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:padding="4dp"
-            android:text="\uF241"
-            android:textColor="@color/md_blue_grey_500"
-            android:textSize="40dp"
-            app:fontFamily="@font/mdi"
-            tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            tools:listitem="@android:layout/simple_list_item_activated_1"/>
     </LinearLayout>
-    <android.support.v7.widget.AppCompatSpinner
-        android:id="@+id/spinner_speed"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/oscillate_panel"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        tools:listitem="@android:layout/simple_list_item_activated_1"/>
+        android:layout_marginTop="10dip"
+        android:gravity="center"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginRight="4sp"
+            android:text="摇头："/>
+        <LinearLayout
+            android:layout_width="150dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/oscillate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:theme="@style/YellowTheme"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/direction_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:gravity="center"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginRight="4sp"
+            android:text="方向："/>
+        <LinearLayout
+            android:layout_width="150dip"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/forward"
+                android:layout_width="44dip"
+                android:layout_height="44dip"
+                android:layout_gravity="center"
+                android:background="@null"
+                android:checked="true"
+                android:src="@drawable/ic_rotate_left"
+                android:contentDescription="@null"/>
+            <ImageButton
+                android:id="@+id/reversal"
+                android:layout_width="44dip"
+                android:layout_height="44dip"
+                android:layout_marginLeft="20dip"
+                android:background="@null"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_rotate_right"
+                android:contentDescription="@null"/>
+        </LinearLayout>
+    </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

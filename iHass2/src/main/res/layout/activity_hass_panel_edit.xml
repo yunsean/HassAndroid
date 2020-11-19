@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,50 +7,78 @@
     android:orientation="vertical"
     android:background="#fff5f5f5">
 
+    <ImageView
+        android:id="@+id/containerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.5"
+        android:background="@null"
+        android:contentDescription="@null"/>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dip"
-        android:gravity="center"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ff555555"
-            android:textSize="14sp"
-            android:text="面板名称："/>
-        <com.dylan.uiparts.edittext.CleanableEditText
-            android:id="@+id/panelName"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginLeft="10dip"
-            android:padding="10dip"
-            android:background="@null"
-            android:inputType="text"
-            android:maxLength="5"
-            android:textSize="14sp"
-            android:textColor="#ff555555"
-            android:textColorHint="#ff999999"
-            android:hint="请输入5字以内面板名称"/>
-    </LinearLayout>
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-        <me.zhanghai.android.materialprogressbar.MaterialProgressBar
-            style="@style/Widget.MaterialProgressBar.ProgressBar"
-            android:id="@+id/loading"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            android:indeterminate="true"
-            android:paddingBottom="40dp"
-            app:mpb_progressStyle="circular"/>
-    </FrameLayout>
+            android:padding="10dip"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ff555555"
+                android:textSize="14sp"
+                android:text="面板名称："/>
+            <com.dylan.uiparts.edittext.CleanableEditText
+                android:id="@+id/panelName"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="10dip"
+                android:padding="10dip"
+                android:background="@null"
+                android:inputType="text"
+                android:textSize="14sp"
+                android:textColor="#ff555555"
+                android:textColorHint="#ff999999"
+                android:hint="请输入5字以内面板名称"/>
+            <ImageButton
+                android:id="@+id/image"
+                android:layout_width="44dip"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_image_black_24dp"
+                android:contentDescription="@null"/>
+            <CheckBox
+                android:id="@+id/translucence"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:textSize="12sp"
+                android:textColor="#ff555555"
+                android:text="元素半透明"/>
+        </LinearLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+            <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+                style="@style/Widget.MaterialProgressBar.ProgressBar"
+                android:id="@+id/loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminate="true"
+                android:paddingBottom="40dp"
+                app:mpb_progressStyle="circular"/>
+        </FrameLayout>
+    </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

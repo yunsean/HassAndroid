@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.android.percent.support.PercentLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:padding="20dip"
+    android:orientation="vertical"
+    android:background="#ffffffff">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/intercept_guide"
+        android:contentDescription="@null"
+        app:layout_widthPercent="40%"
+        app:layout_heightPercent="60%w"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dip"
+        android:textSize="14sp"
+        android:textColor="#ff777777"
+        android:text="        点击下一步后，将显示常规的Home Assistant控制面板，请在控制面板中按照日常的使用方式，点击一个你想作为场景触发的操作，APP将自动记录下该搞作所完成的服务以及参数，并且自动关闭控制面板，填写到上一步的对应输入框中。"/>
+    <CheckBox
+        android:id="@+id/dontShow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginTop="20dip"
+        android:paddingLeft="10dip"
+        android:button="@drawable/ic_radio_button"
+        android:textSize="14sp"
+        android:textColor="#ff777777"
+        android:text="下次不再显示"/>
+    <com.dylan.uiparts.button.SmartButton
+        android:id="@+id/next"
+        android:layout_width="match_parent"
+        android:layout_height="44dip"
+        android:layout_marginTop="10dip"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:text="下一步"
+        app:sv_bgcolor_normal="@color/colorPrimary"
+        app:sv_bgcolor_pressed="@color/colorPrimary"
+        app:sv_txcolor_normal="@color/white"
+        app:sv_txcolor_pressed="#ff555555"
+        app:sv_cornerRadius="3dip"
+        app:sv_shadowEnabled="true"/>
+
+</com.zhy.android.percent.support.PercentLinearLayout>

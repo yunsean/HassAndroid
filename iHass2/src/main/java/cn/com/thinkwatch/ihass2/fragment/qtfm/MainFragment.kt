@@ -14,7 +14,7 @@ import android.view.animation.Transformation
 import android.widget.ImageView
 import android.widget.TextView
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.api.qtfmApi
+import cn.com.thinkwatch.ihass2.network.external.qtfmApi
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.bus.broadcast.XmlyFilterChange
 import com.dylan.common.rx.RxBus2
@@ -57,7 +57,7 @@ class MainFragment : BaseFragment() {
             switchPanel(provincePanel, categoryPanel, localDropdown, categoryDropdown)
             if (loadProvince.visibility != View.GONE) {
                 qtfmApi.getCategories()
-                        .nextOnMain {
+                        .withNext {
                             loadProvince.visibility = View.GONE
                             provinceList.adapter = RecyclerAdapter(R.layout.listitem_hass_broadcast_filter, it.data?.regions_map) {
                                 view, index, province ->
@@ -75,7 +75,7 @@ class MainFragment : BaseFragment() {
                             it.toastex()
                             switchPanel(provincePanel, categoryPanel, localDropdown, categoryDropdown, true)
                         }
-                        .subscribe {
+                        .subscribeOnMain {
                             if (dataDisposable == null) dataDisposable = CompositeDisposable(it)
                             else dataDisposable?.add(it)
                         }
@@ -92,7 +92,7 @@ class MainFragment : BaseFragment() {
             switchPanel(categoryPanel, provincePanel, categoryDropdown, localDropdown)
             if (loadCategory.visibility != View.GONE) {
                 qtfmApi.getCategories()
-                        .nextOnMain {
+                        .withNext {
                             loadCategory.visibility = View.GONE
                             categoryList.adapter = RecyclerAdapter(R.layout.listitem_hass_broadcast_filter, it.data?.channel_categories) {
                                 view, index, category ->
@@ -110,7 +110,7 @@ class MainFragment : BaseFragment() {
                             it.toastex()
                             switchPanel(categoryPanel, provincePanel, categoryDropdown, localDropdown, true)
                         }
-                        .subscribe {
+                        .subscribeOnMain {
                             if (dataDisposable == null) dataDisposable = CompositeDisposable(it)
                             else dataDisposable?.add(it)
                         }

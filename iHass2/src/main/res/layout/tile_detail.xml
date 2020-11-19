@@ -87,6 +87,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_marginBottom="10dip"
                 android:gravity="center_vertical"
                 android:layout_marginTop="5dip"
                 android:scrollbars="none"

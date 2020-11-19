@@ -8,10 +8,9 @@
     android:layout_height="wrap_content"
     android:padding="5dip"
     android:gravity="center"
-    android:orientation="vertical"
-    android:background="#fff5f5f5">
+    android:orientation="vertical">
     <com.dylan.uiparts.imageview.SuperImageView
-        android:id="@+id/button"
+        android:id="@+id/backImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -22,8 +21,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignTop="@id/button"
-        android:layout_alignBottom="@id/button"
+        android:layout_alignTop="@id/backImage"
+        android:layout_alignBottom="@id/backImage"
         android:gravity="center"
         android:padding="5dip"
         android:orientation="vertical">

@@ -8,15 +8,28 @@
 	android:gravity="center"
 	android:background="@drawable/shape_round_ffffff_10dip"
 	android:orientation="vertical">
+	<android.support.v7.widget.AppCompatTextView
+		android:id="@+id/entityId"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_gravity="center"
+		android:layout_marginTop="5dip"
+		android:gravity="center"
+		android:lines="1"
+		android:textColor="#ffcccccc"
+		android:textSize="12sp"
+		app:fontFamily="@font/dincond"
+		tools:text="entity_id"/>
 	<com.dylan.uiparts.edittext.CleanableEditText
 		android:id="@+id/entityName"
 		android:layout_width="200dip"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="10dip"
-		android:gravity="center"
+		android:gravity="center_horizontal"
 		android:padding="5dip"
 		android:background="@null"
 		android:inputType="text"
+		android:singleLine="true"
 		android:lines="1"
 		android:textSize="14sp"
 		android:textColor="#ff555555"
@@ -86,7 +99,7 @@
 			android:padding="5dip"
 			android:gravity="center"
 			android:inputType="number"
-			android:maxLength="1"
+			android:maxLength="2"
 			android:lines="1"
 			android:textSize="14sp"
 			android:textColor="#ff555555"
@@ -148,6 +161,12 @@
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="20dip"
 			android:button="@drawable/group_type_square"/>
+		<RadioButton
+			android:id="@+id/entityTypeList2"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="20dip"
+			android:button="@drawable/group_type_list2"/>
 	</RadioGroup>
 
 	<View

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <com.dylan.uiparts.gifview.GifView
+        android:id="@+id/gifView"
+        android:layout_width="150dip"
+        android:layout_height="wrap_content"
+        android:src="@drawable/read_card"
+        android:contentDescription="@null"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:textColor="#ff777777"
+        android:text="请持卡靠近手机读卡区域..."/>
+
+</LinearLayout>

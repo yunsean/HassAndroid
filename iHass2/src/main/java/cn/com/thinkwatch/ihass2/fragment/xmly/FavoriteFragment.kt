@@ -74,10 +74,10 @@ class FavoriteFragment : BaseFragment() {
     }
     private fun data() {
         db.async {
-            db.getXmlyFavorite(entityId)
+            db.getXmlyFavorite(entityId, Favorite.Type_Xmly)
         }.nextOnMain {
             adapter?.items = it
-            recyclerView.adapter.notifyDataSetChanged()
+            recyclerView.adapter?.notifyDataSetChanged()
             pullable.isLoadMoreEnabled = false
             pullable.isRefreshing = false
             pullable.isLoadingMore = false

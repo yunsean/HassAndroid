@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffffff">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:textColor="#ff111111"
+        android:textSize="14sp"
+        android:text="对象"/>
+    <TextView
+        android:id="@+id/entity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableRight="@drawable/calendar_rightarrow"
+        android:drawablePadding="10dip"
+        android:background="@drawable/selector_ffffff_eeeeee"
+        android:paddingTop="10dip"
+        android:paddingBottom="10dip"
+        android:paddingRight="10dip"
+        android:paddingLeft="30dip"
+        android:textColor="#ff555555"
+        android:textColorHint="#ff999999"
+        android:textSize="14sp"
+        android:hint="请选择对象"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dip"
+        android:background="#fff2f2f2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:textColor="#ff111111"
+        android:textSize="14sp"
+        android:text="参数"/>
+    <EditText
+        android:id="@+id/state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dip"
+        android:background="@null"
+        android:inputType="text"
+        android:padding="10dip"
+        android:textSize="14sp"
+        android:textColor="#ff555555"
+        android:hint="状态为该值"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dip"
+        android:background="#fff2f2f2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:textColor="#ff111111"
+        android:textSize="14sp"
+        android:text="延迟"/>
+    <TextView
+        android:id="@+id/lasted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableRight="@drawable/calendar_rightarrow"
+        android:drawablePadding="10dip"
+        android:background="@drawable/selector_ffffff_eeeeee"
+        android:paddingTop="10dip"
+        android:paddingBottom="10dip"
+        android:paddingRight="10dip"
+        android:paddingLeft="30dip"
+        android:textColor="#ff555555"
+        android:textColorHint="#ff999999"
+        android:textSize="14sp"
+        android:hint="设置持续一定时长后触发(for)"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dip"
+        android:background="#fff2f2f2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dip"
+        android:padding="10dip"
+        android:textColor="#ffaaaaaa"
+        android:textSize="12sp"
+        android:text="* 当指定对象的状态为设定状态时有效"/>
+
+</LinearLayout>

@@ -8,6 +8,7 @@
     android:background="#fff5f5f5">
 
     <LinearLayout
+        android:id="@+id/tabbarPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
@@ -33,31 +34,61 @@
             app:tabMode="scrollable"
             app:tabPadding="0dp"/>
     </LinearLayout>
-    <cn.com.thinkwatch.ihass2.view.MultiSwipeRefreshLayout
-        android:id="@+id/swipeRefresh"
+    <com.zhy.android.percent.support.PercentFrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <FrameLayout
+        android:layout_height="match_parent">
+        <cn.com.thinkwatch.ihass2.view.MultiSwipeRefreshLayout
+            android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:animateLayoutChanges="true"
-            android:clipToPadding="false">
-            <com.dylan.uiparts.viewpager.StaticViewPager
-                android:id="@+id/viewPager"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            <me.zhanghai.android.materialprogressbar.MaterialProgressBar
-                android:id="@+id/networkBusy"
-                style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
+                android:layout_height="match_parent"
+                android:animateLayoutChanges="true"
+                android:clipToPadding="false">
+                <com.dylan.uiparts.viewpager.StaticViewPager
+                    android:id="@+id/viewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+                <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+                    android:id="@+id/networkBusy"
+                    style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:layout_gravity="top"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    android:theme="@style/YellowTheme"
+                    app:mpb_progressStyle="horizontal"
+                    app:mpb_useIntrinsicPadding="false"/>
+            </FrameLayout>
+        </cn.com.thinkwatch.ihass2.view.MultiSwipeRefreshLayout>
+        <com.zhy.android.percent.support.PercentFrameLayout
+            android:id="@+id/groupPanel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:orientation="vertical">
+            <android.support.v7.widget.CardView
+                android:id="@+id/panelCard"
                 android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:layout_gravity="top"
-                android:indeterminate="true"
-                android:theme="@style/YellowTheme"
-                app:mpb_progressStyle="horizontal"
-                app:mpb_useIntrinsicPadding="false"/>
-        </FrameLayout>
-    </cn.com.thinkwatch.ihass2.view.MultiSwipeRefreshLayout>
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|bottom"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp"
+                app:cardPreventCornerOverlap="false"
+                app:cardUseCompatPadding="true"
+                app:layout_widthPercent="65%">
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/groups"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingBottom="10dip"
+                    android:paddingLeft="10dip"/>
+            </android.support.v7.widget.CardView>
+        </com.zhy.android.percent.support.PercentFrameLayout>
+    </com.zhy.android.percent.support.PercentFrameLayout>
 
 </LinearLayout>

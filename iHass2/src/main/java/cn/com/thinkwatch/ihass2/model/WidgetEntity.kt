@@ -5,9 +5,9 @@ import org.xutils.db.annotation.Column
 import org.xutils.db.annotation.Table
 
 @Table(name = "HASS_WIDGET_ENTITIES")
-data class WidgetEntity (@Column(name = "WIDGET_ID") var widgetId: Int = 0,
-                         @Column(name = "ENTITY_ID") var entityId: String = "",
-                         @Column(name = "DISPLAY_ORDER") @Expose var order: Int = 0,
-                         @Column(name = "SHOW_NAME") @Expose var showName: String? = null,
-                         @Column(name = "SHOW_ICON") @Expose var showIcon: String? = null,
-                         @Column(name = "ID", isId = true, autoGen = true) var id: Long = 0L)
+data class WidgetEntity (@Expose @Column(name = "WIDGET_ID") var widgetId: Int = 0,
+                         @Expose @Column(name = "ENTITY_ID") var entityId: String = "",
+                         @Expose @Column(name = "DISPLAY_ORDER") var order: Int = 0,
+                         @Expose @Column(name = "SHOW_NAME") var showName: String? = null,
+                         @Expose @Column(name = "SHOW_ICON") var showIcon: String? = null,
+                         @Expose @Column(name = "ID", isId = true, autoGen = true) var id: Long = 0L)

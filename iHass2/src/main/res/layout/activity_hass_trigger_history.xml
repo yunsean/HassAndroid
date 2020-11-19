@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#fff5f5f5">
+
+     <LinearLayout
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:background="#ffffffff">
+          <com.dylan.uiparts.edittext.CleanableEditText
+              android:id="@+id/keyword"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="10dip"
+              android:layout_marginRight="10dip"
+              android:layout_marginTop="5dip"
+              android:layout_marginBottom="5dip"
+              android:padding="10dip"
+              android:drawableLeft="@drawable/ic_search_black_24dp"
+              android:drawablePadding="10dip"
+              android:background="@drawable/shape_round_f2f2f2_5dip"
+              android:inputType="text"
+              android:imeActionLabel="过滤"
+              android:imeOptions="actionSearch"
+              android:lines="1"
+              android:textSize="14sp"
+              android:textColor="#ff555555"
+              android:textColorHint="#ff999999"
+              android:hint="请输入名称或者服务ID"/>
+     </LinearLayout>
+     <View
+         android:layout_width="match_parent"
+         android:layout_height="1px"
+         android:background="#ffeeeeee" />
+     <com.dylan.dyn3rdparts.swipetoloadlayout.SwipeToLoadLayout
+         android:id="@+id/pullable"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:background="@color/white"
+         app:pullable_headerview_resid="@+id/headerView"
+         app:pullable_scrollview_resid="@+id/recyclerView"
+         app:pullable_footerview_resid="@+id/footerView"
+         app:pullable_loadmore_enabled="false"
+         app:pullable_swipe_style="above">
+          <include
+              android:id="@id/headerView"
+              layout="@layout/pullable_layout_header" />
+          <android.support.v7.widget.RecyclerView
+              android:id="@id/recyclerView"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"/>
+          <include
+              android:id="@id/footerView"
+              layout="@layout/pullable_layout_footer" />
+     </com.dylan.dyn3rdparts.swipetoloadlayout.SwipeToLoadLayout>
+
+</LinearLayout>

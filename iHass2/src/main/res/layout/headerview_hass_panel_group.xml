@@ -6,15 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingTop="1dip"
-    android:paddingLeft="10dip"
-    android:background="#fff5f5f5">
+    android:paddingLeft="10dip">
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/headerName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="4dip"
         android:paddingBottom="5dip"
-        android:background="#fff5f5f5"
         android:gravity="center_vertical"
         android:lines="1"
         android:textColor="#ff777777"

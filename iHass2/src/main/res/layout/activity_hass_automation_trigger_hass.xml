@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffffff">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:textColor="#ff111111"
+        android:textSize="14sp"
+        android:text="触发时机"/>
+    <RadioButton
+        android:id="@+id/startup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dip"
+        android:button="@null"
+        android:drawableRight="@drawable/radio_checkbox"
+        android:padding="10dip"
+        android:checked="true"
+        android:textColor="#ff555555"
+        android:textSize="14sp"
+        android:text="启动完成后"/>
+    <RadioButton
+        android:id="@+id/shutdown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dip"
+        android:button="@null"
+        android:drawableRight="@drawable/radio_checkbox"
+        android:padding="10dip"
+        android:textColor="#ff555555"
+        android:textSize="14sp"
+        android:text="即将关闭前"/>
+
+</RadioGroup>

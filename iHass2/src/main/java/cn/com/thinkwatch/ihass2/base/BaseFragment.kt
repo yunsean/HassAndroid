@@ -14,6 +14,7 @@ import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.global.GlobalConfig
 import com.dylan.common.sketch.Sketch
 import com.dylan.uiparts.activity.ActivityResultDispatch
+import com.dylan.uiparts.activity.RequestPermissionResultDispatch
 import com.dylan.uiparts.layout.LoadableLayout
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.layout_hass_titlebar.view.*
@@ -40,6 +41,9 @@ abstract class BaseFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         ActivityResultDispatch.onActivityResult(this, requestCode, resultCode, data)
     }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        RequestPermissionResultDispatch.onRequestPermissionsResult(this, requestCode, permissions, grantResults)
+    }
     override fun onDestroy() {
         disposable?.dispose()
         super.onDestroy()
@@ -65,8 +69,8 @@ abstract class BaseFragment : Fragment() {
         if (rightResId != 0) Sketch.set_rightDrawable(fragment, R.id.titlebar_right, rightResId)
     }
 
-    protected fun doLeft() {    }
-    protected fun doRight() {    }
+    protected open fun doLeft() {    }
+    protected open fun doRight() {    }
 
     private var snackbar: Snackbar? = null
     protected fun showError(message: String, actionLabel: String? = null, action: (() -> Unit)? = null) {

@@ -63,6 +63,10 @@ open class BaseActivity : SwipeToBackActivity() {
         super.onCreate(savedInstanceState)
         isSwipeEnabled = false
     }
+    override fun onResume() {
+        super.onResume()
+        app.serviceIntercepting = false
+    }
     override fun onDestroy() {
         disposable?.dispose()
         super.onDestroy()
@@ -82,6 +86,9 @@ open class BaseActivity : SwipeToBackActivity() {
         }
     }
     fun setContentViewNoTitlebar(layoutResID: Int) {
+        setContentViewNoTitlebar(layoutResID, ContextCompat.getColor(this, R.color.colorPrimaryDark))
+    }
+    fun setContentViewNoTitlebar(layoutResID: Int, statusBarColor: Int) {
         super.setContentView(layoutResID)
         initTitlebarAction(rootView!!)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -90,7 +97,7 @@ open class BaseActivity : SwipeToBackActivity() {
         if (Utility.isLollipopOrLater()) {
             val window = window
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
+            window.statusBarColor = statusBarColor
         }
     }
     @JvmOverloads
@@ -109,9 +116,9 @@ open class BaseActivity : SwipeToBackActivity() {
     }
 
     private fun initTitlebarAction(customView: View) {
-        titlebarName = customView.findViewById(R.id.titlebar_name) as TextView
-        titlebarLeft = customView.findViewById(R.id.titlebar_left) as Button
-        titlebarRight = customView.findViewById(R.id.titlebar_right) as Button
+        titlebarName = customView.findViewById(R.id.titlebar_name) as TextView?
+        titlebarLeft = customView.findViewById(R.id.titlebar_left) as Button?
+        titlebarRight = customView.findViewById(R.id.titlebar_right) as Button?
         Sketch.set_click(titlebarLeft) { v -> doLeft() }
         Sketch.set_click(titlebarRight) { v -> doRight() }
     }
@@ -220,6 +227,7 @@ open class BaseActivity : SwipeToBackActivity() {
         ActivityResultDispatch.onActivityResult(this, requestCode, resultCode, data)
     }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         RequestPermissionResultDispatch.onRequestPermissionsResult(this, requestCode, permissions, grantResults)
     }
 

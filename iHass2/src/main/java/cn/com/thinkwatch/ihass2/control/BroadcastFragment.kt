@@ -13,7 +13,8 @@ import cn.com.thinkwatch.ihass2.bus.broadcast.FavoriteChanged
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.broadcast.Favorite
-import cn.com.thinkwatch.ihass2.ui.BroadcastActivity
+import cn.com.thinkwatch.ihass2.ui.QtfmBroadcastActivity
+import cn.com.thinkwatch.ihass2.ui.XmlyBroadcastActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.dylan.common.rx.RxBus2
@@ -49,7 +50,7 @@ class BroadcastFragment : ControlFragment() {
                 dismiss()
             }
             button_list.onClick {
-                Intent(ctx, BroadcastActivity::class.java)
+                Intent(ctx, if ("broadcast.qtfm" == entity?.entityId) QtfmBroadcastActivity::class.java else XmlyBroadcastActivity::class.java)
                         .putExtra("entityId", entity?.entityId)
                         .start(ctx)
             }
@@ -62,7 +63,8 @@ class BroadcastFragment : ControlFragment() {
                 }
             })
             play.onClick {
-                RxBus2.getDefault().post(ServiceRequest("broadcast", "toggle", null))
+                if (entity?.isActivated ?: false) RxBus2.getDefault().post(ServiceRequest("broadcast", "stop", null))
+                else RxBus2.getDefault().post(ServiceRequest("broadcast", "play", entity?.entityId))
             }
             adapter = RecyclerAdapter(R.layout.griditem_radio_channel, db.getXmlyFavorite(entity?.entityId ?: "")) {
                 view, index, channel ->
@@ -85,7 +87,7 @@ class BroadcastFragment : ControlFragment() {
             volume.progress = entity?.attributes?.volume?.toInt() ?: 50
             volume_value.text = volume.progress.toString()
             if (entity?.isActivated ?: false) state.text = db.getXmlyCached(entity?.attributes?.url ?: "")?.name ?: "未知电台"
-            else state.text = "off"
+            else state.text = entity?.getFriendlyState("off")
         }
     }
     override fun onChange() = refreshUi()

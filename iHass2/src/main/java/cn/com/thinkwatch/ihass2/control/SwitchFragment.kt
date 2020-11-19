@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
 import android.view.View
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.api.hassApi
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.Period
@@ -55,15 +54,8 @@ class SwitchFragment : ControlFragment() {
             textOn.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "turn_on", entity?.entityId)) }
             textOff.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "turn_off", entity?.entityId)) }
             btnClose.onClick { dismiss() }
-        }
-    }
-    private fun refreshUi() {
-        fragment?.apply {
-            val isActive = entity?.isCurrentStateActive ?: false
-            textOn.textColor = ResourcesCompat.getColor(resources, if (isActive) R.color.primary else R.color.md_grey_500, null)
-            textOff.textColor = ResourcesCompat.getColor(resources, if (isActive) R.color.md_grey_500 else R.color.primary, null)
             if (entity?.attributes?.isStateful ?: false) {
-                context.hassApi.getHistory(context.app.haPassword, calendar.kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"), entity?.entityId, Calendar.getInstance().kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"))
+                app.getHistory(calendar.kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"), entity?.entityId, Calendar.getInstance().kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"))
                         .nextOnMain {
                             useRatio.visibility = View.VISIBLE
                             useRatioDate.visibility = View.VISIBLE
@@ -102,6 +94,13 @@ class SwitchFragment : ControlFragment() {
                             useRatioDate.visibility = View.GONE
                         }
             }
+        }
+    }
+    private fun refreshUi() {
+        fragment?.apply {
+            val isActive = entity?.isCurrentStateActive ?: false
+            textOn.textColor = ResourcesCompat.getColor(resources, if (isActive) R.color.primary else R.color.md_grey_500, null)
+            textOff.textColor = ResourcesCompat.getColor(resources, if (isActive) R.color.md_grey_500 else R.color.primary, null)
         }
     }
     override fun onChange() = refreshUi()

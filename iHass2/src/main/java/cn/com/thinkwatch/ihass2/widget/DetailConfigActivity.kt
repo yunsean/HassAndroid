@@ -13,10 +13,12 @@ import android.widget.SeekBar
 import android.widget.TextView
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.base.BaseActivity
+import cn.com.thinkwatch.ihass2.bus.WidgetChanged
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.enums.WidgetType
 import cn.com.thinkwatch.ihass2.model.*
 import cn.com.thinkwatch.ihass2.ui.MdiListActivity
+import com.dylan.common.rx.RxBus2
 import com.dylan.common.sketch.Animations
 import com.dylan.common.sketch.Sketch
 import com.dylan.common.utils.Utility
@@ -33,7 +35,6 @@ import kotlinx.android.synthetic.main.dialog_list_view.view.*
 import kotlinx.android.synthetic.main.dialog_widget_item_edit.view.*
 import kotlinx.android.synthetic.main.listitem_entity_item.view.*
 import org.jetbrains.anko.*
-import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk25.coroutines.onClick
 
 
@@ -68,6 +69,7 @@ class DetailConfigActivity : BaseActivity() {
         if (checkedEntity == null) return showError("请选择要添加的元素！")
         db.addWidget(widgetId, WidgetType.detail, backColorValue, normalColorValue, activeColorValue, textSizeValue, imageSizeValue, listOf(checkedEntity!!))
         DetailWidgetProvider.updateEntityWidget(this, widgetId, checkedEntity!!)
+        RxBus2.getDefault().post(WidgetChanged())
         setResult(Activity.RESULT_OK, Intent().putExtra(EXTRA_APPWIDGET_ID, widgetId).putExtra("widgetId", widgetId))
         finish()
     }
@@ -161,7 +163,7 @@ class DetailConfigActivity : BaseActivity() {
             false
         }
 
-        setupColor.onCheckedChange { buttonView, isChecked ->
+        setupColor.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked) {
                 recyclerView.visibility = View.GONE
                 customizePanel.visibility = View.VISIBLE
@@ -316,7 +318,7 @@ class DetailConfigActivity : BaseActivity() {
         showEntities.clear()
         checkedEntity?.let { showEntities.add(it) }
         allEntities?.filter {
-            (keyword.isBlank() or it.friendlyName.contains(keyword) or (it.state?.contains(keyword) ?: false)) and (checkedEntity != it)
+            (keyword.isBlank() or it.friendlyName.contains(keyword, true) or it.entityId.contains(keyword) or (it.state?.contains(keyword, true) ?: false)) and (checkedEntity != it)
         }?.let {
             showEntities.addAll(it)
         }

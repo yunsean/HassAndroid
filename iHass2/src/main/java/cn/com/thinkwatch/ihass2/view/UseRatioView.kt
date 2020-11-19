@@ -12,7 +12,6 @@ import android.util.AttributeSet
 import android.view.View
 import cn.com.thinkwatch.ihass2.R
 import org.jetbrains.anko.sp
-import java.util.*
 
 
 class UseRatioView(context: Context, attr: AttributeSet?): View(context, attr) {
@@ -46,7 +45,7 @@ class UseRatioView(context: Context, attr: AttributeSet?): View(context, attr) {
         var color = stateColors.get(state)
         if (color != null) return color
         if (state.isBlank()) {
-            color = Random(System.currentTimeMillis()).nextInt()
+            color = 0xffeeeeee.toInt()
         } else {
             color = 0
             val scale = Math.pow(0xffffff.toDouble(), 1.0 / state.length).toInt()

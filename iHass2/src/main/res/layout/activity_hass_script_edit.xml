@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffffff">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
+        android:paddingTop="5dip"
+        android:paddingBottom="5dip"
+        android:gravity="center"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ff555555"
+            android:textSize="14sp"
+            android:text="名称："/>
+        <com.dylan.uiparts.edittext.CleanableEditText
+            android:id="@+id/name"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="10dip"
+            android:padding="5dip"
+            android:background="@null"
+            android:inputType="text"
+            android:maxLines="1"
+            android:scrollbars="horizontal"
+            android:textSize="14sp"
+            android:textColor="#ff555555"
+            android:textColorHint="#ff999999"
+            android:hint="请输入脚本名称"/>
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="5dip"
+        android:background="#fff2f2f2" />
+
+    <LinearLayout
+        android:id="@+id/contentView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#fff2f2f2"
+        android:visibility="gone"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:background="#ffffffff"
+            android:drawableLeft="@drawable/ic_input_gray_24dp"
+            android:drawablePadding="5dip"
+            android:gravity="center_vertical"
+            android:textSize="14sp"
+            android:textColor="#ff777777"
+            android:text="动作"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:background="#fff2f2f2" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/actionsView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:background="#ffffffff" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffffff">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:textColor="#ff111111"
+        android:textSize="14sp"
+        android:text="对象"/>
+
+    <TextView
+        android:id="@+id/entity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableRight="@drawable/calendar_rightarrow"
+        android:drawablePadding="10dip"
+        android:background="@drawable/selector_ffffff_eeeeee"
+        android:paddingTop="10dip"
+        android:paddingBottom="10dip"
+        android:paddingRight="10dip"
+        android:paddingLeft="30dip"
+        android:textColor="#ff555555"
+        android:textColorHint="#ff999999"
+        android:textSize="14sp"
+        android:hint="请选择对象"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dip"
+        android:background="#fff2f2f2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:textColor="#ff111111"
+        android:textSize="14sp"
+        android:text="属性列表"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/attributes"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>

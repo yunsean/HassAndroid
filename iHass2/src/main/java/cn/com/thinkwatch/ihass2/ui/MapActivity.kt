@@ -18,6 +18,7 @@ import cn.com.thinkwatch.ihass2.bus.EntityChanged
 import cn.com.thinkwatch.ihass2.bus.LocationChanged
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.model.MDIFont
+import cn.com.thinkwatch.ihass2.utils.ZonedDateAsTime
 import com.baidu.mapapi.map.*
 import com.baidu.mapapi.model.LatLng
 import com.baidu.mapapi.search.geocode.*
@@ -31,7 +32,6 @@ import com.dylan.uiparts.activity.RequestPermissionResult
 import com.dylan.uiparts.activity.RequestPermissionResultDispatch
 import com.dylan.uiparts.recyclerview.RecyclerViewDivider
 import com.yunsean.dynkotlins.extensions.OnSettingDialogListener
-import com.yunsean.dynkotlins.extensions.kdateTime
 import com.yunsean.dynkotlins.extensions.showDialog
 import com.yunsean.dynkotlins.ui.RecyclerAdapter
 import com.yunsean.dynkotlins.ui.RecyclerAdapterWrapper
@@ -52,9 +52,10 @@ class MapActivity : BaseActivity() {
                                val icon: String?,
                                val isHome: Boolean,
                                val latLng: LatLng,
+                               val geoLatLng: LatLng,
                                var address: String?,
                                val isGps: Boolean,
-                               val updateAt: Long?,
+                               val lastUpdated: String?,
                                val picture: String?,
                                var drawable: Drawable? = null,
                                var neighbors: MutableList<Tracker>? = null)
@@ -73,8 +74,8 @@ class MapActivity : BaseActivity() {
         if (entityId.isNullOrBlank()) return finish()
         initData(entityId)
         initMap()
-        disposable = RxBus2.getDefault().register(EntityChanged::class.java, {
-            if (it.entity.isDeviceTracker) {
+        disposable = RxBus2.getDefault().register(EntityChanged::class.java, { event->
+            if (showing?.find { it.entityId == event.entityId } != null) {
                 initData(this.entityId)
             }
         }, disposable)
@@ -150,9 +151,10 @@ class MapActivity : BaseActivity() {
                             if (it.showIcon.isNullOrBlank()) it.iconState else it.showIcon,
                             it.isActivated,
                             latLng,
+                            LatLng(it.attributes?.latitude?.toDouble() ?: .0, it.attributes?.longitude?.toDouble() ?: .0),
                             null,
                             "gps".equals(it.attributes?.sourceType),
-                            it.attributes?.updateAt,
+                            it.lastUpdated,
                             it.attributes?.entityPicture)
                     if (!it.attributes?.entityPicture.isNullOrBlank()) {
                         Glide.with(act).load(it.attributes?.entityPicture)
@@ -169,7 +171,7 @@ class MapActivity : BaseActivity() {
     }
     override fun doRight() {
         try {
-            current?.let { Actions.map(this, it.latLng.longitude, it.latLng.latitude) }
+            current?.geoLatLng?.let { Actions.map(this, it.longitude, it.latitude) }
         } catch (_: Exception) {
             showError("未找到可用的导航软件！")
         }
@@ -227,8 +229,8 @@ class MapActivity : BaseActivity() {
             val layout = layoutInflater.inflate(R.layout.location_overlay, null, false)
             layout.title.setText(it.name)
             layout.title.isActivated = it.isGps
-            layout.updateAt.visibility = if (it.updateAt == null) View.GONE else View.VISIBLE
-            it.updateAt?.let { layout.updateAt.setText("更新：${it.kdateTime()}") }
+            layout.updateAt.visibility = if (it.lastUpdated == null) View.GONE else View.VISIBLE
+            it.lastUpdated?.let { layout.updateAt.setText("更新：${ZonedDateAsTime().render(it)}") }
             layout.address.visibility = if (it.address.isNullOrBlank()) View.GONE else View.VISIBLE
             layout.address.setText("位于：${it.address}")
             layout.distance.visibility = if (app.location == null) View.GONE else View.VISIBLE

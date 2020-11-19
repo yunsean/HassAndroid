@@ -75,7 +75,7 @@
         android:id="@+id/chart"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginRight="16dp"
+        android:paddingRight="16dp"
         app:layout_heightPercent="80%w"
         android:visibility="invisible"/>
     <me.zhanghai.android.materialprogressbar.MaterialProgressBar

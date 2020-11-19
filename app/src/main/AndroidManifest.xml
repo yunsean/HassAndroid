@@ -10,7 +10,17 @@
         android:name=".Application"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:replace="android:name">
+        tools:replace="name,allowBackup,label,icon">
+
+        <meta-data
+            android:name="com.baidu.speech.APP_ID"
+            android:value="11729902"/>
+        <meta-data
+            android:name="com.baidu.speech.API_KEY"
+            android:value="dnzcg5graREwgEFIUk8aGpf9QV9wIyDA"/>
+        <meta-data
+            android:name="com.baidu.speech.SECRET_KEY"
+            android:value="fXTLA7UfGakUdGCPtpVmCAlOIsUkX4xm"/>
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
@@ -24,7 +34,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="portrait" android:launchMode="singleTask" android:theme="@style/MyNoTitlebarTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
-        <activity android:name=".MoreActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ShareActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ShortcutEditActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
     </application>

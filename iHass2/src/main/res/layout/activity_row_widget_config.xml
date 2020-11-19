@@ -38,7 +38,7 @@
             android:drawablePadding="10dip"
             android:background="@drawable/shape_round_f2f2f2_5dip"
             android:inputType="text"
-            android:maxLength="5"
+            android:lines="1"
             android:textSize="14sp"
             android:textColor="#ff555555"
             android:textColorHint="#ff999999"

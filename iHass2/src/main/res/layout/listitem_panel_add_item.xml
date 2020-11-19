@@ -6,12 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="44dip"
     android:orientation="horizontal">
-    <ImageView
+    <TextView
         android:id="@+id/create"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerInside"
-        android:background="@drawable/selector_ffffff_eeeeee"
-        android:src="@drawable/ic_add_blue_24dp"
-        android:contentDescription="@null"/>
+        android:paddingLeft="10dip"
+        android:gravity="center"
+        android:background="@drawable/selector_aaffffff_eeeeee"
+        android:textColor="@color/colorPrimary"
+        android:textSize="14sp"
+        android:text="继续添加"/>
 </LinearLayout>

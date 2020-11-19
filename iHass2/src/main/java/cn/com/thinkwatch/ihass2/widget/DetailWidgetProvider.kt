@@ -10,6 +10,7 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import cn.com.thinkwatch.ihass2.R
+import cn.com.thinkwatch.ihass2.db.LocalStorage
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.*
@@ -17,6 +18,7 @@ import cn.com.thinkwatch.ihass2.ui.EmptyActivity
 import com.dylan.common.rx.RxBus2
 import com.yunsean.dynkotlins.extensions.loges
 import org.jetbrains.anko.dip
+import org.json.JSONObject
 
 class DetailWidgetProvider : AppWidgetProvider() {
 
@@ -69,7 +71,30 @@ class DetailWidgetProvider : AppWidgetProvider() {
             val sb = StringBuffer()
             try {
                 val attributes = entity.attributes
-                if (attributes != null) {
+                if (attributes?.ihassDetail != null && !attributes.ihassDetail.isNullOrBlank()) {
+                    LocalStorage.instance.getDbEntity(entity.entityId)?.let {
+                        try {
+                            JSONObject(it.rawJson).optJSONObject("attributes")?.let { attr->
+                                attributes.ihassDetail.toString().trim('"').split(',').forEach {
+                                    it.trim().let {
+                                        if (it.isBlank()) return@let
+                                        val parts = it.split('!')
+                                        val value = attr.optString(parts[0])
+                                        if (value.isNullOrBlank()) return@let
+                                        when (parts.size) {
+                                            1-> sb.append(parts[0]).append("：").append(value).append("\n")
+                                            2-> sb.append(parts[1]).append("：").append(value).append("\n")
+                                            3-> sb.append(parts[1]).append("：").append(value).append(parts[2]).append("\n")
+                                            else-> return@let
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (ex: Exception) {
+                            ex.printStackTrace()
+                        }
+                    }
+                } else if (attributes != null) {
                     Attribute::class.java.declaredFields.forEach {
                         val metadata = it.getAnnotation(Metadata::class.java)
                         try {

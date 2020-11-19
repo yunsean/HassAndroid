@@ -38,6 +38,8 @@
             android:id="@+id/play"
             android:layout_width="wrap_content"
             android:layout_height="44dip"
+            android:paddingLeft="15dip"
+            android:paddingRight="15dip"
             android:background="@null"
             android:scaleType="centerInside"
             android:src="@drawable/selector_play_stop"

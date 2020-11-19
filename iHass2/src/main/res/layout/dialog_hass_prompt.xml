@@ -48,7 +48,7 @@
 			android:minHeight="36dip"
 			android:background="@drawable/shape_round_f2f2f2_5dip"
 			android:gravity="center"
-			android:inputType="textPassword"
+			android:inputType="text"
 			android:visibility="visible"
 			android:textColor="#ff555555"
 			android:textSize="16sp" />

@@ -9,6 +9,5 @@ class StateChanged(@SerializedName("id") var id: Int? = null,
     data class Event(@SerializedName("data") var data: EventData? = null,
                      @SerializedName("event_type") var type: String? = null)
     data class EventData(@SerializedName("entity_id") var entityId: String? = null,
-                         @SerializedName("old_state") var oldState: JsonEntity? = null,
                          @SerializedName("new_state") var newState: JsonEntity? = null)
 }

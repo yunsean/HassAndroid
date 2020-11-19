@@ -33,16 +33,32 @@
             android:textColor="#ff999999"
             tools:text="2018-01-01"/>
     </LinearLayout>
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="12dip"
+        android:gravity="center"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
+        android:textColor="#ff555555"
+        android:textSize="14sp"
+        android:textStyle="normal"
+        app:autoSizeMaxTextSize="16sp"
+        app:autoSizeTextType="uniform"
+        app:fontFamily="@font/dincond"
+        tools:text="73.1"/>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="horizontal"
         android:paddingBottom="8dp"
-        android:paddingTop="24dp">
+        android:paddingTop="12dp">
 
         <android.support.v7.widget.AppCompatTextView
-            android:id="@+id/text_start_pause"
+            android:id="@+id/text_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -51,7 +67,7 @@
             android:focusable="true"
             android:gravity="center"
             android:padding="4dp"
-            android:text="\uF40E"
+            android:text="\uF40A"
             android:textColor="@color/md_blue_grey_500"
             android:textSize="40dp"
             app:fontFamily="@font/mdi"
@@ -127,19 +143,6 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="24dp">
-            <android.support.v7.widget.SwitchCompat
-                android:id="@+id/switch_toggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:theme="@style/YellowTheme"/>
-        </LinearLayout>
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

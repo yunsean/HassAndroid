@@ -60,6 +60,7 @@
                 android:textSize="10sp"
                 android:textStyle="normal"
                 app:layout_marginTopPercent="5%w"
+                app:fontFamily="@font/dincond"
                 tools:ignore="MissingPrefix,SmallSp"
                 tools:text="PM2.5值"/>
             <View
@@ -89,6 +90,7 @@
                 android:textColor="@color/color_xiaomi"
                 android:textSize="11sp"
                 android:textStyle="normal"
+                app:fontFamily="@font/dincond"
                 tools:ignore="SmallSp"
                 tools:text="Bathroom"/>
         </com.zhy.android.percent.support.PercentLinearLayout>
@@ -103,7 +105,7 @@
             android:id="@+id/turnOn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/selector_ffffff_eeeeee"
+            android:background="@drawable/selector_clear_eeeeee"
             android:src="@drawable/switch_on"
             android:contentDescription="@null"
             app:layout_paddingTopPercent="7%w"
@@ -125,7 +127,7 @@
             android:id="@+id/turnOff"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/selector_ffffff_eeeeee"
+            android:background="@drawable/selector_clear_eeeeee"
             android:src="@drawable/switch_off"
             android:contentDescription="@null"
             app:layout_paddingTopPercent="8%w"

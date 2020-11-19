@@ -65,6 +65,12 @@
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="20dip"
 			android:button="@drawable/group_type_square"/>
+		<RadioButton
+			android:id="@+id/groupTypeList2"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="20dip"
+			android:button="@drawable/group_type_list2"/>
 	</RadioGroup>
 	<TextView
 		android:layout_width="wrap_content"
@@ -99,7 +105,6 @@
 			android:padding="5dip"
 			android:gravity="center"
 			android:inputType="number"
-			android:maxLength="2"
 			android:lines="1"
 			android:textSize="14sp"
 			android:textColor="#ff555555"

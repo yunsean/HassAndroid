@@ -17,12 +17,14 @@ import android.widget.TextView
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.adapter.CreatableAdapter
 import cn.com.thinkwatch.ihass2.base.BaseActivity
+import cn.com.thinkwatch.ihass2.bus.WidgetChanged
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.enums.WidgetType
 import cn.com.thinkwatch.ihass2.model.JsonEntity
 import cn.com.thinkwatch.ihass2.model.MDIFont
 import cn.com.thinkwatch.ihass2.ui.MdiListActivity
 import cn.com.thinkwatch.ihass2.utils.SimpleItemTouchHelperCallback
+import com.dylan.common.rx.RxBus2
 import com.dylan.common.sketch.Animations
 import com.dylan.common.sketch.Sketch
 import com.dylan.common.utils.Utility
@@ -39,7 +41,6 @@ import kotlinx.android.synthetic.main.dialog_list_view.view.*
 import kotlinx.android.synthetic.main.dialog_panel_add_entity.view.*
 import kotlinx.android.synthetic.main.listitem_entity_item.view.*
 import org.jetbrains.anko.*
-import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk25.coroutines.onClick
 
 
@@ -73,6 +74,7 @@ class RowConfigActivity : BaseActivity() {
         if (checkedEntities.size < 1) return showError("请选择要添加的元素！")
         db.addWidget(widgetId, WidgetType.row, backColorValue, normalColorValue, activeColorValue, textSizeValue, imageSizeValue, checkedEntities)
         RowWidgetProvider.updateEntityWidget(this, widgetId, checkedEntities)
+        RxBus2.getDefault().post(WidgetChanged())
         setResult(Activity.RESULT_OK, Intent().putExtra(EXTRA_APPWIDGET_ID, widgetId).putExtra("widgetId", widgetId))
         finish()
     }
@@ -221,7 +223,7 @@ class RowConfigActivity : BaseActivity() {
         this.touchHelper = ItemTouchHelper(callback)
         this.touchHelper.attachToRecyclerView(this.demos)
 
-        setupColor.onCheckedChange { buttonView, isChecked ->
+        setupColor.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked) {
                 recyclerView.visibility = View.GONE
                 customizePanel.visibility = View.VISIBLE
@@ -300,13 +302,13 @@ class RowConfigActivity : BaseActivity() {
     private fun updateDemo() {
         this.adapter.notifyDataSetChanged()
         this.demos.layoutManager = GridLayoutManager(ctx, Math.max(1, checkedEntities.size))
-        this.demos.adapter.notifyDataSetChanged()
+        this.demos.adapter?.notifyDataSetChanged()
     }
     private fun filter() {
         val keyword = act.keyword.text()
         showEntities.clear()
         allEntities?.filter {
-            (keyword.isBlank() or it.friendlyName.contains(keyword) or (it.state?.contains(keyword) ?: false)) and !checkedEntities.contains(it)
+            (keyword.isBlank() or it.friendlyName.contains(keyword, true) or it.entityId.contains(keyword) or (it.state?.contains(keyword, true) ?: false)) and !checkedEntities.contains(it)
         }?.let {
             showEntities.addAll(it)
         }

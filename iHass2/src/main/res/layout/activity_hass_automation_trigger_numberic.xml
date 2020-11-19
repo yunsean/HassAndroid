@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffffff">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:textColor="#ff111111"
+        android:textSize="14sp"
+        android:text="对象"/>
+    <TextView
+        android:id="@+id/entity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableRight="@drawable/calendar_rightarrow"
+        android:drawablePadding="10dip"
+        android:background="@drawable/selector_ffffff_eeeeee"
+        android:paddingTop="10dip"
+        android:paddingBottom="10dip"
+        android:paddingRight="10dip"
+        android:paddingLeft="30dip"
+        android:textColor="#ff555555"
+        android:textColorHint="#ff999999"
+        android:textSize="14sp"
+        android:hint="请选择对象"/>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="30dip"
+        android:paddingRight="30dip"
+        android:paddingBottom="7dip">
+        <EditText
+            android:id="@+id/valueTemplate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:textColor="@color/colorPrimary"
+            android:textColorHint="#ff999999"
+            android:textSize="15sp"
+            android:hint="参数模板(可选)" />
+    </android.support.design.widget.TextInputLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dip"
+        android:background="#fff2f2f2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:textColor="#ff111111"
+        android:textSize="14sp"
+        android:text="参数"/>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="30dip"
+        android:paddingRight="30dip"
+        android:paddingBottom="7dip">
+        <EditText
+            android:id="@+id/above"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:textColor="@color/colorPrimary"
+            android:textColorHint="#ff999999"
+            android:textSize="15sp"
+            android:hint="高于(above)" />
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="30dip"
+        android:paddingRight="30dip"
+        android:paddingBottom="7dip">
+        <EditText
+            android:id="@+id/below"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:textColor="@color/colorPrimary"
+            android:textColorHint="#ff999999"
+            android:textSize="15sp"
+            android:hint="低于(below)"/>
+    </android.support.design.widget.TextInputLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dip"
+        android:background="#fff2f2f2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:textColor="#ff111111"
+        android:textSize="14sp"
+        android:text="延迟"/>
+    <TextView
+        android:id="@+id/lasted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableRight="@drawable/calendar_rightarrow"
+        android:drawablePadding="10dip"
+        android:background="@drawable/selector_ffffff_eeeeee"
+        android:paddingTop="10dip"
+        android:paddingBottom="10dip"
+        android:paddingRight="10dip"
+        android:paddingLeft="30dip"
+        android:textColor="#ff555555"
+        android:textColorHint="#ff999999"
+        android:textSize="14sp"
+        android:hint="设置持续一定时长后触发(for)"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dip"
+        android:background="#fff2f2f2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dip"
+        android:padding="10dip"
+        android:textColor="#ffaaaaaa"
+        android:textSize="12sp"
+        android:text="* 触发下限和触发上限至少填写一个\n* 当同时填写时代表只在此区间内触发\n* 上限和下限均为开区间(不包含)"/>
+
+</LinearLayout>

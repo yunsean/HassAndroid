@@ -10,7 +10,6 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.api.hassApi
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.Period
@@ -22,6 +21,7 @@ import com.yunsean.dynkotlins.extensions.nextOnMain
 import kotlinx.android.synthetic.main.control_climate.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.act
+import java.lang.StringBuilder
 import java.math.BigDecimal
 import java.util.*
 
@@ -50,7 +50,21 @@ class ClimateFragment : ControlFragment() {
         ui()
     }
     private fun spinner(spinner: AppCompatSpinner, list: List<String>, selected: String?, changed: (value: String)->Unit) {
-        val adapter = ArrayAdapter(getActivity(), R.layout.spinner_edittext_lookalike, list)
+        val adapter = ArrayAdapter(getActivity(), R.layout.spinner_edittext_lookalike, list.map {
+            val text = StringBuilder()
+            var newString = true
+            for (i in 0 until it.length) {
+                val ch = it.get(i)
+                if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch >= '0' && ch <= '9') {
+                    if (newString) text.append(ch.toUpperCase())
+                    else text.append(ch)
+                    newString = false
+                } else {
+                    newString = true
+                }
+            }
+            text.toString()
+        })
         spinner.adapter = adapter
         spinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) { changed(list.get(position)) }
@@ -65,29 +79,31 @@ class ClimateFragment : ControlFragment() {
             useRatio.textMap = mapOf("off" to "关闭", "unavailable" to "未知", "Cool" to "制冷",
                     "Heat" to "制热", "Dehumidify" to "除湿", "Ventilate" to "通风")
             button_close.onClick { dismiss() }
-            spinner(fan_speed, entity?.attributes?.fanList ?: listOf(), entity?.attributes?.fanSpeed) {
+            spinner(fan_speed, entity?.attributes?.fanModes ?: listOf(), entity?.attributes?.fanMode) {
                 if (it != entity?.attributes?.fanMode) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_fan_mode", entity?.entityId, fanMode = it))
             }
-            spinner(work_mode, entity?.attributes?.operationList ?: listOf(), entity?.attributes?.operationMode) {
-                if (it != entity?.attributes?.operationMode) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_operation_mode", entity?.entityId, operationMode = it))
+            spinner(work_mode, entity?.attributes?.hvacModes ?: listOf(), entity?.attributes?.hvacMode) {
+                if (it != entity?.attributes?.hvacMode) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_hvac_mode", entity?.entityId, hvacMode = it))
             }
-            spinner(swing_mode, entity?.attributes?.swingList ?: listOf(), entity?.attributes?.swingMode) {
+            spinner(swing_mode, entity?.attributes?.swingModes ?: listOf(), entity?.attributes?.swingMode) {
                 if (it != entity?.attributes?.swingMode) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_swing_mode", entity?.entityId, swingMode = it))
             }
             text_minus.onClick {
-                if (temperature < 16) return@onClick
+                if (temperature <= entity?.attributes?.minTemp?.toInt() ?: 16) return@onClick
                 temperature = temperature - 1
                 fragment?.text_target_state?.text = "${temperature}°C"
                 RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_temperature", entity?.entityId, temperature = BigDecimal.valueOf(temperature.toLong())))
             }
             text_plus.onClick {
-                if (temperature > 30) return@onClick
+                if (temperature >= entity?.attributes?.maxTemp?.toInt() ?: 30) return@onClick
                 temperature = temperature + 1
                 fragment?.text_target_state?.text = "${temperature}°C"
                 RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_temperature", entity?.entityId, temperature = BigDecimal.valueOf(temperature.toLong())))
             }
+            aux_heat.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_aux_heat", entity?.entityId, auxHeat = aux_heat.isChecked)) }
+            away_mode.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_away_mode", entity?.entityId, awayMode = away_mode.isChecked)) }
             switch_toggle.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "turn_" + if (switch_toggle.isChecked) "on" else "off", entity?.entityId)) }
-            context.hassApi.getHistory(context.app.haPassword, calendar.kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"), entity?.entityId, Calendar.getInstance().kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"))
+            app.getHistory(calendar.kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"), entity?.entityId, Calendar.getInstance().kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"))
                     .nextOnMain {
                         useRatio.visibility = View.VISIBLE
                         useRatioDate.visibility = View.VISIBLE
@@ -128,16 +144,21 @@ class ClimateFragment : ControlFragment() {
         }
         refreshUi()
     }
+    private val SUPPORT_SWING_MODE = 512
+    private val SUPPORT_AWAY_MODE = 1024
+    private val SUPPORT_AUX_HEAT = 2048
     private fun refreshUi() {
         fragment?.apply {
             temperature = entity?.attributes?.temperature?.toIntOrNull() ?: 26
             switch_toggle?.isChecked = entity?.isActivated ?: false
+            aux_heat.isChecked = entity?.attributes?.auxHeat ?: false
+            away_mode.isChecked = entity?.attributes?.awayMode ?: false
+            swing_mode_panel.visibility = if ((entity?.attributes?.supportedFeatures ?: 0) and SUPPORT_SWING_MODE != 0) View.VISIBLE else View.GONE
+            aux_heat_panel.visibility = if ((entity?.attributes?.supportedFeatures ?: 0) and SUPPORT_AUX_HEAT != 0) View.VISIBLE else View.GONE
+            away_mode_panel.visibility = if ((entity?.attributes?.supportedFeatures ?: 0) and SUPPORT_AWAY_MODE != 0) View.VISIBLE else View.GONE
             text_current_temperature?.text = "${entity?.attributes?.currentTemperature}°C"
             text_target_state?.text = "${entity?.attributes?.temperature}°C"
             state?.text = entity?.friendlyState
-            fan_speed.setSelection(entity?.attributes?.fanList?.indexOf(entity?.attributes?.fanSpeed) ?: 0)
-            work_mode.setSelection(entity?.attributes?.operationList?.indexOf(entity?.attributes?.operationMode) ?: 0)
-            swing_mode.setSelection(entity?.attributes?.swingList?.indexOf(entity?.attributes?.swingMode) ?: 0)
         }
     }
     override fun onChange() {

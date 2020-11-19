@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.api.hassApi
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.model.Period
 import cn.com.thinkwatch.ihass2.ui.MapActivity
@@ -48,20 +47,21 @@ class TrackerFragment : ControlFragment() {
     }
     private fun ui() {
         fragment?.apply {
+            useRatio.textMap = entity?.attributes?.ihassState?.let { it } ?: mapOf("home" to "在家", "not_home" to "外出")
             adatper = RecyclerAdapter(R.layout.listitem_entity_period, null) {
                 view, index, item ->
                 view.time.text = item.lastChanged.ktime()
-                view.state.text = if ("home".equals(item.state)) "在家" else if ("not_home".equals(item.state)) "外出" else item.state
+                view.state.text = entity?.getFriendlyState(item.state)
             }
             recyclerView.adapter = adatper
             recyclerView.layoutManager = LinearLayoutManager(context)
             prevDay.onClick {
                 calendar.add(Calendar.DATE, -1)
-                refreshUi()
+                updateHistory()
             }
             nextDay.onClick {
                 calendar.add(Calendar.DATE, 1)
-                refreshUi()
+                updateHistory()
             }
             btnClose.onClick {
                 dismiss()
@@ -71,15 +71,24 @@ class TrackerFragment : ControlFragment() {
                         .putExtra("entityId", entity?.entityId)
                         .start(ctx)
             }
+            updateHistory()
         }
     }
     private fun refreshUi() {
         fragment?.apply {
+            showMap.visibility = if (entity?.attributes?.latitude != null && entity?.attributes?.longitude != null) View.VISIBLE else View.GONE
+        }
+    }
+    private fun updateHistory(){
+        fragment?.apply {
+            day.setText(calendar.kdate())
             loading.visibility = View.VISIBLE
             content.visibility = View.GONE
-            day.setText(calendar.kdate())
-            context.hassApi.getHistory(context.app.haPassword, calendar.kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"), entity?.entityId)
+            totalView.visibility = View.GONE
+            app.getHistory(calendar.kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"), entity?.entityId)
                     .nextOnMain {
+                        val state = entity?.attributes?.ihassTotal
+                        val extra = (entity?.attributes?.ihassTotalExtra?.toIntOrNull() ?: 0) * 1000
                         loading.visibility = View.GONE
                         content.visibility = View.VISIBLE
                         if (it.size > 0 && it.get(0).size > 0) {
@@ -88,10 +97,24 @@ class TrackerFragment : ControlFragment() {
                             val maxMicroSec = 24 * 3600 * 1000
                             val datas = mutableListOf<Period>()
                             val raws = it.get(0).sortedBy { it.lastChanged }
+                            var total = 0L
                             raws.forEachIndexed { index, period ->
+                                if (state != null && index > 0 && raws.get(index - 1).state == state) total += (period.lastChanged?.time ?: 0) - (raws.get(index - 1).lastChanged?.time ?: 0) + extra
                                 if (datas.size > 0 && period.state == datas.get(datas.size - 1).state) return@forEachIndexed
                                 if (index < raws.size - 1 && isSimilarDate(period.lastChanged, raws[index + 1].lastChanged)) return@forEachIndexed
                                 datas.add(period)
+                            }
+                            if (state != null) {
+                                raws.lastOrNull()?.let {
+                                    if (it.state == state) total += System.currentTimeMillis() - (it.lastChanged?.time ?: 0)
+                                }
+                                total /= 1000
+                                val hour = total / 3600
+                                total %= 3600
+                                val minute = total / 60
+                                total %= 60
+                                totalView.text = "${entity?.getFriendlyState(state)}时长：" + String.format("%02d:%02d:%02d", hour, minute, total)
+                                totalView.visibility = View.VISIBLE
                             }
                             datas.forEach {
                                 if (it.lastChanged == null) return@forEach
@@ -118,7 +141,6 @@ class TrackerFragment : ControlFragment() {
                         useRatio.segments = listOf()
                         adatper.items = listOf()
                     }
-            showMap.visibility = if (entity?.attributes?.latitude != null && entity?.attributes?.longitude != null) View.VISIBLE else View.GONE
         }
     }
     override fun onChange() = refreshUi()

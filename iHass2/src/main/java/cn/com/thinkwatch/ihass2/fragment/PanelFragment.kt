@@ -1,13 +1,13 @@
 package cn.com.thinkwatch.ihass2.fragment
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.v7.widget.GridLayoutManager
 import android.view.View
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.adapter.PanelAdapter
 import cn.com.thinkwatch.ihass2.adapter.PanelGroup
-import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.bean.*
 import cn.com.thinkwatch.ihass2.bus.EntityChanged
@@ -18,9 +18,11 @@ import cn.com.thinkwatch.ihass2.enums.ItemType
 import cn.com.thinkwatch.ihass2.enums.TileType
 import cn.com.thinkwatch.ihass2.model.JsonEntity
 import cn.com.thinkwatch.ihass2.ui.PanelEditActivity
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import com.dylan.common.rx.RxBus2
 import com.truizlop.sectionedrecyclerview.SectionedSpanSizeLookup
-import com.yunsean.dynkotlins.extensions.ktime
 import com.yunsean.dynkotlins.extensions.start
 import com.yunsean.dynkotlins.extensions.withNext
 import io.reactivex.disposables.CompositeDisposable
@@ -31,9 +33,12 @@ import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.ctx
 
 
+
+
 class PanelFragment : BaseFragment() {
     override val layoutResId: Int = R.layout.fragment_hass_panel
     private var panelId: Long = 0
+    private var tileAlpha: Boolean = false
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         panelId = if (arguments?.containsKey("panelId") ?: false) arguments?.getLong("panelId") ?: 0L else 0L
@@ -44,16 +49,17 @@ class PanelFragment : BaseFragment() {
         }, RxBus2.getDefault().register(PanelChanged::class.java, {
             if (it.panelId == panelId) data()
         }, RxBus2.getDefault().register(EntityChanged::class.java, { event->
-            refreshTime.text = "状态更新于：${app.refreshAt.ktime()}"
             groups?.forEach {
                 it.entities.forEach {
-                    if (it.entity.entityId.equals(event.entity.entityId)) {
-                        it.entity.state = event.entity.state
-                        it.entity.attributes = event.entity.attributes
-                        it.entity.lastChanged = event.entity.lastChanged
-                        it.entity.lastUpdated = event.entity.lastUpdated
-                        adapter.notifyDataSetChanged()
-                        return@register
+                    if (it.entity.entityId.equals(event.entityId)) {
+                        db.getEntity(event.entityId)?.apply {
+                            it.entity.state = state
+                            it.entity.attributes = attributes
+                            it.entity.lastChanged = lastChanged
+                            it.entity.lastUpdated = lastUpdated
+                            adapter.notifyDataSetChanged()
+                            return@register
+                        }
                     }
                 }
             }
@@ -76,7 +82,22 @@ class PanelFragment : BaseFragment() {
         }
     }
     private fun data() {
-        refreshTime.text = "状态更新于：${app.refreshAt.ktime()}"
+        db.getPanel(panelId)?.let {
+            tileAlpha = it.tileAlpha ?: 1f < .9f
+            backImage.visibility = View.GONE
+            it.backImage?.let {
+                try {
+                    Glide.with(ctx).asBitmap().load(it).into(object : SimpleTarget<Bitmap>() {
+                        override fun onResourceReady(resource: Bitmap?, transition: Transition<in Bitmap>?) {
+                            if (resource == null) return
+                            backImage?.visibility = View.VISIBLE
+                            backImage?.setImageBitmap(resource)
+                        }
+                    })
+                } catch (ex: Exception) {
+                }
+            }
+        }
         db.async {
             val entities = db.readPanel(panelId)
             val groups = mutableListOf<PanelGroup>()
@@ -101,21 +122,23 @@ class PanelFragment : BaseFragment() {
                 } else if (entity != null) {
                     if (entity.tileType == TileType.inherit) entity.tileType = latest?.group?.tileType ?: TileType.tile
                     if (entity.tileType == TileType.circle) {
-                        latest?.entities?.add(CircleBean(entity))
+                        latest?.entities?.add(CircleBean(entity, tileAlpha))
                     } else if (entity.tileType == TileType.square) {
-                        latest?.entities?.add(SquareBean(entity))
+                        latest?.entities?.add(SquareBean(entity, tileAlpha))
                     } else if (entity.tileType == TileType.list) {
-                        latest?.entities?.add(DetailBean(entity))
-                    } else if (entity.isSwitch) {
-                        latest?.entities?.add(SwitchBean(entity))
+                        latest?.entities?.add(DetailBean(entity, tileAlpha))
+                    } else if (entity.tileType == TileType.list2) {
+                        latest?.entities?.add(Detail2Bean(entity, tileAlpha))
+                    } else if (entity.isSwitch || entity.isInputBoolean) {
+                        latest?.entities?.add(SwitchBean(entity, tileAlpha))
                     } else if (entity.isCamera) {
-                        latest?.entities?.add(CameraBean(entity))
-                    } else if (entity.isAutomation) {
-                        latest?.entities?.add(AutomationBean(entity))
+                        latest?.entities?.add(CameraBean(entity, tileAlpha))
+                    } else if (entity.isAnySensors) {
+                        latest?.entities?.add(SensorBean(entity, tileAlpha))
                     } else if (entity.isDeviceTracker) {
-                        latest?.entities?.add(TrackerBean(entity))
+                        latest?.entities?.add(TrackerBean(entity, tileAlpha))
                     } else {
-                        latest?.entities?.add(NormalBean(entity))
+                        latest?.entities?.add(NormalBean(entity, tileAlpha))
                     }
                 }
             }

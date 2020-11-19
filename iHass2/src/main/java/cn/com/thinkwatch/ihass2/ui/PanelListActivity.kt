@@ -35,14 +35,19 @@ class PanelListActivity : BaseActivity() {
         ui()
         data()
         disposable = RxBus2.getDefault().register(PanelChanged::class.java, {
-            data()
+            if (it.isAdd) {
+                db.getPanel(it.panelId)?.let { adapter.items.add(it) }
+                adapter.notifyDataSetChanged()
+            } else {
+                data()
+            }
         }, disposable)
     }
     override fun doRight() {
         val panels = adapter.items
         panels.forEachIndexed { index, panel -> panel.order = index }
         db.savePanels(panels)
-        RxBus2.getDefault().post(PanelChanged(0L))
+        RxBus2.getDefault().post(PanelChanged(0L, true))
         finish()
     }
 

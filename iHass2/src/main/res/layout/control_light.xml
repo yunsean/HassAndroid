@@ -26,13 +26,8 @@
                 android:layout_marginRight="16dp"
                 app:alphaSlider="false"
                 app:density="12"
-                app:lightnessSlider="true"
-                app:lightnessSliderView="@+id/v_lightness_slider"
+                app:lightnessSlider="false"
                 app:wheelType="FLOWER" />
-            <com.flask.colorpicker.slider.LightnessSlider
-                android:id="@+id/v_lightness_slider"
-                android:layout_width="match_parent"
-                android:layout_height="48dp" />
             <LinearLayout
                 android:id="@+id/layout_brightness"
                 android:layout_width="match_parent"
@@ -115,6 +110,41 @@
                         app:dsb_trackHeight="4dp"/>
                 </FrameLayout>
             </LinearLayout>
+            <LinearLayout
+                android:id="@+id/layout_whitevalue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp">
+                <android.support.v7.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:padding="4dp"
+                    android:text="\uf5ac"
+                    android:textColor="@color/md_blue_grey_500"
+                    android:textSize="24dp"
+                    app:fontFamily="@font/mdi"
+                    tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
+                <org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
+                    android:id="@+id/seekbar_whitevalue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    app:dsb_indicatorColor="@color/md_blue_500"
+                    app:dsb_max="255"
+                    app:dsb_min="0"
+                    app:dsb_progressColor="@color/color_mdi_button"
+                    app:dsb_rippleColor="@color/md_blue_100"
+                    app:dsb_scrubberHeight="4dp"
+                    app:dsb_thumbSize="16dp"
+                    app:dsb_trackColor="@color/md_grey_400"
+                    app:dsb_trackHeight="4dp"/>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
     <FrameLayout
@@ -143,6 +173,30 @@
                 tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/effect_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/effect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingLeft="15dip"
+                android:paddingRight="15dip"
+                android:paddingTop="5dip"
+                android:paddingBottom="5dip"
+                android:text="效果"
+                android:textSize="14sp"
+                android:textColor="@color/md_blue_500"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dip"
+                android:background="@color/md_blue_500" />
+        </LinearLayout>
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
@@ -151,15 +205,6 @@
             android:paddingRight="12dp"
             android:paddingTop="8dp"
             tools:ignore="RtlHardcoded">
-            <Button
-                android:id="@+id/button_reset"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="72dp"
-                android:text="重置"
-                android:textColor="@color/md_blue_500"
-                app:layout_columnWeight="1"/>
             <Button
                 android:id="@+id/button_close"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"

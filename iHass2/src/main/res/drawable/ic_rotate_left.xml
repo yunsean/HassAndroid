@@ -1,0 +1,4 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_activated="true" android:drawable="@drawable/ic_rotate_left_blue_24dp" />
+    <item android:drawable="@drawable/ic_rotate_left_black_24dp" />
+</selector>

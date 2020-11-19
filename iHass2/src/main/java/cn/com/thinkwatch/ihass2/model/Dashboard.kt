@@ -15,4 +15,6 @@ data class Dashboard (@Column(name = "PANEL_ID") var panelId: Long = 0,
                       @Column(name = "COLUMN_COUNT") @Expose var columnCount: Int = 1,
                       @Column(name = "ITEM_TYPE") @Expose var itemType: ItemType = ItemType.entity,
                       @Column(name = "TILE_TYPE") @Expose var tileType: TileType = TileType.inherit,
+                      @Column(name = "ENTITY_SPELL") var spell: String = "",
+                      @Column(name = "ENTITY_SIMILAR") var similar: String = "",
                       @Column(name = "ID", isId = true, autoGen = true) var id: Long = 0)

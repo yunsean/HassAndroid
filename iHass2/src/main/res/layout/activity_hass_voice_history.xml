@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#fff5f5f5">
+     <com.dylan.dyn3rdparts.swipetoloadlayout.SwipeToLoadLayout
+         android:id="@+id/pullable"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:background="@color/white"
+         app:pullable_headerview_resid="@+id/headerView"
+         app:pullable_scrollview_resid="@+id/recyclerView"
+         app:pullable_footerview_resid="@+id/footerView"
+         app:pullable_loadmore_enabled="false"
+         app:pullable_swipe_style="above">
+          <include
+              android:id="@id/headerView"
+              layout="@layout/pullable_layout_header" />
+          <android.support.v7.widget.RecyclerView
+              android:id="@id/recyclerView"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"/>
+          <include
+              android:id="@id/footerView"
+              layout="@layout/pullable_layout_footer" />
+     </com.dylan.dyn3rdparts.swipetoloadlayout.SwipeToLoadLayout>
+</LinearLayout>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="false"
+    android:orientation="vertical"
+    android:background="#fff5f5f5">
+
+    <include
+        android:id="@+id/titlebar_bar"
+        layout="@layout/layout_titlebar_main" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="50"
+            android:background="#123456"
+            android:orientation="horizontal"/>
+        <FrameLayout
+            android:id="@+id/statusBar"
+            android:layout_width="match_parent"
+            android:layout_height="47dip"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="40dip"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="47dip"
+                android:gravity="center"
+                android:padding="0dip"
+                android:background="@drawable/status_bar"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="47dip"
+                    android:layout_height="52dip"
+                    android:layout_marginLeft="-34dip"
+                    android:src="@drawable/status_bar_left" />
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/buttonGuide"
+                    android:layout_width="0dip"
+                    android:layout_height="44dip"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dip"
+                    android:gravity="center_vertical"
+                    android:lines="1"
+                    android:textSize="14sp"
+                    android:textColor="#1761f5"
+                    android:fontFamily="@font/dincond"
+                    android:text="← 戳我戳我，我支持单击、双击、长按和上滑哦！"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="14sp"/>
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/shortcut"
+                    android:layout_width="0dip"
+                    android:layout_height="44dip"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dip"
+                    android:visibility="gone"/>
+                <View
+                    android:layout_width="1dip"
+                    android:layout_height="10dip"
+                    android:layout_marginLeft="5dip"
+                    android:background="#ffeeeeee" />
+                <ImageButton
+                    android:id="@+id/setting"
+                    android:layout_width="44dip"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:src="@drawable/ic_action_setting"
+                    android:scaleType="centerInside"
+                    android:contentDescription="@null"/>
+                <ImageButton
+                    android:id="@+id/automotion"
+                    android:layout_width="44dip"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:visibility="gone"
+                    android:src="@drawable/ic_action_automotion"
+                    android:scaleType="centerInside"
+                    android:contentDescription="@null"/>
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dip"
+                android:background="#ff8bc8fc" />
+        </FrameLayout>
+        <ImageButton
+            android:id="@+id/ball"
+            android:layout_width="44dip"
+            android:layout_height="44dip"
+            android:layout_gravity="bottom"
+            android:layout_marginTop="4dip"
+            android:layout_marginLeft="3dip"
+            android:layout_marginRight="3dip"
+            android:layout_marginBottom="2dip"
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/ball"
+            android:contentDescription="@null"/>
+    </FrameLayout>
+
+</LinearLayout>

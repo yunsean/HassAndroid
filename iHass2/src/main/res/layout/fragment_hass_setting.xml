@@ -10,6 +10,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:textSize="12sp"
+            android:textColor="#ffaaaaaa"
+            android:text="界面参数"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="44dip"
@@ -56,9 +63,39 @@
                 app:sb_flip="true"/>
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/webFirstPanel"
             android:layout_width="match_parent"
             android:layout_height="44dip"
-            android:layout_marginTop="10dip"
+            android:layout_marginTop="1dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:background="#ffffffff"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="#ff555555"
+                android:text="默认显示Web页面"/>
+            <com.dylan.uiparts.checkbox.SwitchButton
+                android:id="@+id/webFirst"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dip"
+                app:sb_flip="true"/>
+        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:textSize="12sp"
+            android:textColor="#ffaaaaaa"
+            android:text="位置上报"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dip"
             android:paddingLeft="10dip"
             android:paddingRight="10dip"
             android:background="#ffffffff"
@@ -114,7 +151,7 @@
                     android:text="请选择"/>
             </LinearLayout>
             <LinearLayout
-                android:id="@+id/gpsPasswordPanel"
+                android:id="@+id/gpsWebHookIdPanel"
                 android:layout_width="match_parent"
                 android:layout_height="44dip"
                 android:layout_marginTop="1dip"
@@ -128,25 +165,268 @@
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
                     android:textColor="#ff555555"
-                    android:text="GpsLogger密码"/>
+                    android:text="WebHook ID"/>
                 <TextView
-                    android:id="@+id/gpsPassword"
+                    android:id="@+id/gpsWebHookId"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dip"
                     android:drawablePadding="10dip"
+                    android:background="@null"
                     android:gravity="center_vertical|end"
                     android:textSize="14sp"
                     android:textColor="#ff999999"
-                    android:text="无"/>
+                    android:hint="无"/>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/gpsHassComponentPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:id="@+id/gpsPasswordPanel"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dip"
+                    android:layout_marginTop="1dip"
+                    android:paddingLeft="10dip"
+                    android:paddingRight="10dip"
+                    android:background="@drawable/selector_ffffff_eeeeee"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="#ff555555"
+                        android:text="GpsLogger密码"/>
+                    <TextView
+                        android:id="@+id/gpsPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dip"
+                        android:drawablePadding="10dip"
+                        android:gravity="center_vertical|end"
+                        android:textSize="14sp"
+                        android:textColor="#ff999999"
+                        android:text="无"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="44dip"
+                    android:paddingLeft="10dip"
+                    android:paddingRight="10dip"
+                    android:layout_marginTop="1dip"
+                    android:background="#ffffffff"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="#ff555555"
+                        android:text="上报前台应用(iHassLogger)"/>
+                    <TextView
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginTop="2dip"
+                        android:layout_marginLeft="10dip"
+                        android:textSize="10sp"
+                        android:textColor="#ffaaaaaa"
+                        android:text="需开启使用情况权限"/>
+                    <com.dylan.uiparts.checkbox.SwitchButton
+                        android:id="@+id/appLogger"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dip"
+                        android:checked="false"
+                        app:sb_flip="true"/>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:textSize="12sp"
+            android:textColor="#ffaaaaaa"
+            android:text="环境检测"/>
+        <LinearLayout
+            android:id="@+id/nfcCardPanel"
+            android:layout_width="match_parent"
+            android:layout_height="44dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:background="#ffffffff"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="#ff555555"
+                android:text="NFC探测"/>
+            <com.dylan.uiparts.checkbox.SwitchButton
+                android:id="@+id/nfcCard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dip"
+                app:sb_flip="true"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/bluetoothPanel"
+            android:layout_width="match_parent"
+            android:layout_height="44dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:layout_marginTop="1dip"
+            android:background="#ffffffff"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="#ff555555"
+                android:text="蓝牙探测"/>
+            <com.dylan.uiparts.checkbox.SwitchButton
+                android:id="@+id/bluetooth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dip"
+                app:sb_flip="true"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/wifiPanel"
+            android:layout_width="match_parent"
+            android:layout_height="44dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:layout_marginTop="1dip"
+            android:background="#ffffffff"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="#ff555555"
+                android:text="WIFI探测"/>
+            <com.dylan.uiparts.checkbox.SwitchButton
+                android:id="@+id/wifi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dip"
+                app:sb_flip="true"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/gpsPanel"
+            android:layout_width="match_parent"
+            android:layout_height="44dip"
+            android:layout_marginTop="1dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:background="#ffffffff"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="#ff555555"
+                android:text="位置探测"/>
+            <com.dylan.uiparts.checkbox.SwitchButton
+                android:id="@+id/gps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dip"
+                app:sb_flip="true"/>
+        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:textSize="12sp"
+            android:textColor="#ffaaaaaa"
+            android:text="后台保活"/>
+        <TextView
+            android:id="@+id/batteryOptimizations"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="44dip"
+            android:layout_marginTop="1dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:gravity="center_vertical"
+            android:drawablePadding="10dip"
+            android:drawableRight="@drawable/ic_chevron_right_grey_24dp"
+            android:background="@drawable/selector_ffffff_eeeeee"
+            android:textSize="14sp"
+            android:textColor="#ff555555"
+            android:text="忽略电量优化"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dip"
+            android:layout_marginTop="1dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:background="#ffffffff"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#ff555555"
+                android:text="熄屏接收通知"/>
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginTop="2dip"
+                android:layout_marginLeft="10dip"
+                android:textSize="10sp"
+                android:textColor="#ffaaaaaa"
+                android:text="忽略电池优化后可能有效"/>
+            <com.dylan.uiparts.checkbox.SwitchButton
+                android:id="@+id/screenOffEvent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dip"
+                android:checked="false"
+                app:sb_flip="true"/>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/shortcut"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="44dip"
+            android:layout_marginTop="1dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:gravity="center_vertical"
+            android:drawablePadding="10dip"
+            android:drawableRight="@drawable/ic_chevron_right_grey_24dp"
+            android:background="@drawable/selector_ffffff_eeeeee"
+            android:textSize="14sp"
+            android:textColor="#ff555555"
+            android:text="模拟其他APP图标"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:textSize="12sp"
+            android:textColor="#ffaaaaaa"
+            android:text="其他设置"/>
         <TextView
             android:id="@+id/save"
             android:clickable="true"
             android:layout_width="match_parent"
             android:layout_height="44dip"
-            android:layout_marginTop="10dip"
             android:paddingLeft="10dip"
             android:paddingRight="10dip"
             android:gravity="center_vertical"

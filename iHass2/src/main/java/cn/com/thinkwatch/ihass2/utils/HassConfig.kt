@@ -19,25 +19,34 @@ class HassConfig {
         db.setConfig(key, str)
         allConfigs.set(key, str)
     }
-    @Synchronized fun get(key: String, volatiled: Boolean = false): String? {
-        var value: String? = null
-        if (!volatiled) value = allConfigs.get(key)
+    @Synchronized fun get(key: String): String? {
+        var value: String? = allConfigs.get(key)
         if (value != null) return value
         value = db.getConfig(key)
         value?.let { allConfigs.set(key, it) }
         return value
     }
-    fun optString(key: String, volatiled: Boolean = false): String? = get(key, volatiled)
-    fun getString(key: String, fallback: String = "", volatiled: Boolean = false): String = get(key, volatiled) ?: fallback
-    fun optInt(key: String, volatiled: Boolean = false): Int? = get(key, volatiled)?.toIntOrNull()
-    fun getInt(key: String, fallback: Int = 0, volatiled: Boolean = false): Int = get(key, volatiled)?.toIntOrNull() ?: fallback
-    fun optBoolean(key: String, volatiled: Boolean = false): Boolean? = get(key, volatiled)?.toBoolean()
-    fun getBoolean(key: String, fallback: Boolean = false, volatiled: Boolean = false): Boolean = get(key, volatiled)?.toBoolean() ?: fallback
+
+    fun optString(key: String): String? = get(key)
+    fun getString(key: String, fallback: String = ""): String = get(key) ?: fallback
+    fun optInt(key: String): Int? = get(key)?.toIntOrNull()
+    fun getInt(key: String, fallback: Int = 0): Int = get(key)?.toIntOrNull() ?: fallback
+    fun optLong(key: String): Long? = get(key)?.toLongOrNull()
+    fun getLong(key: String, fallback: Long = 0): Long = get(key)?.toLongOrNull() ?: fallback
+    fun optBoolean(key: String): Boolean? = get(key)?.toBoolean()
+    fun getBoolean(key: String, fallback: Boolean = false): Boolean = get(key)?.toBoolean() ?: fallback
+
+    fun isInited() : Boolean {
+        if (!get(Hass_HostUrl).isNullOrBlank()) return true
+        return false
+    }
 
     val haHostUrl: String
         get() = get(Hass_HostUrl) ?: ""
     val haPassword: String
         get() = get(Hass_Password) ?: ""
+    val haToken: String
+        get() = get(Hass_Token) ?: ""
 
     private object Holder {
         val INSTANCE = HassConfig()
@@ -45,14 +54,53 @@ class HassConfig {
     companion object {
         val INSTANCE: HassConfig by lazy { Holder.INSTANCE }
 
+        val Connect_ScreenOff = "connect.screenOff"
+
         val Hass_HostUrl = "hass.HostUrl"
         val Hass_Password = "hass.Password"
+        val Hass_Token = "hass.Token"
+        val Hass_LocalUrl = "hass.LocalUrl"
+        val Hass_LocalBssid = "hass.LocalBssid"
+
         val Ui_PullRefresh = "ui.pullRefresh"
         val Ui_HomePanels = "ui.homePanels"
+        val Ui_WebFrist = "ui.webFirst"
         val Gps_Logger = "gps.logger"
         val Gps_DeviceName = "gps.deviceName"
         val Gps_DeviceId = "gps.deviceId"
         val Gps_Password = "gps.password"
+        val Gps_AppLogger = "gps.appLogger"
+        val Gps_WebHookId = "gps.webHookId"
+
+        val Probe_NfcCard = "probe.nfcCard"
+        val Probe_BluetoothBle = "probe.bluetoothBle"
+        val Probe_Wifi = "probe.wifi"
+        val Probe_Gps = "probe.gps"
+
+        val Speech_DoubleHomeKey = "speech.doubleHomeKey"
+        val Speech_TripleHomeKey = "speech.tripleHomeKey"
+        val Speech_Notification = "speech.notification"
+        val Speech_ShowWakeup = "speech.showWakeup"
+
+        val Speech_ScreenOnMode = "speech.screenOnMode"
+        val Speech_ScreenOnWifi = "speech.screenOnWifi"
+        val Speech_ScreenOnBluetooth = "speech.screenOnBluetooth"
+        val Speech_ScreenOnCharging = "speech.screenOnCharging"
+
+        val Speech_ScreenOffMode = "speech.screenOffMode"
+        val Speech_ScreenOffWifi = "speech.screenOffWifi"
+        val Speech_ScreenOffBluetooth = "speech.screenOffBluetooth"
+        val Speech_ScreenOffCharging = "speech.screenOffCharging"
+
+        val Speech_FromBluetooth = "speech.recordFromBluetooth"
+        val Speech_HeadsetWakeup = "speech.headsetWakeup"
+        val Speech_NoWakeupLock = "speech.noWakeupLock"
+        val Speech_VoiceOpenApp = "speech.voiceOpenApp"
+        val Speech_VoiceContact = "speech.voiceContact"
+
+        val Wakeup_Forbid = 0
+        val Wakeup_Condition = 1
+        val Wakeup_Always = -1
     }
 }
 

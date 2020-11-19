@@ -9,7 +9,6 @@ import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import com.dylan.common.rx.RxBus2
 import com.yunsean.dynkotlins.extensions.loges
 import kotlinx.android.synthetic.main.pager_hass_camera_ptz.*
-import org.jetbrains.anko.sdk25.coroutines.onTouch
 
 
 class CameraPtzFragment : BaseFragment() {
@@ -27,21 +26,25 @@ class CameraPtzFragment : BaseFragment() {
         RxBus2.getDefault().post(ServiceRequest("camera", "onvif_ptz", entityId = entityId, pan = pan, tilt = tilt))
     }
     private fun ui() {
-        this.left.onTouch { v, event ->
+        this.left.setOnTouchListener { v, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) callService("LEFT")
             else if (event.actionMasked == MotionEvent.ACTION_CANCEL || event.actionMasked == MotionEvent.ACTION_UP) callService()
+            true
         }
-        this.right.onTouch { v, event ->
+        this.right.setOnTouchListener { v, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) callService("RIGHT")
             else if (event.actionMasked == MotionEvent.ACTION_CANCEL || event.actionMasked == MotionEvent.ACTION_UP) callService()
+            true
         }
-        this.up.onTouch { v, event ->
+        this.up.setOnTouchListener { v, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) callService(null, "UP")
             else if (event.actionMasked == MotionEvent.ACTION_CANCEL || event.actionMasked == MotionEvent.ACTION_UP) callService()
+            true
         }
-        this.down.onTouch { v, event ->
+        this.down.setOnTouchListener { v, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) callService(null, "DOWN")
             else if (event.actionMasked == MotionEvent.ACTION_CANCEL || event.actionMasked == MotionEvent.ACTION_UP) callService()
+            true
         }
     }
 }

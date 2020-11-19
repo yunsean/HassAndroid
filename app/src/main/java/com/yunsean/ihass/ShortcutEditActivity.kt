@@ -57,7 +57,7 @@ class ShortcutEditActivity : BaseActivity() {
     private lateinit var touchHelper: ItemTouchHelper
     private fun ui() {
         this.adapter = RecyclerAdapter(entities) {
-            view, index, item, holder ->
+            view, _, item, holder ->
             val bgColor: Int
             val name: String
             val icon: String?
@@ -69,7 +69,7 @@ class ShortcutEditActivity : BaseActivity() {
                 }
                 ItemType.divider-> {
                     bgColor = 0xfff2f2f2.toInt()
-                    name = item.showName ?: "分组"
+                    name = ""
                     icon = if (item.showIcon.isNullOrBlank()) "mdi:google-circles-communities" else item.showIcon
                 }
                 else-> {
@@ -82,9 +82,9 @@ class ShortcutEditActivity : BaseActivity() {
             view.name.text = name
             MDIFont.get().setIcon(view.icon, icon)
             view.icon.visibility = if (icon.isNullOrBlank()) View.INVISIBLE else View.VISIBLE
-            view.order.onTouch { v, event ->
+            view.order.setOnTouchListener { _, event ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN) touchHelper.startDrag(holder)
-                false
+                true
             }
             view.insert.onClick {
                 doAdd(item)

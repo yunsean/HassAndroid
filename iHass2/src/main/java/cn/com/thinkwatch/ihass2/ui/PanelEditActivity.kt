@@ -2,6 +2,9 @@ package cn.com.thinkwatch.ihass2.ui
 
 import android.app.Dialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -20,10 +23,22 @@ import cn.com.thinkwatch.ihass2.model.JsonEntity
 import cn.com.thinkwatch.ihass2.model.MDIFont
 import cn.com.thinkwatch.ihass2.model.Panel
 import cn.com.thinkwatch.ihass2.utils.SimpleItemTouchHelperCallback
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.dylan.common.rx.RxBus2
+import com.dylan.common.sketch.Drawables
+import com.dylan.dyn3rdparts.gallerypicker.ImageGridActivity
+import com.dylan.dyn3rdparts.gallerypicker.ImagePicker
+import com.dylan.dyn3rdparts.gallerypicker.bean.ImageItem
+import com.dylan.dyn3rdparts.gallerypicker.loader.PicassoImageLoader
+import com.dylan.dyn3rdparts.gallerypicker.view.CropImageView
 import com.dylan.uiparts.activity.ActivityResult
 import com.dylan.uiparts.recyclerview.RecyclerViewDivider
 import com.dylan.uiparts.recyclerview.SwipeItemLayout
+import com.fendoudebb.util.QuickBlur
 import com.yunsean.dynkotlins.extensions.*
 import kotlinx.android.synthetic.main.activity_hass_panel_edit.*
 import kotlinx.android.synthetic.main.dialog_panel_add_entity.view.*
@@ -31,12 +46,15 @@ import kotlinx.android.synthetic.main.dialog_panel_add_group.view.*
 import kotlinx.android.synthetic.main.listitem_panel_edit_item.view.*
 import org.jetbrains.anko.act
 import org.jetbrains.anko.backgroundColor
+import org.jetbrains.anko.ctx
 import org.jetbrains.anko.layoutInflater
 import org.jetbrains.anko.sdk25.coroutines.onClick
-import org.jetbrains.anko.sdk25.coroutines.onTouch
+import java.io.File
+import java.io.FileOutputStream
 
 class PanelEditActivity : BaseActivity() {
 
+    private var backImage: String? = null
     private var panelId: Long = 0L
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,19 +70,20 @@ class PanelEditActivity : BaseActivity() {
         val panelName = this.panelName.text()
         var created = false
         if (panelId == 0L) {
-            panelId = db.addPanel(Panel(panelName))
+            panelId = db.addPanel(Panel(panelName, backImage = backImage, tileAlpha = if (translucence.isChecked) .7f else 1f))
             if (panelId == 0L) return
             created = true
         } else {
             db.getPanel(panelId)?.let {
                 it.name = panelName
+                it.backImage = backImage
+                it.tileAlpha = if (!backImage.isNullOrBlank() and translucence.isChecked) .8f else 1f
                 db.savePanel(it)
             }
         }
         entities.forEachIndexed { index, entity -> entity.displayOrder = index }
         db.saveDashboard(panelId, entities)
-        if (created) RxBus2.getDefault().post(PanelChanged(0))
-        else RxBus2.getDefault().post(PanelChanged(panelId))
+        RxBus2.getDefault().post(PanelChanged(panelId, created))
         finish()
     }
 
@@ -72,6 +91,26 @@ class PanelEditActivity : BaseActivity() {
     private lateinit var adapter: RecyclerAdapter<JsonEntity>
     private lateinit var touchHelper: ItemTouchHelper
     private fun ui() {
+        this.image.onClick {
+            if (backImage.isNullOrEmpty()) {
+                ImagePicker.getInstance()
+                        .setImageLoader(PicassoImageLoader())
+                        .setShowCamera(false)
+                        .setCrop(true)
+                        .setSaveRectangle(true)
+                        .setMultiMode(false)
+                        .setStyle(CropImageView.Style.RECTANGLE)
+                        .setFocusWidth(containerView.width)
+                        .setFocusHeight(containerView.height)
+                        .setOutPutX(containerView.width)
+                        .setOutPutY(containerView.height)
+                startActivityForResult(Intent(this@PanelEditActivity, ImageGridActivity::class.java), 109)
+            } else {
+                backImage = null
+                containerView.visibility = View.GONE
+                translucence.visibility = View.GONE
+            }
+        }
         this.adapter = RecyclerAdapter(entities) {
             view, index, item, holder ->
             val bgColor: Int
@@ -98,7 +137,7 @@ class PanelEditActivity : BaseActivity() {
             view.name.text = name
             MDIFont.get().setIcon(view.icon, icon)
             view.icon.visibility = if (icon.isNullOrBlank()) View.INVISIBLE else View.VISIBLE
-            view.order.onTouch { v, event ->
+            view.order.setOnTouchListener { v, event ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN) touchHelper.startDrag(holder)
                 false
             }
@@ -116,6 +155,7 @@ class PanelEditActivity : BaseActivity() {
                             override fun onSettingDialog(dialog: Dialog, contentView: View) {
                                 contentView.entityName.setText(item.showName ?: item.friendlyName)
                                 MDIFont.get().setIcon(contentView.entityIcon, if (item.showIcon.isNullOrBlank()) item.mdiIcon else item.showIcon)
+                                contentView.entityId.text = item.entityId
                                 contentView.entityIcon.tag = item.showIcon
                                 contentView.iconPanel.onClick {
                                     hotEntity = item
@@ -130,6 +170,7 @@ class PanelEditActivity : BaseActivity() {
                                     TileType.circle-> contentView.entityTypeCircle.isChecked = true
                                     TileType.square-> contentView.entityTypeSquare.isChecked = true
                                     TileType.tile-> contentView.entityTypeTile.isChecked = true
+                                    TileType.list2-> contentView.entityTypeList2.isChecked = true
                                     else-> contentView.entityTypeInherit.isChecked = true
                                 }
                                 contentView.entityAdd.onClick {
@@ -150,6 +191,7 @@ class PanelEditActivity : BaseActivity() {
                                     else if (contentView.entityTypeCircle.isChecked) TileType.circle
                                     else if (contentView.entityTypeSquare.isChecked) TileType.square
                                     else if (contentView.entityTypeTile.isChecked) TileType.tile
+                                    else if (contentView.entityTypeList2.isChecked) TileType.list2
                                     else TileType.inherit
                                     item.columnCount = span
                                     item.tileType = type
@@ -169,6 +211,7 @@ class PanelEditActivity : BaseActivity() {
                                     TileType.list-> contentView.groupTypeList.isChecked = true
                                     TileType.circle-> contentView.groupTypeCircle.isChecked = true
                                     TileType.square-> contentView.groupTypeSquare.isChecked = true
+                                    TileType.list2-> contentView.groupTypeList2.isChecked = true
                                     else-> contentView.groupTypeTile.isChecked = true
                                 }
                                 contentView.groupAdd.onClick {
@@ -186,6 +229,7 @@ class PanelEditActivity : BaseActivity() {
                                     val type = if (contentView.groupTypeList.isChecked) TileType.list
                                     else if (contentView.groupTypeCircle.isChecked) TileType.circle
                                     else if (contentView.groupTypeSquare.isChecked) TileType.square
+                                    else if (contentView.groupTypeList2.isChecked) TileType.list2
                                     else TileType.tile
                                     var column = contentView.groupColumns.text().toIntOrNull() ?: 0
                                     if (column < 1) return toastex("请设置每行显示列数！")
@@ -222,11 +266,56 @@ class PanelEditActivity : BaseActivity() {
         }.nextOnMain {
             loading.visibility = View.GONE
             panelName.setText(panel?.name)
+            translucence.isChecked = panel?.tileAlpha ?: 1f < 0.9f
+            panel?.backImage?.let {
+                Glide.with(ctx).load(it).listener(object: RequestListener<Drawable> {
+                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean = false
+                    override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                        translucence.visibility = View.VISIBLE
+                        containerView.visibility = View.VISIBLE
+                        return false
+                    }
+                }).into(containerView)
+            }
+            this.backImage = panel?.backImage
             entities.clear()
             entities.addAll(it)
             adapter.notifyDataSetChanged()
         }.error {
             it.toastex()
+        }
+    }
+
+    @ActivityResult(requestCode = 109)
+    private fun imagePicked(resultCode: Int,  data: Intent?) {
+        if (data != null) {
+            val images = data.getSerializableExtra(ImagePicker.EXTRA_RESULT_ITEMS) as ArrayList<ImageItem>?
+            if (images != null && images.size > 0) {
+                val uri = Uri.fromFile(File(images[0].path))
+                var bitmap = Drawables.decodeUriAsBitmap(this, uri)
+                if (bitmap != null) {
+                    bitmap = QuickBlur.with(ctx).bitmap(bitmap).scale(2).radius(5).blur()
+                    val outDir = "/data/data/${ctx.packageName}/files"
+                    val outFile = File(outDir, System.currentTimeMillis().toString() + ".jpg")
+                    try {
+                        val fileOutputStream = FileOutputStream(outFile)
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 40, fileOutputStream)
+                        fileOutputStream.flush()
+                        fileOutputStream.close()
+                        Glide.with(ctx).load(outFile.absoluteFile).listener(object: RequestListener<Drawable> {
+                            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean = false
+                            override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                                backImage = outFile.absolutePath
+                                translucence.visibility = View.VISIBLE
+                                containerView.visibility = View.VISIBLE
+                                return false
+                            }
+                        }).into(containerView)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
         }
     }
 

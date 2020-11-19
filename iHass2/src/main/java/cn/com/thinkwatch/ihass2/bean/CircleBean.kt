@@ -12,13 +12,14 @@ import com.dylan.common.rx.RxBus2
 import kotlinx.android.synthetic.main.tile_circle.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 
-class CircleBean(entity: JsonEntity): BaseBean(entity) {
+class CircleBean(entity: JsonEntity, val translucence: Boolean): BaseBean(entity) {
     override fun layoutResId(): Int = R.layout.tile_circle
     override fun bindToView(itemView: View, context: Context) {
+        itemView.backImage.alpha = if (translucence) .8f else 1f
         MDIFont.get().setIcon(itemView.icon, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)
         itemView.icon.isActivated = entity.isActivated
         itemView.contentView.onClick {
-            if (entity.isSwitch && entity.isStateful) {
+            if ((entity.isSwitch && entity.isStateful) || entity.isInputBoolean) {
                 RxBus2.getDefault().post(ServiceRequest(entity.domain, "toggle", entity.entityId))
             } else {
                 RxBus2.getDefault().post(EntityClicked(entity))

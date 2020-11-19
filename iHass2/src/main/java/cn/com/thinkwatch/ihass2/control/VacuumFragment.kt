@@ -9,7 +9,6 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.api.hassApi
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.Period
@@ -49,11 +48,12 @@ class VacuumFragment : ControlFragment() {
     private fun ui() {
         fragment?.apply {
             useRatio.colorMap = mapOf("off" to R.color.vacuumOff, "unavailable" to R.color.vacuumUnvaliable, "on" to R.color.vacuumOn)
-            useRatio.textMap = mapOf("off" to "关闭", "unavailable" to "未知", "vacuum" to "清扫")
+            useRatio.textMap = entity?.attributes?.ihassState ?: mapOf("docked" to "停靠", "cleaning" to "清扫", "idle" to "暂停", "unavailable" to "离线", "off" to "关机", "returning" to "回充")
             button_close.onClick { dismiss() }
-            text_start_pause.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "start_pause", entity?.entityId)) }
+            text_start.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "start", entity?.entityId)) }
             text_stop.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "stop", entity?.entityId)) }
-            text_locate.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "clean_spot", entity?.entityId)) }
+            text_clean_spot.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "clean_spot", entity?.entityId)) }
+            text_locate.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "locate", entity?.entityId)) }
             text_home.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "return_to_base", entity?.entityId)) }
             val speeds: List<String> = entity?.attributes?.fanSpeedList ?: listOf()
             val adapter = ArrayAdapter(getActivity(), R.layout.spinner_edittext_lookalike, speeds)
@@ -65,14 +65,7 @@ class VacuumFragment : ControlFragment() {
                 override fun onNothingSelected(p0: AdapterView<*>?) { }
             }
             spinner_speed.setSelection(speeds.indexOf(entity?.attributes?.fanSpeed ?: ""))
-            switch_toggle.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "turn_" + if (switch_toggle.isChecked) "on" else "off", entity?.entityId)) }
-        }
-        refreshUi()
-    }
-    private fun refreshUi() {
-        fragment?.apply {
-            switch_toggle?.isChecked = if ("OFF" == entity?.friendlyState?.toUpperCase()) false else true
-            context.hassApi.getHistory(context.app.haPassword, calendar.kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"), entity?.entityId, Calendar.getInstance().kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"))
+            app.getHistory(calendar.kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"), entity?.entityId, Calendar.getInstance().kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"))
                     .nextOnMain {
                         useRatio.visibility = View.VISIBLE
                         useRatioDate.visibility = View.VISIBLE
@@ -110,6 +103,12 @@ class VacuumFragment : ControlFragment() {
                         useRatio.visibility = View.GONE
                         useRatioDate.visibility = View.GONE
                     }
+        }
+        refreshUi()
+    }
+    private fun refreshUi() {
+        fragment?.apply {
+            state?.setText(entity?.friendlyState)
         }
     }
     override fun onChange() {

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.api.xmlyApi
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.bus.broadcast.FavoriteChanged
 import cn.com.thinkwatch.ihass2.bus.broadcast.XmlyFilterChange
@@ -13,18 +12,20 @@ import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.dto.xmly.Channel
 import cn.com.thinkwatch.ihass2.model.broadcast.Cached
 import cn.com.thinkwatch.ihass2.model.broadcast.Favorite
+import cn.com.thinkwatch.ihass2.network.external.xmlyApi
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.dylan.common.rx.RxBus2
 import com.dylan.uiparts.recyclerview.RecyclerViewDivider
-import com.yunsean.dynkotlins.extensions.nextOnMain
 import com.yunsean.dynkotlins.extensions.readPref
 import com.yunsean.dynkotlins.extensions.toastex
+import com.yunsean.dynkotlins.extensions.withNext
 import com.yunsean.dynkotlins.ui.RecyclerAdapter
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.listitem_hass_broadcast_channel.view.*
 import kotlinx.android.synthetic.main.pager_hass_broadcast.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.ctx
 
 
@@ -53,12 +54,12 @@ class ChannelFragment : BaseFragment() {
                 data()
             }
         }, RxBus2.getDefault().register(FavoriteChanged::class.java, {
-            favoritedChannels = db.getXmlyFavorite(entityId).map { it.id }
+            favoritedChannels = db.getXmlyFavorite(entityId, Favorite.Type_Xmly).map { it.id }
             adapter?.notifyDataSetChanged()
         }, disposable))
 
         ui()
-        favoritedChannels = db.getXmlyFavorite(entityId).map { it.id }
+        favoritedChannels = db.getXmlyFavorite(entityId, Favorite.Type_Xmly).map { it.id }
         pullable.postDelayed({ pullable?.isRefreshing = true }, 500)
     }
     override fun onDestroy() {
@@ -81,10 +82,12 @@ class ChannelFragment : BaseFragment() {
                     .into(view.channelIcon)
             view.onClick {
                 db.addXmlyCached(Cached(channel.id, channel.name, channel.coverLarge, channel.playUrl.aac64, channel.playCount))
-                RxBus2.getDefault().post(ServiceRequest("broadcast", "play", entityId, url = channel.playUrl.aac64))
+                if (entityId.startsWith("media_player.")) RxBus2.getDefault().post(ServiceRequest("media_player", "play_media", entityId, mediaContentId = channel.playUrl.aac64, mediaContentType = "music"))
+                else RxBus2.getDefault().post(ServiceRequest("broadcast", "play", entityId, url = channel.playUrl.aac64))
+                act?.finish()
             }
             view.channelFavor.onClick {
-                if (view.channelFavor.isChecked) db.addXmlyFavorite(Favorite(channel.id, entityId, channel.name, channel.coverLarge, channel.playUrl.aac64, channel.playCount))
+                if (view.channelFavor.isChecked) db.addXmlyFavorite(Favorite(channel.id, Favorite.Type_Xmly, entityId, channel.name, channel.coverLarge, channel.playUrl.aac64, channel.playCount))
                 else db.delXmlyFavorite(channel.id)
                 db.addXmlyCached(Cached(channel.id, channel.name, channel.coverLarge, channel.playUrl.aac64, channel.playCount))
                 RxBus2.getDefault().post(FavoriteChanged())
@@ -110,11 +113,11 @@ class ChannelFragment : BaseFragment() {
         else if (showType == R.id.category) xmlyApi.getCategoryChannel(filterValue, pageIndex)
         else if (showType == R.id.country) xmlyApi.getNationalChannel(pageIndex)
         else xmlyApi.getNetworkChannel(pageIndex)
-        query.nextOnMain {
+        query.withNext {
             if (pageIndex == 1) channels.clear()
             it.data?.let {
                 channels.addAll(it.data)
-                recyclerView.adapter.notifyDataSetChanged()
+                recyclerView.adapter?.notifyDataSetChanged()
                 pullable.isLoadMoreEnabled = (it.totalSize + it.pageSize - 1) / it.pageSize > it.page
             }
             pullable.isRefreshing = false
@@ -123,7 +126,7 @@ class ChannelFragment : BaseFragment() {
             it.toastex()
             pullable.isRefreshing = false
             pullable.isLoadingMore = false
-        }.subscribe {
+        }.subscribeOnMain {
             dataDisposable = it
         }
     }

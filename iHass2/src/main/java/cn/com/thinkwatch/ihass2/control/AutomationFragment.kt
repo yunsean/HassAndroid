@@ -11,7 +11,6 @@ import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import com.dylan.common.rx.RxBus2
 import com.yunsean.dynkotlins.extensions.kdateTime
 import kotlinx.android.synthetic.main.control_automation.view.*
-import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.act
 import java.text.SimpleDateFormat
@@ -36,7 +35,7 @@ class AutomationFragment : ControlFragment() {
         fragment?.apply {
             button_trigger.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "trigger", entity?.entityId)) }
             button_close.onClick { dismiss() }
-            switch_toggle.onCheckedChange { buttonView, isChecked -> RxBus2.getDefault().post(ServiceRequest(entity?.domain, "turn_" + if (isChecked) "on" else "off", entity?.entityId)) }
+            switch_toggle.setOnCheckedChangeListener { buttonView, isChecked -> RxBus2.getDefault().post(ServiceRequest(entity?.domain, "turn_" + if (isChecked) "on" else "off", entity?.entityId)) }
         }
         refreshUi()
     }

@@ -15,7 +15,7 @@
         android:fontFamily="@font/dincond"
         android:textColor="#ff999999"
         android:textSize="14sp"
-        android:text="扫码下载iHass"/>
+        android:text="扫码下载贝壳家"/>
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="0dip"
@@ -59,17 +59,20 @@
             android:textSize="12sp"
             android:textColor="#ffaaaaaa"
             android:text="        如果您觉得这个APP能够帮到您，或者觉得有点意思，可以截图分享给您的朋友，或者直接点击上边的“复制”将下载地址复制后粘贴到微信等输入窗口！"/>
-        <View
-            android:layout_width="1dip"
+        <ImageView
+            android:layout_width="match_parent"
             android:layout_height="0dip"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:src="@drawable/logo"
+            android:scaleType="centerInside"
+            android:contentDescription="@null"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="15dip"
             android:textSize="12sp"
             android:textColor="#ffaaaaaa"
-            android:text="        如果您使用过程中遇到任何问题，或者有更多的想法和建议，请点击下方的企鹅图标加入Hass App使用QQ群！"/>
+            android:text="        如果您使用过程中遇到任何问题，或者有更多的想法和建议，请点击下方的企鹅图标加入贝壳家使用QQ群！"/>
         <ImageButton
             android:id="@+id/qqGroup"
             android:layout_width="wrap_content"

@@ -3,11 +3,10 @@ package cn.com.thinkwatch.ihass2.fragment
 import android.os.Bundle
 import android.view.View
 import cn.com.thinkwatch.ihass2.R
-import cn.com.thinkwatch.ihass2.api.hassApi
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.db.db
-import cn.com.thinkwatch.ihass2.model.JsonEntity
+import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import com.yunsean.dynkotlins.extensions.nextOnMain
 import com.yunsean.dynkotlins.extensions.text
 import com.yunsean.dynkotlins.extensions.toastex
@@ -32,7 +31,7 @@ class CameraTtsFragment : BaseFragment() {
         this.send.onClick {
             val text = content.text().trim()
             if (text.isBlank()) return@onClick ctx.toastex("请输入文字内容")
-            hassApi.setState(app.haPassword, entityId, JsonEntity(state = text))
+            app.callService3(ServiceRequest(entity?.domain, "set_value", entity?.entityId, value = text))
                     .nextOnMain {
                         ctx.toastex("已发送")
                     }

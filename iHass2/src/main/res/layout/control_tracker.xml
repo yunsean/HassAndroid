@@ -59,6 +59,17 @@
             android:layout_width="match_parent"
             android:layout_height="36dip"
             android:layout_marginTop="10dip"/>
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/totalView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dip"
+            android:layout_marginBottom="5dip"
+            android:textSize="13sp"
+            android:textColor="#ff888888"
+            tools:text="在家时长：00:00:00"
+            app:fontFamily="@font/dincond"/>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"

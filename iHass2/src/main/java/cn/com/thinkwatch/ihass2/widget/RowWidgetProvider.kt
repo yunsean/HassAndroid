@@ -73,7 +73,7 @@ class RowWidgetProvider : AppWidgetProvider() {
         private val CLICK_ACTION7 = "cn.com.thinkwatch.ihass2.action.CLICK7"
         private val CLICK_ACTION8 = "cn.com.thinkwatch.ihass2.action.CLICK8"
         private val CLICK_ACTION9 = "cn.com.thinkwatch.ihass2.action.CLICK9"
-        private val actions = arrayOf(CLICK_ACTION0, CLICK_ACTION1, CLICK_ACTION2, CLICK_ACTION3, CLICK_ACTION4, CLICK_ACTION5, CLICK_ACTION6, CLICK_ACTION7, CLICK_ACTION8, CLICK_ACTION9)
+        val actions = arrayOf(CLICK_ACTION0, CLICK_ACTION1, CLICK_ACTION2, CLICK_ACTION3, CLICK_ACTION4, CLICK_ACTION5, CLICK_ACTION6, CLICK_ACTION7, CLICK_ACTION8, CLICK_ACTION9)
         fun updateEntityWidget(context: Context, widgetId: Int, entities: List<JsonEntity>) {
             val manager = AppWidgetManager.getInstance(context)
             val parentView = RemoteViews(context.packageName, R.layout.widget_row)
@@ -84,7 +84,7 @@ class RowWidgetProvider : AppWidgetProvider() {
                 if (index >= actions.size) return@forEachIndexed
                 val remoteView = RemoteViews(context.packageName, R.layout.widget_item)
                 val iconColor = if (entity.isActivated) widget.activeColor else widget.normalColor
-                val iconText = if (entity.showIcon.isNullOrBlank()) if (entity.isSensor && entity.attributes?.unitOfMeasurement != null) entity.state else entity.iconState else entity.showIcon
+                val iconText = if (entity.isSensor && (entity.attributes?.unitOfMeasurement != null || entity.isDigitalState)) entity.state else if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon
                 remoteView.setOnClickPendingIntent(R.id.itemView, PendingIntent.getActivity(context, widgetId, Intent(context, EmptyActivity::class.java)
                         .setAction(actions.get(index))
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)

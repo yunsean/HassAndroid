@@ -7,19 +7,57 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
-    <ScrollView
+    <cn.com.thinkwatch.ihass2.view.UseRatioView
+        android:id="@+id/useRatio"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="36dip"
+        android:layout_marginTop="10dip"/>
+    <LinearLayout
+        android:id="@+id/useRatioDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dip"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/beginDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:textColor="#ff999999"
+            tools:text="2018-01-01" />
+        <TextView
+            android:id="@+id/endDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:textSize="10sp"
+            android:textColor="#ff999999"
+            tools:text="2018-01-01"/>
+    </LinearLayout>
+    <FrameLayout
+        android:id="@+id/positionPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp">
+        <TextView
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textSize="14sp"
+            android:textColor="#ffaaaaaa"
+            android:text="位置"/>
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="horizontal"
-            android:paddingBottom="8dp"
-            android:paddingTop="24dp">
+            android:paddingTop="8dp">
             <android.support.v7.widget.AppCompatTextView
-                android:id="@+id/text_up"
+                android:id="@+id/positionUp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -34,7 +72,7 @@
                 app:fontFamily="@font/mdi"
                 tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
             <android.support.v7.widget.AppCompatTextView
-                android:id="@+id/text_stop"
+                android:id="@+id/positionStop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -49,7 +87,7 @@
                 app:fontFamily="@font/mdi"
                 tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
             <android.support.v7.widget.AppCompatTextView
-                android:id="@+id/text_down"
+                android:id="@+id/positionDown"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -64,7 +102,106 @@
                 app:fontFamily="@font/mdi"
                 tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
         </LinearLayout>
-    </ScrollView>
+    </FrameLayout>
+    <org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
+        android:id="@+id/position"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        app:dsb_indicatorColor="@color/md_blue_500"
+        app:dsb_max="100"
+        app:dsb_min="0"
+        app:dsb_progressColor="@color/md_blue_500"
+        app:dsb_rippleColor="@color/md_blue_100"
+        app:dsb_scrubberHeight="4dp"
+        app:dsb_thumbSize="16dp"
+        app:dsb_trackColor="@color/md_grey_400"
+        app:dsb_trackHeight="4dp"/>
+    <FrameLayout
+        android:id="@+id/tilePanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:orientation="horizontal"
+        android:paddingTop="8dp">
+        <TextView
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textSize="14sp"
+            android:textColor="#ffaaaaaa"
+            android:text="倾角"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp">
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tileOpen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:padding="4dp"
+                android:text="\uF05C"
+                android:textColor="@color/md_grey_800"
+                android:textSize="40dp"
+                app:fontFamily="@font/mdi"
+                tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tileStop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:padding="4dp"
+                android:text="\uF4DB"
+                android:textColor="@color/md_grey_800"
+                android:textSize="40dp"
+                app:fontFamily="@font/mdi"
+                tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tileClose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:padding="4dp"
+                android:text="\uF042"
+                android:textColor="@color/md_grey_800"
+                android:textSize="40dp"
+                app:fontFamily="@font/mdi"
+                tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
+        </LinearLayout>
+    </FrameLayout>
+    <org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
+        android:id="@+id/tile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        app:dsb_indicatorColor="@color/md_blue_500"
+        app:dsb_max="100"
+        app:dsb_min="0"
+        app:dsb_progressColor="@color/md_blue_500"
+        app:dsb_rippleColor="@color/md_blue_100"
+        app:dsb_scrubberHeight="4dp"
+        app:dsb_thumbSize="16dp"
+        app:dsb_trackColor="@color/md_grey_400"
+        app:dsb_trackHeight="4dp"/>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

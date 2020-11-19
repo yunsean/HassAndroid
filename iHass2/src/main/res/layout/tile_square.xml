@@ -9,7 +9,7 @@
     android:layout_marginLeft="1dp"
     android:layout_marginRight="1dp"
     app:cardBackgroundColor="#ffffffff"
-    app:cardCornerRadius="1dp"
+    app:cardCornerRadius="2dp"
     app:cardElevation="2dp"
     app:cardPreventCornerOverlap="false"
     app:cardUseCompatPadding="true">
@@ -22,20 +22,42 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_heightPercent="100%w" />
-        <android.support.v7.widget.AppCompatTextView
-            android:id="@+id/icon"
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:paddingBottom="15dip"
-            android:lines="1"
-            android:textColor="@color/color_xiaomi"
-            android:textSize="24sp"
-            android:textStyle="normal"
-            app:autoSizeTextType="none"
-            app:fontFamily="@font/mdi"
-            tools:ignore="MissingPrefix"
-            tools:text="\uf033"/>
+            android:paddingBottom="15dip">
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/icon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:lines="1"
+                android:textColor="@color/color_xiaomi"
+                android:textSize="24sp"
+                android:textStyle="normal"
+                app:autoSizeTextType="none"
+                app:fontFamily="@font/mdi"
+                tools:ignore="MissingPrefix"
+                tools:text="\uf033"/>
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dip"
+                android:paddingRight="5dip"
+                android:gravity="center"
+                android:lines="1"
+                android:textColor="@color/color_xiaomi"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                app:autoSizeTextType="uniform"
+                android:autoSizeMaxTextSize="16sp"
+                app:autoSizeMinTextSize="6sp"
+                app:fontFamily="@font/dincond"
+                tools:ignore="MissingPrefix"
+                tools:text="group"/>
+        </FrameLayout>
         <TextView
             android:id="@+id/name"
             android:layout_width="match_parent"

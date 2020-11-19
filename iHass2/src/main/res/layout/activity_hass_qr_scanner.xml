@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:thiz="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true"
+    android:background="#ff000000">
+
+    <cn.bingoogolapple.qrcode.zxing.ZXingView
+        android:id="@+id/zxingview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:qrcv_animTime="1000"
+        app:qrcv_borderColor="@color/colorPrimary"
+        app:qrcv_borderSize="1dp"
+        app:qrcv_cornerColor="@color/colorPrimaryDark"
+        app:qrcv_cornerLength="20dp"
+        app:qrcv_cornerSize="3dp"
+        app:qrcv_isBarcode="false"
+        app:qrcv_isOnlyDecodeScanBoxArea="true"
+        app:qrcv_isScanLineReverse="true"
+        app:qrcv_isShowDefaultGridScanLineDrawable="false"
+        app:qrcv_isShowDefaultScanLineDrawable="false"
+        app:qrcv_isShowTipBackground="false"
+        app:qrcv_isShowTipTextAsSingleLine="false"
+        app:qrcv_isTipTextBelowRect="true"
+        app:qrcv_maskColor="#77000000"
+        app:qrcv_qrCodeTipText="请扫描服务端生成的二维码，以获取配置信息"
+        app:qrcv_rectWidth="200dp"
+        app:qrcv_scanLineColor="@color/colorPrimaryDark"
+        app:qrcv_scanLineMargin="0dp"
+        app:qrcv_scanLineSize="1dp"
+        app:qrcv_tipTextColor="@android:color/darker_gray"
+        app:qrcv_tipTextSize="14sp"
+        app:qrcv_toolbarHeight="56dp"
+        app:qrcv_topOffset="90dp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#ff000000">
+        <TextView
+            android:id="@+id/titlebar_name"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:text="@string/app_name"/>
+        <com.dylan.uiparts.button.SmartButton
+            android:id="@+id/titlebar_left"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:drawableLeft="@drawable/titlebar_back"
+            android:drawablePadding="5dip"
+            android:minWidth="44dip"
+            android:singleLine="true"
+            android:gravity="center_vertical"
+            android:textSize="14sp"
+            thiz:sv_bgcolor_normal="@color/transparent"
+            thiz:sv_bgcolor_pressed="@color/transparent"
+            thiz:sv_txcolor_normal="@color/white"
+            thiz:sv_txcolor_pressed="@color/lightGray"/>
+        <com.dylan.uiparts.button.SmartButton
+            android:id="@+id/titlebar_right"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="right"
+            android:drawableRight="@drawable/titlebar_more"
+            android:drawablePadding="5dip"
+            android:minWidth="44dip"
+            android:singleLine="true"
+            android:gravity="center_vertical|right"
+            android:textSize="14sp"
+            thiz:sv_bgcolor_normal="@color/transparent"
+            thiz:sv_bgcolor_pressed="@color/transparent"
+            thiz:sv_txcolor_normal="@color/white"
+            thiz:sv_txcolor_pressed="@color/lightGray"/>
+    </FrameLayout>
+
+</RelativeLayout>
+

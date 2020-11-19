@@ -7,7 +7,7 @@ import android.os.Environment
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import com.hz.android.fileselector.FileSelectorView
-import kotlinx.android.synthetic.main.activity_hass_choice_json.*
+import kotlinx.android.synthetic.main.activity_hass_choice_file.*
 import org.jetbrains.anko.dip
 import java.io.File
 
@@ -17,8 +17,9 @@ class ChoiceFileActivity : BaseActivity() {
     private var extesionNames = listOf("json")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_hass_choice_json)
-        setTitle("选择配置文件", true)
+        setContentView(R.layout.activity_hass_choice_file)
+        val title = intent.getStringExtra("title") ?: "选择配置文件"
+        setTitle(title, true)
         setAutoHideSoftInput(AutoHideSoftInputMode.WhenClick)
 
         try { intent.getStringArrayListExtra("extensionNames") } catch (_: Exception) { null }?.let {
@@ -28,7 +29,10 @@ class ChoiceFileActivity : BaseActivity() {
     }
 
     private fun ui() {
-        fileSelectorView.setCurrentDirectory(File(Environment.getExternalStorageDirectory(), "/"))
+
+        var currentDirectory = intent.getStringExtra("currentDirectory") ?: Environment.getExternalStorageDirectory().absolutePath
+        if (!File(currentDirectory).exists()) currentDirectory = Environment.getExternalStorageDirectory().absolutePath
+        fileSelectorView.setCurrentDirectory(File(currentDirectory))
         fileSelectorView.setTextSize(16f)
         fileSelectorView.setTextColor(0xff555555.toInt())
         fileSelectorView.setIconSize(dip(28))

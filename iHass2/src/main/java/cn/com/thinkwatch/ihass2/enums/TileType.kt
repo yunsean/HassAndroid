@@ -5,5 +5,6 @@ enum class TileType (override val code: Int) : BaseEnum {
     tile(0),
     list(1),
     circle(2),
-    square(3)
+    square(3),
+    list2(4)
 }

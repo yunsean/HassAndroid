@@ -1,15 +1,8 @@
-package cn.com.thinkwatch.ihass2.api
+package cn.com.thinkwatch.ihass2.api.http
 
 import android.util.Log
 import cn.com.thinkwatch.ihass2.BuildConfig
-import cn.com.thinkwatch.ihass2.model.service.Field
-import cn.com.thinkwatch.ihass2.model.service.Fields
-import cn.com.thinkwatch.ihass2.model.service.Service
-import cn.com.thinkwatch.ihass2.model.service.Services
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
+import cn.com.thinkwatch.ihass2.api.BaseApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
@@ -17,7 +10,6 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import java.lang.reflect.Type
 import java.nio.charset.Charset
 import java.security.cert.CertificateException
 import java.text.SimpleDateFormat
@@ -27,7 +19,7 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-object BaseApi {
+object HttpBaseApi {
     private val CONNECTION_TIMEOUT_IN_SEC = 5
     private val DEFAULT_READ_TIMEOUT_IN_SEC = 15
     private var okHttpClient: OkHttpClient? = null
@@ -104,52 +96,8 @@ object BaseApi {
                 .build()
                 .create(clazz)
     }
-
     val dfLong = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ", Locale.ENGLISH)
     val dfShort = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZZZ", Locale.ENGLISH)
-    fun <T> api(baseUrl: String, clazz: Class<T>): T = build(clazz, baseUrl, GsonConverterFactory.create(GsonBuilder()
-            .registerTypeAdapter(Date::class.java, object : JsonDeserializer<Date> {
-                override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Date? {
-                    try {
-                        val value = json.toString().trim('"')
-                        if (value.length == 25) {
-                            return dfShort.parse(value)
-                        } else {
-                            return dfLong.parse(value)
-                        }
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                        return null
-                    }
-                }
-            })
-            .registerTypeAdapter(Services::class.java, object : JsonDeserializer<Services> {
-                override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Services {
-                    val services = mutableMapOf<String, Service>()
-                    json?.let {
-                        val jsonObject = it.asJsonObject
-                        for (entry in jsonObject.entrySet()) {
-                            val service = context?.deserialize<Service>(entry.value, Service::class.java)
-                            if (service != null) services.put(entry.key, service)
-                        }
-                    }
-                    return Services(services)
-                }
-            })
-            .registerTypeAdapter(Fields::class.java, object : JsonDeserializer<Fields> {
-                override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Fields {
-                    val fields = mutableMapOf<String, Field>()
-                    json?.let {
-                        val jsonObject = it.asJsonObject
-                        for (entry in jsonObject.entrySet()) {
-                            val field = context?.deserialize<Field>(entry.value, Field::class.java)
-                            if (field != null) fields.put(entry.key, field)
-                        }
-                    }
-                    return Fields(fields)
-                }
-            })
-            .create()))
-
-    fun rawApi(baseUrl: String): RawApi = build(RawApi::class.java, baseUrl, ScalarsConverterFactory.create())
+    fun <T> api(baseUrl: String, clazz: Class<T>): T = build(clazz, baseUrl, GsonConverterFactory.create(BaseApi.gson))
+    fun rawApi(baseUrl: String): HttpRawApi = build(HttpRawApi::class.java, baseUrl, ScalarsConverterFactory.create())
 }
