@@ -1,2 +1,51 @@
-# iHass
-The android client for Home Assistant, based on https://github.com/axzae/homeassist
+> # 基于Home assistant的Android智能家居客户端
+
+
+
+#### 提供功能
+
+* 设备控制
+  * 灯
+  * 风扇
+  * 空调
+  * 开关（有状态开关/无状态开关）
+  * 文本输入
+  * 数字输入
+  * 窗帘/幕布
+  * 锁
+  * 媒体播放器
+  * 扫地机
+  * 在线电台
+  * 脚本
+  * 自动化执行
+  * 摄像头云台
+* 传感器状态
+  * 历史记录
+  * 状态时长统计
+  * 数值传感器曲线图
+  * 摄像头预览
+  * 状态时间轴图
+* 实体编辑
+  * 名称
+  * 图标
+  * 针对APP的特定参数编辑
+* 自动化编辑
+  * 抽象化自动化编辑
+  * 基本支持home assistant所有原语
+  * linja模板语言支持
+* 脚本编辑
+* 服务调用
+* 情景触发
+* 状态通知
+
+
+
+#### 编译
+
+基于Android Studio
+
+
+
+#### 鸣谢
+
+该项目初期基于https://github.com/axzae/homeassist
