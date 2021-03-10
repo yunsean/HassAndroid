@@ -36,7 +36,37 @@
 * 脚本编辑
 * 服务调用
 * 情景触发
+  * 蓝牙区域
+  * WIFI区域
+  * GPS区域
+  * NFC刷卡
+  * 手机熄屏亮屏事件
 * 状态通知
+  * 状态变化（等于、不等于）
+  * 数值状态（大于、小于）
+  * 状态趋势（上升、下降）
+* 语音控制
+  * 基于百度语音
+  * 语音唤醒（贝壳贝壳，你好贝壳）
+  * 语音指令（基于正则表达式的简单指令）
+
+
+
+#### 使用参考
+
+[**iHass APP v1.0.0发布 - 基于HA的Android客户端APP**](https://bbs.hassbian.com/thread-4403-1-1.html)
+
+[**Hass APP v1.0.10发布 - 位置上报**](https://bbs.hassbian.com/thread-4672-1-1.html)
+
+[**iHass App v1.0.12发布 - 场景触发**](https://bbs.hassbian.com/thread-4862-1-1.html)
+
+[**iHass APP v1.0.15发布 - 状态通知**](https://bbs.hassbian.com/thread-4962-1-1.html)
+
+~~[**iHass APP v1.0.17发布 - 公网穿透**](https://bbs.hassbian.com/thread-5085-1-1.html) 已废弃~~
+
+[**iHass App v2.0.1发布 - 语音助手**](https://bbs.hassbian.com/thread-5403-1-1.html)
+
+[ **iHass App v2.1.0发布 - 自动化编辑**](https://bbs.hassbian.com/thread-8214-1-1.html)
 
 
 
