@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/text"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:paddingLeft="25dip"
+    android:paddingRight="25dip"
+    android:textColor="#ffaaaaaa"
+    android:textSize="12sp"
+    android:text="指尖上的智能家居"/>

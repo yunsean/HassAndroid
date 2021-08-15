@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.os.DeadObjectException
 import android.os.IBinder
 import android.support.v4.app.Fragment
+import android.support.v7.widget.RecyclerView
 import android.view.Gravity
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -115,7 +116,6 @@ open class HassApplication: Application() {
             cfg.set(HassConfig.Hass_HostUrl, readPref("Hass_HostUrl"))
             cfg.set(HassConfig.Hass_Password, readPref("Hass_Password"))
             cfg.set(HassConfig.Ui_PullRefresh, readPref("pullRefresh"))
-            cfg.set(HassConfig.Ui_HomePanels, readPref("homePanels"))
             cfg.set(HassConfig.Gps_Logger, readPref("gps.Logger"))
             cfg.set(HassConfig.Gps_DeviceName, readPref("gps.deviceName"))
             cfg.set(HassConfig.Gps_DeviceId, readPref("Gps_DeviceId"))
@@ -372,9 +372,16 @@ open class HassApplication: Application() {
             field = value
         }
 
+    var stubbornTabs = mutableListOf<FragmentItem>()
+    var panelViewPool = RecyclerView.RecycledViewPool()
+
     companion object {
         lateinit var application: HassApplication
             private set
+
+        data class FragmentItem(val name: String,
+                                val icon: String,
+                                val clazz: String)
     }
 }
 

@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.adapter.PanelAdapter
 import cn.com.thinkwatch.ihass2.adapter.PanelGroup
+import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.bean.*
 import cn.com.thinkwatch.ihass2.bus.EntityChanged
@@ -20,6 +21,9 @@ import cn.com.thinkwatch.ihass2.enums.ItemType
 import cn.com.thinkwatch.ihass2.enums.TileType
 import cn.com.thinkwatch.ihass2.model.JsonEntity
 import cn.com.thinkwatch.ihass2.ui.PanelEditActivity
+import cn.com.thinkwatch.ihass2.ui.PanelListActivity
+import cn.com.thinkwatch.ihass2.utils.HassConfig
+import cn.com.thinkwatch.ihass2.utils.cfg
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
@@ -27,14 +31,14 @@ import com.dylan.common.rx.RxBus2
 import com.truizlop.sectionedrecyclerview.SectionedSpanSizeLookup
 import com.yunsean.dynkotlins.extensions.start
 import com.yunsean.dynkotlins.extensions.withNext
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_hass_panel.*
 import kotlinx.android.synthetic.main.fragment_hass_panel.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.ctx
-
-
+import org.jetbrains.anko.support.v4.startActivity
 
 
 class PanelFragment : BaseFragment() {
@@ -71,10 +75,15 @@ class PanelFragment : BaseFragment() {
 
     private lateinit var adapter: PanelAdapter
     private fun ui() {
+        this.loading.visibility = View.VISIBLE
+        this.editing.visibility = if (cfg.getBoolean(HassConfig.Ui_HomePanels, true)) View.VISIBLE else View.GONE
+        this.editing.setOnClickListener { startActivity<PanelEditActivity>(Pair("panelId", panelId)) }
+        this.editing.setOnLongClickListener { startActivity<PanelListActivity>(); true }
         this.adapter = PanelAdapter(ctx)
         val layoutManager = GridLayoutManager(ctx, 4)
         val lookup = SectionedSpanSizeLookup(adapter, layoutManager)
         layoutManager.spanSizeLookup = lookup
+        this.recyclerView.setRecycledViewPool(app.panelViewPool)
         this.recyclerView.layoutManager = layoutManager
         this.recyclerView.adapter = adapter
         this.showEdit.onClick {
@@ -85,6 +94,7 @@ class PanelFragment : BaseFragment() {
     }
     private fun data() {
         db.getPanel(panelId)?.let {
+            titleItem.text = it.name
             tileAlpha = it.tileAlpha ?: 1f < .9f
             backImage.visibility = View.GONE
             it.backImage?.let {
@@ -144,6 +154,8 @@ class PanelFragment : BaseFragment() {
                     }
                 }
             }
+            val delay = cfg.getInt(HassConfig.Ui_PageDelay, 0)
+            if (delay > 10) Thread.sleep(delay.toLong())
             groups
         }.withNext {
             show(it)
@@ -165,6 +177,7 @@ class PanelFragment : BaseFragment() {
         groups = beans
         adapter.groups = groups
         fragment?.emptyView?.visibility = if (adapter.groups?.size ?: 0 > 0) View.GONE else View.VISIBLE
+        fragment?.loading?.visibility = View.GONE
     }
 
     fun maxCommonDivisor(m: Int, n: Int): Int {

@@ -138,7 +138,7 @@
         <activity android:name=".ui.NfcPickActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.GpsPickActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.InterceptGuideActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
-        <activity android:name=".ui.ServiceInterceptActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
+        <activity android:name=".ui.ServiceInterceptActivity" android:screenOrientation="portrait" android:theme="@style/MyNoTitlebarTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.PoiSearchActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysVisible"/>
         <activity android:name=".ui.MdiListActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>
         <activity android:name=".ui.CameraViewActivity" android:screenOrientation="portrait" android:theme="@style/MyAppTheme" android:configChanges="orientation|screenSize"  android:windowSoftInputMode="adjustPan|stateAlwaysHidden"/>

@@ -41,6 +41,7 @@ import com.dylan.common.sketch.Sketch
 import com.dylan.uiparts.activity.RequestPermissionResult
 import com.dylan.uiparts.activity.RequestPermissionResultDispatch
 import com.dylan.uiparts.recyclerview.RecyclerViewDivider
+import com.dylan.uiparts.views.ToastEx
 import com.yunsean.dynkotlins.extensions.*
 import com.yunsean.dynkotlins.ui.RecyclerAdapter
 import com.yunsean.dynkotlins.ui.RecyclerAdapterWrapper
@@ -86,19 +87,16 @@ class SettingFragment : BaseFragment() {
         this.homePanels.isChecked = cfg.getBoolean(HassConfig.Ui_HomePanels)
         this.homePanels.setOnCheckedChangeListener { buttonView, isChecked ->
             set(HassConfig.Ui_HomePanels, isChecked)
+            if (!isChecked) ToastEx.makeText(ctx, "请确保已经将设置页面加入到了底部标签栏，否则你将无法进入面板编辑页面！", ToastEx.LENGTH_LONG).show()
         }
-        this.webFirst.isChecked = cfg.getBoolean(HassConfig.Ui_WebFrist)
-        this.webFirst.setOnCheckedChangeListener { buttonView, isChecked ->
-            set(HassConfig.Ui_WebFrist, isChecked)
-        }
-        this.showTopbar.isChecked = cfg.getBoolean(HassConfig.Ui_ShowTopbar)
-        this.showTopbar.setOnCheckedChangeListener { buttonView, isChecked ->
-            set(HassConfig.Ui_ShowTopbar, isChecked)
-        }
-        this.showSidebar.isChecked = cfg.getBoolean(HassConfig.Ui_ShowSidebar)
-        this.showSidebar.setOnCheckedChangeListener { buttonView, isChecked ->
-            set(HassConfig.Ui_ShowSidebar, isChecked)
-        }
+        this.pageDelay.progress = cfg.getInt(HassConfig.Ui_PageDelay, 0)
+        this.pageDelay.setOnProgressChangeListener(object : DiscreteSeekBar.OnProgressChangeListener {
+            override fun onProgressChanged(seekBar: DiscreteSeekBar, value: Int, fromUser: Boolean) {}
+            override fun onStartTrackingTouch(seekBar: DiscreteSeekBar) {}
+            override fun onStopTrackingTouch(seekBar: DiscreteSeekBar) {
+                set(HassConfig.Ui_PageDelay, seekBar.progress)
+            }
+        })
         this.fontScale.progress = cfg.getInt(HassConfig.Ui_FontScale, 85)
         this.fontScale.setOnProgressChangeListener(object : DiscreteSeekBar.OnProgressChangeListener {
             override fun onProgressChanged(seekBar: DiscreteSeekBar, value: Int, fromUser: Boolean) {}

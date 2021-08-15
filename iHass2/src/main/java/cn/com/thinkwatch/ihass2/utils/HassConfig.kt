@@ -54,75 +54,73 @@ class HassConfig {
     companion object {
         val INSTANCE: HassConfig by lazy { Holder.INSTANCE }
 
-        val Connect_ScreenOff = "connect.screenOff"
+        const val Connect_ScreenOff = "connect.screenOff"
 
-        val Hass_HostUrl = "hass.HostUrl"
-        val Hass_Password = "hass.Password"
-        val Hass_Token = "hass.Token"
-        val Hass_LocalUrl = "hass.LocalUrl"
-        val Hass_LocalBssid = "hass.LocalBssid"
+        const val Hass_HostUrl = "hass.HostUrl"
+        const val Hass_Password = "hass.Password"
+        const val Hass_Token = "hass.Token"
+        const val Hass_LocalUrl = "hass.LocalUrl"
+        const val Hass_LocalBssid = "hass.LocalBssid"
 
-        val Ui_PullRefresh = "ui.pullRefresh"
-        val Ui_HomePanels = "ui.homePanels"
-        val Ui_WebFrist = "ui.webFirst"
-        val Ui_ShowTopbar = "ui.showTopbar"
-        val Ui_ShowSidebar = "ui.showSidebar"
-        val Ui_FontScale = "ui.fontScale"
+        const val Ui_PullRefresh = "ui.pullRefresh"
+        const val Ui_HomePanels = "ui.panelShowEditor"
+        const val Ui_FontScale = "ui.fontScale"
+        const val Ui_PageDelay = "ui.pageDelay"
 
-        val Gps_Logger = "gps.logger"
-        val Gps_DeviceName = "gps.deviceName"
-        val Gps_DeviceId = "gps.deviceId"
-        val Gps_Password = "gps.password"
-        val Gps_AppLogger = "gps.appLogger"
-        val Gps_WebHookId = "gps.webHookId"
+        const val Gps_Logger = "gps.logger"
+        const val Gps_DeviceName = "gps.deviceName"
+        const val Gps_DeviceId = "gps.deviceId"
+        const val Gps_Password = "gps.password"
+        const val Gps_AppLogger = "gps.appLogger"
+        const val Gps_WebHookId = "gps.webHookId"
 
-        val Probe_NfcCard = "probe.nfcCard"
-        val Probe_BluetoothBle = "probe.bluetoothBle"
-        val Probe_Wifi = "probe.wifi"
-        val Probe_Gps = "probe.gps"
+        const val Probe_NfcCard = "probe.nfcCard"
+        const val Probe_BluetoothBle = "probe.bluetoothBle"
+        const val Probe_Wifi = "probe.wifi"
+        const val Probe_Gps = "probe.gps"
 
-        val Speech_DoubleHomeKey = "speech.doubleHomeKey"
-        val Speech_TripleHomeKey = "speech.tripleHomeKey"
-        val Speech_Notification = "speech.notification"
-        val Speech_ShowWakeup = "speech.showWakeup"
+        const val Speech_DoubleHomeKey = "speech.doubleHomeKey"
+        const val Speech_TripleHomeKey = "speech.tripleHomeKey"
+        const val Speech_Notification = "speech.notification"
+        const val Speech_ShowWakeup = "speech.showWakeup"
 
-        val Speech_ScreenOnMode = "speech.screenOnMode"
-        val Speech_ScreenOnWifi = "speech.screenOnWifi"
-        val Speech_ScreenOnBluetooth = "speech.screenOnBluetooth"
-        val Speech_ScreenOnCharging = "speech.screenOnCharging"
+        const val Speech_ScreenOnMode = "speech.screenOnMode"
+        const val Speech_ScreenOnWifi = "speech.screenOnWifi"
+        const val Speech_ScreenOnBluetooth = "speech.screenOnBluetooth"
+        const val Speech_ScreenOnCharging = "speech.screenOnCharging"
 
-        val Speech_ScreenOffMode = "speech.screenOffMode"
-        val Speech_ScreenOffWifi = "speech.screenOffWifi"
-        val Speech_ScreenOffBluetooth = "speech.screenOffBluetooth"
-        val Speech_ScreenOffCharging = "speech.screenOffCharging"
+        const val Speech_ScreenOffMode = "speech.screenOffMode"
+        const val Speech_ScreenOffWifi = "speech.screenOffWifi"
+        const val Speech_ScreenOffBluetooth = "speech.screenOffBluetooth"
+        const val Speech_ScreenOffCharging = "speech.screenOffCharging"
 
-        val Speech_FromBluetooth = "speech.recordFromBluetooth"
-        val Speech_HeadsetWakeup = "speech.headsetWakeup"
-        val Speech_NoWakeupLock = "speech.noWakeupLock"
-        val Speech_VoiceOpenApp = "speech.voiceOpenApp"
-        val Speech_VoiceContact = "speech.voiceContact"
+        const val Speech_FromBluetooth = "speech.recordFromBluetooth"
+        const val Speech_HeadsetWakeup = "speech.headsetWakeup"
+        const val Speech_NoWakeupLock = "speech.noWakeupLock"
+        const val Speech_VoiceOpenApp = "speech.voiceOpenApp"
+        const val Speech_VoiceContact = "speech.voiceContact"
 
-        val Aux_ProtectEye = "aux.protectEye"
-        val Aux_ProtectEye_Color = "aux.protectEyeColor"
+        const val Aux_ProtectEye = "aux.protectEye"
+        const val Aux_ProtectEye_Color = "aux.protectEyeColor"
 
-        val Wakeup_Forbid = 0
-        val Wakeup_Condition = 1
-        val Wakeup_Always = -1
+        const val Wakeup_Forbid = 0
+        const val Wakeup_Condition = 1
+        const val Wakeup_Always = -1
 
-        val Album_Used = "album.used"
-        val Album_UserStub = "album.userStub"
-        val Album_Folders = "album.folders"
-        val Album_AutoUpload = "album.autoUpload"
-        val Album_UploadWifi = "album.uploadWifi"
-        val Album_ScanInterval = "album.scanInterval"
-        val Album_Override = "album.override"
-        val Album_EarlyTime = "album.earlyTime"
-        val Album_LastScan = "album.lastScan"
+        const val Album_Used = "album.used"
+        const val Album_UserStub = "album.userStub"
+        const val Album_Folders = "album.folders"
+        const val Album_AutoUpload = "album.autoUpload"
+        const val Album_UploadWifi = "album.uploadWifi"
+        const val Album_ScanInterval = "album.scanInterval"
+        const val Album_Override = "album.override"
+        const val Album_EarlyTime = "album.earlyTime"
+        const val Album_LastScan = "album.lastScan"
 
-        val UploadMode_None = 0
-        val UploadMode_SomeWifi = 1
-        val UploadMode_AllWifi = 2
-        val UploadMode_Always = 3
+        const val UploadMode_None = 0
+        const val UploadMode_SomeWifi = 1
+        const val UploadMode_AllWifi = 2
+        const val UploadMode_Always = 3
     }
 }
 

@@ -56,7 +56,7 @@ open class LocalStorage(dbDir: String? = null) {
         var currentVersion = 0
         val daoConfig = DbManager.DaoConfig()
                 .setDbName("hass")
-                .setDbVersion(11)
+                .setDbVersion(12)
                 .setAllowTransaction(false)
                 .setDbUpgradeListener { db, oldVersion, newVersion ->
                     if (oldVersion < 4) {
@@ -85,6 +85,9 @@ open class LocalStorage(dbDir: String? = null) {
                     }
                     if (oldVersion < 11) {
                         try { db.execNonQuery("ALTER TABLE HASS_PANELS ADD PANEL_ICON TEXT") } catch (_: Exception) {}
+                    }
+                    if (oldVersion < 12) {
+                        try { db.execNonQuery("ALTER TABLE HASS_PANELS ADD STUBBORN_CLASS TEXT") } catch (_: Exception) {}
                     }
                     currentVersion = oldVersion
                 }
@@ -808,10 +811,7 @@ open class LocalStorage(dbDir: String? = null) {
                 cn.com.thinkwatch.ihass2.utils.HassConfig.Hass_LocalUrl,
                 cn.com.thinkwatch.ihass2.utils.HassConfig.Hass_LocalBssid,
                 cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_PullRefresh,
-                cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_HomePanels,
-                cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_WebFrist,
-                cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_ShowTopbar,
-                cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_ShowSidebar,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_FontScale,
                 cn.com.thinkwatch.ihass2.utils.HassConfig.Gps_Logger,
                 cn.com.thinkwatch.ihass2.utils.HassConfig.Gps_DeviceName,
                 cn.com.thinkwatch.ihass2.utils.HassConfig.Gps_DeviceId,
@@ -900,13 +900,23 @@ open class LocalStorage(dbDir: String? = null) {
     fun import(context: Context, config: HassConfig) {
         config.configs.forEach { context.cfg.set(it.key, it.value) }
         dbManager.database.beginTransaction()
-        try { dbManager.delete(Dashboard::class.java) } catch (ex: Exception) { }
-        try { dbManager.delete(Panel::class.java) } catch (ex: Exception) { }
-        try { dbManager.delete(Widget::class.java) } catch (ex: Exception) { }
-        try { dbManager.delete(WidgetEntity::class.java) } catch (ex: Exception) { }
-        try { dbManager.delete(EventTrigger::class.java) } catch (ex: Exception) { }
-        try { dbManager.delete(Observed::class.java) } catch (ex: Exception) { }
-        try { dbManager.delete(Notification::class.java) } catch (ex: Exception) { }
+        if (config.panels != null) {
+            try { dbManager.delete(Dashboard::class.java) } catch (ex: Exception) { }
+            try { dbManager.delete(Panel::class.java) } catch (ex: Exception) { }
+        }
+        if (config.widgets != null) {
+            try { dbManager.delete(Widget::class.java) } catch (ex: Exception) { }
+            try { dbManager.delete(WidgetEntity::class.java) } catch (ex: Exception) { }
+        }
+        if (config.triggers != null) {
+            try { dbManager.delete(EventTrigger::class.java) } catch (ex: Exception) { }
+        }
+        if (config.observeds != null) {
+            try { dbManager.delete(Observed::class.java) } catch (ex: Exception) { }
+        }
+        if (config.notifications != null) {
+            try { dbManager.delete(Notification::class.java) } catch (ex: Exception) { }
+        }
         config.panels?.forEach {
             dbManager.save(Panel(it.name ?: "", it.order, icon = it.icon))
             val panelId = autoGenId()

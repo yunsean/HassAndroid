@@ -43,10 +43,10 @@ class PanelAdapter(val context: Context,
         return ViewHolder(view)
     }
     override fun onBindItemViewHolder(holder: ViewHolder, section: Int, position: Int) {
-        groups!!.get(section).entities.get(position).bindToView(holder.itemView, context)
+        groups!![section].entities[position].bindToView(holder.itemView, context)
     }
     override fun getSectionItemViewType(section: Int, position: Int): Int {
-        return groups!!.get(section).entities.get(position).layoutResId()
+        return groups!![section].entities[position].layoutResId()
     }
 
     var groups: List<PanelGroup>? = null

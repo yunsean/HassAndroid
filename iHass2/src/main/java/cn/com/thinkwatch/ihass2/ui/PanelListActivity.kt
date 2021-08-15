@@ -1,26 +1,38 @@
 package cn.com.thinkwatch.ihass2.ui
 
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
+import cn.com.thinkwatch.ihass2.HassApplication
 import cn.com.thinkwatch.ihass2.R
+import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.bus.PanelChanged
 import cn.com.thinkwatch.ihass2.db.db
+import cn.com.thinkwatch.ihass2.model.MDIFont
 import cn.com.thinkwatch.ihass2.model.Panel
 import cn.com.thinkwatch.ihass2.utils.SimpleItemTouchHelperCallback
 import com.dylan.common.rx.RxBus2
 import com.dylan.uiparts.activity.ActivityResult
-import com.yunsean.dynkotlins.extensions.nextOnMain
-import com.yunsean.dynkotlins.extensions.start
-import com.yunsean.dynkotlins.extensions.toastex
+import com.dylan.uiparts.recyclerview.RecyclerViewDivider
+import com.yunsean.dynkotlins.extensions.*
+import com.yunsean.dynkotlins.ui.RecyclerAdapter
 import kotlinx.android.synthetic.main.activity_hass_panel_list.*
+import kotlinx.android.synthetic.main.dialog_list_view.view.*
 import kotlinx.android.synthetic.main.listitem_panel_list_item.view.*
+import kotlinx.android.synthetic.main.tile_square.*
 import org.jetbrains.anko.act
+import org.jetbrains.anko.find
+import org.jetbrains.anko.image
 import org.jetbrains.anko.layoutInflater
 import org.jetbrains.anko.sdk25.coroutines.onClick
 
@@ -73,8 +85,7 @@ class PanelListActivity : BaseActivity() {
                 }
             }
         }.setOnCreateClicked {
-            Intent(act, PanelEditActivity::class.java)
-                    .start(act, 100)
+            add()
         }
         this.recyclerView.adapter = adapter
         this.recyclerView.layoutManager = GridLayoutManager(this, 4)
@@ -86,6 +97,35 @@ class PanelListActivity : BaseActivity() {
             adapter.notifyDataSetChanged()
             edit.text = if (isEditing) "完成" else "编辑"
         }
+    }
+    private fun add() {
+        showDialog(R.layout.dialog_list_view, object : OnSettingDialogListener {
+            override fun onSettingDialog(dialog: Dialog, contentView: View) {
+                val types = mutableListOf<HassApplication.Companion.FragmentItem>().apply {
+                    add(HassApplication.Companion.FragmentItem("自定义", "mdi:view-list", ""))
+                    addAll(app.stubbornTabs)
+                }
+                contentView.recyclerView.layoutManager = LinearLayoutManager(act)
+                contentView.recyclerView.adapter = RecyclerAdapter(R.layout.listitem_add_panel, types) { view, index, item ->
+                    view.find<TextView>(R.id.name).text = item.name
+                    MDIFont.get().setIcon(view.find(R.id.icon), item.icon)
+                    view.setOnClickListener {
+                        if (item.clazz.isBlank()) {
+                            Intent(act, PanelEditActivity::class.java)
+                                .start(act, 100)
+                        } else {
+                            db.addPanel(Panel(name = item.name, icon = item.icon, stubbornClass = item.clazz))
+                            data()
+                        }
+                        dialog.dismiss()
+                    }
+                }
+                contentView.recyclerView.addItemDecoration(
+                    RecyclerViewDivider()
+                    .setColor(0xffeeeeee.toInt())
+                    .setSize(1))
+            }
+        }, cancelable = true)
     }
     @ActivityResult(requestCode = 100)
     private fun afterEditPanel() {

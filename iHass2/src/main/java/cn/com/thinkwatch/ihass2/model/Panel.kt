@@ -12,4 +12,5 @@ data class Panel (@Column(name = "PANEL_NAME") var name: String = "",
                   @Column(name = "PANEL_ICON") @Expose var icon: String? = null,
                   @Column(name = "BACK_IMAGE") @Expose var backImage: String? = null,
                   @Column(name = "TILE_ALPHA") @Expose var tileAlpha: Float? = null,
+                  @Column(name = "STUBBORN_CLASS") @Expose var stubbornClass: String? = null,
                   @Column(name = "PANEL_ID", isId = true, autoGen = true) var id: Long = 0)

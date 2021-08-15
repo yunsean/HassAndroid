@@ -54,77 +54,9 @@
                 android:layout_weight="1"
                 android:textSize="14sp"
                 android:textColor="#ff555555"
-                android:text="首页显示面板编辑按钮"/>
+                android:text="显示面板编辑按钮"/>
             <com.dylan.uiparts.checkbox.SwitchButton
                 android:id="@+id/homePanels"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dip"
-                app:sb_flip="true"/>
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/webFirstPanel"
-            android:layout_width="match_parent"
-            android:layout_height="44dip"
-            android:layout_marginTop="1dip"
-            android:paddingLeft="10dip"
-            android:paddingRight="10dip"
-            android:background="#ffffffff"
-            android:gravity="center"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="14sp"
-                android:textColor="#ff555555"
-                android:text="默认显示Web页面"/>
-            <com.dylan.uiparts.checkbox.SwitchButton
-                android:id="@+id/webFirst"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dip"
-                app:sb_flip="true"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="44dip"
-            android:paddingLeft="10dip"
-            android:paddingRight="10dip"
-            android:background="#ffffffff"
-            android:gravity="center"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="14sp"
-                android:textColor="#ff555555"
-                android:text="显示顶部TAB栏"/>
-            <com.dylan.uiparts.checkbox.SwitchButton
-                android:id="@+id/showTopbar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dip"
-                app:sb_flip="true"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="44dip"
-            android:paddingLeft="10dip"
-            android:paddingRight="10dip"
-            android:background="#ffffffff"
-            android:gravity="center"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="14sp"
-                android:textColor="#ff555555"
-                android:text="显示左侧面板导航栏"/>
-            <com.dylan.uiparts.checkbox.SwitchButton
-                android:id="@+id/showSidebar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dip"
@@ -153,6 +85,36 @@
                 app:dsb_indicatorColor="@color/md_blue_500"
                 app:dsb_max="200"
                 app:dsb_min="60"
+                app:dsb_progressColor="@color/md_blue_500"
+                app:dsb_rippleColor="@color/md_blue_100"
+                app:dsb_scrubberHeight="4dp"
+                app:dsb_thumbSize="16dp"
+                app:dsb_trackColor="@color/md_grey_400"
+                app:dsb_trackHeight="4dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:background="#ffffffff"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="#ff555555"
+                android:text="切页等待时间"/>
+            <org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
+                android:id="@+id/pageDelay"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                app:dsb_indicatorColor="@color/md_blue_500"
+                app:dsb_max="1000"
+                app:dsb_min="0"
                 app:dsb_progressColor="@color/md_blue_500"
                 app:dsb_rippleColor="@color/md_blue_100"
                 app:dsb_scrubberHeight="4dp"

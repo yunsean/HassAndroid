@@ -15,7 +15,7 @@ class ServiceInterceptActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_service_intercept)
+        setContentViewNoTitlebar(R.layout.activity_service_intercept)
         setTitle("服务录制", true, "", R.drawable.ic_action_panels)
         supportActionBar?.elevation = 0F
 

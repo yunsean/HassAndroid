@@ -5,18 +5,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.support.design.widget.TabItem
-import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.view.ViewPager
-import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
-import android.view.MotionEvent
+import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseFragment
@@ -33,26 +29,25 @@ import cn.com.thinkwatch.ihass2.ui.CameraViewActivity
 import cn.com.thinkwatch.ihass2.utils.Gsons
 import cn.com.thinkwatch.ihass2.utils.HassConfig
 import cn.com.thinkwatch.ihass2.utils.cfg
+import cn.com.thinkwatch.ihass2.view.AutoCenterLinearLayoutManager
 import cn.com.thinkwatch.ihass2.view.FloatWindow
 import com.dylan.common.rx.RxBus2
-import com.dylan.common.sketch.Animations
 import com.dylan.uiparts.activity.ActivityResult
+import com.yunsean.dynkotlins.extensions.loges
 import com.yunsean.dynkotlins.extensions.start
 import com.yunsean.dynkotlins.extensions.toastex
 import com.yunsean.dynkotlins.extensions.withComplete
 import com.yunsean.dynkotlins.ui.RecyclerAdapter
+import com.yunsean.dynkotlins.ui.RecyclerAdapterWrapper
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.fragment_hass_main.*
 import kotlinx.android.synthetic.main.fragment_hass_main.view.*
 import kotlinx.android.synthetic.main.listitem_hass_panel_thumb.view.*
-import kotlinx.android.synthetic.main.listitem_panel_item.view.*
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 import org.jetbrains.anko.sdk25.coroutines.onClick
-import org.jetbrains.anko.support.v4.*
-import org.jetbrains.anko.vibrator
-import q.rorbin.verticaltablayout.VerticalTabLayout
-import q.rorbin.verticaltablayout.adapter.TabAdapter
-import q.rorbin.verticaltablayout.widget.ITabView
-import q.rorbin.verticaltablayout.widget.TabView
+import org.jetbrains.anko.support.v4.act
+import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.onRefresh
 
 
 class HassFragment : BaseFragment() {
@@ -65,29 +60,21 @@ class HassFragment : BaseFragment() {
         this.panels = db.listPanel()
 
         ui()
-        tabbar()
-        group()
-        slider()
+        tabs()
         disposable = RxBus2.getDefault().register(PanelChanged::class.java, {
             if (it.isAdd) {
                 panels = db.listPanel()
-                groupAdapter.items = panels
                 adapter.notifyDataSetChanged()
-                sliderAdapter.items = panels
-                allGroups.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowSidebar)) View.VISIBLE else View.GONE
-                this.tabbarPanel.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowTopbar, true)) View.VISIBLE else View.GONE
+                tabsAdapter.items = panels
+                warpperAdapterWrapper.notifyDataSetChanged()
             }
         }, RxBus2.getDefault().register(HassConfiged::class.java, {
             panels = db.listPanel()
-            groupAdapter.items = panels
-            sliderAdapter.items = panels
             adapter.notifyDataSetChanged()
-        }, RxBus2.getDefault().register(DisplayPanel::class.java, {
-            showPanel(it.show, bottomMargin = it.bottomMargin)
+            tabsAdapter.items = panels
+            warpperAdapterWrapper.notifyDataSetChanged()
         }, RxBus2.getDefault().register(ConfigChanged::class.java, {
             swipeRefresh.isEnabled = cfg.getBoolean(HassConfig.Ui_PullRefresh)
-            allGroups.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowSidebar)) View.VISIBLE else View.GONE
-            tabbarPanel.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowTopbar, true)) View.VISIBLE else View.GONE
         }, RxBus2.getDefault().register(EntityLongClicked::class.java, {
             onLongClicked(it.entity)
         }, RxBus2.getDefault().register(EntityClicked::class.java, {
@@ -100,18 +87,7 @@ class HassFragment : BaseFragment() {
             networkBusy.visibility = if (it.busy) View.VISIBLE else View.GONE
         }, RxBus2.getDefault().register(HassErrorEvent::class.java, {
             showError(it.message)
-        }, RxBus2.getDefault().register(ChoosePanel::class.java, { event->
-            showPanel(event.panel)
-        }, RxBus2.getDefault().register(MotionEvent::class.java, { event->
-            choiceGroup(event)
-        }, disposable))))))))))))
-    }
-    override fun onResume() {
-        super.onResume()
-    }
-    override fun onPause() {
-        //floatWindow?.hideFloatWindow()
-        super.onPause()
+        }, disposable)))))))))
     }
     override fun onDestroy() {
         dataDisposable?.dispose()
@@ -121,7 +97,7 @@ class HassFragment : BaseFragment() {
     fun showPanel(panel: Panel?) {
         if (panel == null) {
             if (panelsFragment == null) panelsFragment = ControlFragment.newInstance(JsonEntity(), PanelsFragment::class.java)
-            if (!(panelsFragment?.isAdded ?: false)) panelsFragment?.show(childFragmentManager)
+            if (panelsFragment?.isAdded != true) panelsFragment?.show(childFragmentManager)
         } else {
             val index = panels.indexOfFirst { it.id == panel.id }
             if (index >= 0) viewPager.setCurrentItem(index, true)
@@ -215,122 +191,70 @@ class HassFragment : BaseFragment() {
     }
 
     private lateinit var panels: List<Panel>
-    private lateinit var adapter: FragmentStatePagerAdapter
-    private fun tabbar() {
-        adapter = object : FragmentStatePagerAdapter(childFragmentManager) {
-            override fun getPageTitle(position: Int): CharSequence = panels.get(position).name
-            override fun getCount(): Int = panels.size
-            override fun getItem(position: Int): Fragment = BaseFragment.newInstance(PanelFragment::class.java, Intent().putExtra("panelId", panels.get(position).id))
-        }
-        this.tabbarPanel.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowTopbar, true)) View.VISIBLE else View.GONE
-        this.allGroups.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowSidebar)) View.VISIBLE else View.GONE
-        this.viewPager.setCanScroll(true)
-        this.viewPager.adapter = adapter
-        this.tabbar.setupWithViewPager(this.viewPager)
-        this.tabbar.setSelectedTabIndicatorHeight(dip(3F))
-        this.tabbar.setOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(p0: TabLayout.Tab?) {
-                if (p0 == null) return
-                viewPager.setCurrentItem(p0.position, false)
-                sliderAdapter.notifyDataSetChanged()
-                panels[p0.position].apply { RxBus2.getDefault().post(CurrentPanelChanged(id, name)) }
-            }
-            override fun onTabReselected(p0: TabLayout.Tab?) = Unit
-            override fun onTabUnselected(p0: TabLayout.Tab?) = Unit
-        })
-    }
-
-    private lateinit var sliderAdapter: RecyclerAdapter<Panel>
-    private fun slider() {
-        this.sliderAdapter = RecyclerAdapter(R.layout.listitem_hass_panel_thumb, panels) {
-            view, index, item ->
+    private lateinit var adapter: FragmentPagerAdapter
+    private lateinit var tabsAdapter: RecyclerAdapter<Panel>
+    private lateinit var warpperAdapterWrapper: RecyclerAdapterWrapper<*>
+    private lateinit var tabsLayoutManager: AutoCenterLinearLayoutManager
+    private var lastClickedView: View? = null
+    private var lastClickedTime = 0L
+    private fun tabs() {
+        this.tabsAdapter = RecyclerAdapter(R.layout.listitem_hass_panel_thumb, panels) {
+                view, index, item ->
             if (item.icon.isNullOrBlank()) {
                 view.item.text = item.name
-                view.item.textSize = 14F
+                view.item.textSize = if (index == viewPager.currentItem) 22F else 15F
             } else {
                 MDIFont.get().setIcon(view.item, item.icon)
-                view.item.textSize = 28F
+                view.item.textSize = if (index == viewPager.currentItem) 36F else 24F
             }
             view.item.isSelected = index == viewPager.currentItem
-            view.onClick {
-                viewPager.setCurrentItem(index, false)
-                sliderAdapter.notifyDataSetChanged()
+            view.setOnClickListener {
+                lastClickedView = it
+                if (System.currentTimeMillis() - lastClickedTime < 1000) {
+                    RxBus2.getDefault().post(RefreshEvent())
+                    lastClickedTime = 0L
+                } else {
+                    lastClickedTime = System.currentTimeMillis()
+                }
+                viewPager.setCurrentItem(index, true)
             }
         }
-        allGroups.adapter = sliderAdapter
-        allGroups.layoutManager = LinearLayoutManager(ctx, LinearLayoutManager.VERTICAL, true)
-    }
+        tabsLayoutManager = AutoCenterLinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL, false)
+        tabs.layoutManager = tabsLayoutManager
+        warpperAdapterWrapper = RecyclerAdapterWrapper(tabsAdapter)
+            .addFootView(layoutInflater.inflate(R.layout.layout_hass_home_right, tabs, false))
+        tabs.adapter = warpperAdapterWrapper
+        //OverScrollDecoratorHelper.setUpOverScroll(tabs, OverScrollDecoratorHelper.ORIENTATION_HORIZONTAL)
 
-    private lateinit var groupAdapter: RecyclerAdapter<Panel>
-    private var focusGroupIndex = -1
-    private fun group() {
-        groupAdapter = RecyclerAdapter(R.layout.listitem_main_panel_item, panels) {
-            view, index, item ->
-            view.name.text = item.name
-            view.icon.visibility = View.GONE
-            view.isActivated = index == focusGroupIndex
-            view.onClick {
-                showPanel(false, index)
+        this.adapter = object : FragmentPagerAdapter(childFragmentManager) {
+            override fun getPageTitle(position: Int): CharSequence = panels.get(position).name
+            override fun getCount(): Int = panels.size
+            override fun getItem(position: Int): Fragment {
+                val panel = panels[position]
+                return if (panel.stubbornClass.isNullOrBlank()) newInstance(PanelFragment::class.java, Intent().putExtra("panelId", panel.id))
+                else Class.forName(panel.stubbornClass!!).newInstance() as Fragment
             }
         }
-        groups.adapter = groupAdapter
-        val layoutManager = GridLayoutManager(ctx, 3)
-        layoutManager.reverseLayout = false
-        groups.layoutManager = layoutManager
-        groupPanel.onClick { showPanel(false) }
-    }
-    private fun choiceGroup(event: MotionEvent) {
-        if (groupPanel.visibility != View.VISIBLE) return
-        val location = IntArray(2)
-        groups.getLocationInWindow(location)
-        val view = groups.findChildViewUnder(event.getRawX() - location[0], event.getRawY() - location[1])
-        val index = if (view != null) groups.getChildAdapterPosition(view) else focusGroupIndex
-        if (index != focusGroupIndex) {
-            focusGroupIndex = index
-            groupAdapter.notifyDataSetChanged()
-            ctx.vibrator.vibrate(20)
-        }
-        if (event.action == MotionEvent.ACTION_UP && focusGroupIndex >= 0) {
-            showPanel(false, focusGroupIndex)
-        }
-    }
-    private fun showPanel(show: Boolean, switchTo: Int? = null, bottomMargin: Int = 0) {
-        if (show && groupPanel.visibility == View.GONE) {
-            (panelCard.layoutParams as ViewGroup.MarginLayoutParams?)?.let {
-                it.bottomMargin = bottomMargin
-                panelCard.requestLayout()
+        this.viewPager.setCanScroll(true)
+        this.viewPager.adapter = this.adapter
+        this.viewPager.offscreenPageLimit = panels.size
+        this.viewPager.addOnPageChangeListener(object: ViewPager.OnPageChangeListener {
+            override fun onPageScrolled(p0: Int, p1: Float, p2: Int) = Unit
+            override fun onPageScrollStateChanged(p0: Int) = Unit
+            override fun onPageSelected(index: Int) {
+                warpperAdapterWrapper.notifyDataSetChanged()
+                tabsLayoutManager.smoothScrollToPosition(tabs, RecyclerView.State(), index)
             }
-            groupPanel.visibility = View.VISIBLE
-            focusGroupIndex = -1
-            groupAdapter.notifyDataSetChanged()
-            Animations.ScaleAnimationY(groupPanel, 0F, 1F, 1F)
-                    .duration(300)
-                    .start()
-        } else if (!show && groupPanel.visibility == View.VISIBLE) {
-            Animations.ScaleAnimationY(groupPanel, 1F, 0F, 1F)
-                    .duration(300)
-                    .animationListener {
-                        groupPanel.visibility = View.GONE
-                        if (switchTo != null && switchTo >= 0 && switchTo < panels.size) viewPager.setCurrentItem(switchTo, false)
-                    }
-                    .start()
-        }
+        })
     }
 
     private fun ui() {
         this.swipeRefresh.onRefresh { data() }
         this.swipeRefresh.setSwipeableChildren(this.viewPager)
         this.swipeRefresh.isEnabled = cfg.getBoolean(HassConfig.Ui_PullRefresh)
-        allGroups.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowSidebar)) View.VISIBLE else View.GONE
-        tabbarPanel.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowTopbar, true)) View.VISIBLE else View.GONE
-        if (!panels.isEmpty()) panels[0].apply { RxBus2.getDefault().post(CurrentPanelChanged(id, name)) }
-        this.refresh.onClick { data() }
+        if (panels.isNotEmpty()) panels[0].apply { RxBus2.getDefault().post(CurrentPanelChanged(id, name)) }
     }
     private fun data() {
-        Animations.RotateAnimation(this.refresh, 0f, 360f, Animation.RELATIVE_TO_SELF, .5f, Animation.RELATIVE_TO_SELF, .5f)
-                .duration(1000)
-                .repeatCount(1000)
-                .start()
         dataDisposable?.dispose()
         this.swipeRefresh.isRefreshing = false
         this.networkBusy.visibility = View.VISIBLE
@@ -338,13 +262,11 @@ class HassFragment : BaseFragment() {
         app.refreshState().withComplete {
             fragment?.apply {
                 swipeRefresh.isEnabled = cfg.getBoolean(HassConfig.Ui_PullRefresh)
-                refresh.clearAnimation()
                 networkBusy.visibility = View.GONE
             }
         }.error {
             fragment?.apply {
                 swipeRefresh.isEnabled = cfg.getBoolean(HassConfig.Ui_PullRefresh)
-                refresh.clearAnimation()
                 networkBusy.visibility = View.GONE
             }
             showError(it.getMessage() ?: "刷新状态失败", "重试") { data() }

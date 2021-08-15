@@ -2,6 +2,7 @@ package cn.com.thinkwatch.ihass2.bean
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.MotionEvent
 import android.view.View
@@ -12,6 +13,7 @@ abstract class BaseBean(var entity: JsonEntity) {
     abstract fun layoutResId(): Int
     abstract fun bindToView(itemView: View, context: Context)
 
+    @SuppressLint("ClickableViewAccessibility")
     protected fun getTouchListener(upperView: View): View.OnTouchListener {
         return View.OnTouchListener { v, event ->
             when (event.action) {

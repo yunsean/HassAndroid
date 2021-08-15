@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="15dip"
+    android:gravity="center_vertical"
+    android:background="@drawable/selector_ffffff_eeeeee_round_10dp"
+    android:orientation="horizontal">
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:lines="1"
+        android:textColor="@color/color_xiaomi"
+        android:textSize="24sp"
+        android:textStyle="normal"
+        app:autoSizeTextType="none"
+        app:fontFamily="@font/mdi"
+        tools:ignore="MissingPrefix"
+        tools:text="\uf033"/>
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dip"
+        android:gravity="center"
+        android:lines="1"
+        android:textColor="@color/color_xiaomi"
+        android:textSize="16sp"
+        android:textStyle="normal"
+        tools:text="group"/>
+</android.support.v7.widget.LinearLayoutCompat>
