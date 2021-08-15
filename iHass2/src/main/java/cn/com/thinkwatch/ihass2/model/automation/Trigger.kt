@@ -63,6 +63,7 @@ data class MqttTrigger(
 
 data class NumericStateTrigger(
         @SerializedName("entity_id") var entityId: String = "",
+        @SerializedName("attribute") var attribute: String? = null,
         @SerializedName("value_template") var valueTemplate: String? = null,
         var above: BigDecimal? = null,
         var below: BigDecimal? = null,
@@ -73,6 +74,7 @@ data class NumericStateTrigger(
 
 data class StateTrigger(
         @SerializedName("entity_id") var entityId: String = "",
+        @SerializedName("attribute") var attribute: String? = null,
         var from: String? = null,
         var to: String? = null,
         @SerializedName("for") var lasted: String? = null): Trigger(TriggerPlatform.state) {

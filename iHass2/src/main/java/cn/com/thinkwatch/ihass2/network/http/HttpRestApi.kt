@@ -6,6 +6,8 @@ import cn.com.thinkwatch.ihass2.dto.EntityConfigResult
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.JsonEntity
 import cn.com.thinkwatch.ihass2.model.Period
+import cn.com.thinkwatch.ihass2.model.album.AlbumListResult
+import cn.com.thinkwatch.ihass2.model.album.AlbumResult
 import cn.com.thinkwatch.ihass2.model.automation.Automation
 import cn.com.thinkwatch.ihass2.model.script.Script
 import cn.com.thinkwatch.ihass2.model.service.Domain
@@ -14,6 +16,7 @@ import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.*
 import java.util.*
+
 
 interface HttpRestApi {
     @GET("/api/states")
@@ -77,4 +80,37 @@ interface HttpRestApi {
 
     @GET("/api/config/customize/config/{entityId}")
     fun getConfigEntity(@Header("x-ha-access") password: String?, @Header("Authorization") token: String?, @Path("entityId") entityId: String?): Observable<EntityConfigResult>
+
+    @POST("/api/alumb/sync")
+    fun albumPostSync(@Header("x-ha-access") password: String?,
+                      @Header("Authorization") token: String?,
+                      @Body body: RequestBody,
+                      @Query("user") user: String?,
+                      @Query("path") path: String?,
+                      @Query("md5") md5: String?,
+                      @Query("override") override: Boolean? = null,
+                      @Query("time") time: Long? = null): Observable<AlbumResult>
+    @GET("/api/alumb/sync")
+    fun albumGetSync(@Header("x-ha-access") password: String?,
+                     @Header("Authorization") token: String?,
+                     @Query("user") user: String,
+                     @Query("path") path: String): Observable<AlbumResult>
+    @DELETE("/api/alumb/sync")
+    fun albumDeleteFile(@Header("x-ha-access") password: String?,
+                        @Header("Authorization") token: String?,
+                        @Query("user") user: String,
+                        @Query("path") path: String): Observable<AlbumResult>
+    @GET("/api/alumb/list")
+    fun albumListFile(@Header("x-ha-access") password: String?,
+                      @Header("Authorization") token: String?,
+                      @Query("user") user: String,
+                      @Query("path") path: String,
+                      @Query("pageIndex") pageIndex: Int,
+                      @Query("wanttime") wanttime: Boolean = true): Observable<AlbumListResult>
+    @Headers("Content-Type: application/json")
+    @PUT("/api/alumb/check")
+    fun albumCheckFile(@Header("x-ha-access") password: String?,
+                       @Header("Authorization") token: String?,
+                       @Query("user") user: String,
+                       @Body body: RequestBody?): Observable<List<String>?>
 }

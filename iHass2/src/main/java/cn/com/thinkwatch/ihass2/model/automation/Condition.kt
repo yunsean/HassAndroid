@@ -49,6 +49,7 @@ data class OrCondition(
 
 data class NumericStateCondition(
         @SerializedName("entity_id") var entityId: String = "",
+        @SerializedName("attribute") var attribute: String? = null,
         var above: BigDecimal? = null,
         var below: BigDecimal? = null,
         @SerializedName("value_template") var valueTemplate: String? = null
@@ -77,6 +78,7 @@ data class TimeOffset(
 }
 data class StateCondition(
         @SerializedName("entity_id") var entityId: String = "",
+        @SerializedName("attribute") var attribute: String? = null,
         var state: String = "",
         @SerializedName("for") var lasted: TimeOffset? = null
 ) : Condition(ConditionType.state) {

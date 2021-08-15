@@ -119,7 +119,7 @@ class NumberHandler: VoiceHandler {
         if (candicate == null) return controller.finish(FinishAction.reset, "数据处理错误！")
         val entity = candicate.entity
         if (entity == null) return controller.finish(FinishAction.reset, "未找到可控制的设备！")
-        val name = if (candicate.dashboard.showName.isNullOrBlank()) entity.friendlyName else candicate.dashboard.showName
+        val name = if (candicate.dashboard.showName.isNullOrEmpty()) entity.friendlyName else candicate.dashboard.showName
         var method: String = ""
         var request: ServiceRequest? = null
         if (entity.entityId.startsWith("light.")) {

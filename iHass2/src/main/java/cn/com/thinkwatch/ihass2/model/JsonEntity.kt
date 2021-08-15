@@ -152,7 +152,7 @@ data class JsonEntity(@SerializedName("entity_id") var entityId: String = "",
         else if (isDeviceTracker) if (state == "home") "在家" else if (state == "not_home") "外出" else state
         else if (isAlarmControlPanel) state
         else if (isPersistentNotification) "Notification"
-        else if (isMiioGateway) HassApplication.application.xmlyChannels.get(attributes?.channel?: 0)?.name ?: "radio"
+        else if (isMiioGateway) HassApplication.application.xmlyChannels.get(attributes?.channel?.toInt() ?: 0)?.name ?: "radio"
         else if (isBroadcastRadio && isActivated) LocalStorage.instance.getXmlyCached(attributes?.url?: "")?.name ?: "未知电台"
         else if (isBroadcastVoice && isActivated) "播放中"
         else if (isBroadcastMusic && isActivated) attributes?.url?.let {

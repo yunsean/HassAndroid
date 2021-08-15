@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="64dip"
+    android:paddingLeft="10dip"
+    android:paddingRight="10dip"
+    android:paddingTop="3dip"
+    android:paddingBottom="3dip"
+    android:gravity="center"
+    android:orientation="horizontal">
+    <ImageView
+        android:layout_width="44dip"
+        android:layout_height="44dip"
+        android:padding="7dip"
+        android:scaleType="centerInside"
+        android:src="@drawable/album_notification_upload"
+        android:contentDescription="@null" />
+    <LinearLayout
+        android:layout_width="0dip"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginLeft="10dip"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dip"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <LinearLayout
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/file"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:lines="1"
+                    android:ellipsize="end"
+                    android:textSize="11sp"
+                    android:textColor="#aaaaaa"
+                    android:text="文件路径" />
+                <TextView
+                    android:id="@+id/size"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dip"
+                    android:textSize="10sp"
+                    android:textColor="#aaaaaa"
+                    android:text="文件路径" />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/succeedCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dip"
+                android:textSize="13sp"
+                android:textColor="#03A9F4"
+                android:text="10" />
+            <TextView
+                android:id="@+id/failedCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dip"
+                android:textSize="13sp"
+                android:textColor="#FF5722"
+                android:text="10" />
+            <TextView
+                android:id="@+id/watingCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dip"
+                android:textSize="13sp"
+                android:textColor="#aaaaaa"
+                android:text="20" />
+        </LinearLayout>
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="7.5dp"
+            android:layout_marginTop="7dip"
+            android:max="100"
+            android:progress="80"
+            android:layout_marginRight="8dp"
+            android:progressDrawable="@drawable/album_progress_bar"
+            android:visibility="visible"/>
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/status"
+        android:layout_width="44dip"
+        android:layout_height="44dip"
+        android:padding="5dip"
+        android:src="@drawable/album_status_sync"
+        android:contentDescription="@null" />
+</LinearLayout>

@@ -39,7 +39,7 @@ class CoverFragment : ControlFragment() {
         val builder = AlertDialog.Builder(getActivity())
         fragment = act.getLayoutInflater().inflate(R.layout.control_cover, null)
         builder.setView(fragment)
-        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
+        builder.setTitle(if (entity?.showName.isNullOrEmpty()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     override fun onResume() {

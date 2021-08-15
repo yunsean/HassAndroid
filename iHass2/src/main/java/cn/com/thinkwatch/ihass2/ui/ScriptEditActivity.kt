@@ -9,6 +9,8 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.dto.AutomationResponse
@@ -50,6 +52,7 @@ import java.lang.reflect.Type
 class ScriptEditActivity : BaseActivity() {
 
     private var entityId: String = ""
+    private var scriptMode: String = "single"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentViewWithLoadable(R.layout.activity_hass_script_edit)
@@ -70,7 +73,11 @@ class ScriptEditActivity : BaseActivity() {
         val id = if (this.entityId.isBlank()) System.currentTimeMillis().toString() else this.entityId
         val name = act.name.text()
         if (name.isBlank()) return showError("请输入脚本名称")
-        val script = Script(name, actions)
+        val max = act.max.text().toIntOrNull() ?: 0
+        val mode = scriptMode
+        if (mode == "queued" && max < 1) return showError("请输入1~10之间的队列深度")
+        if (mode == "parallel" && max < 1) return showError("请输入1~10之间的并行限额")
+        val script = Script(name, actions, scriptMode, max)
         val json = gsonBuilder.toJson(script)
         val waiting = Dialogs.showWait(ctx)
         val body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json)
@@ -99,6 +106,13 @@ class ScriptEditActivity : BaseActivity() {
                     if (disposable == null) disposable = CompositeDisposable(it)
                     else disposable?.add(it)
                 }
+    }
+
+    private enum class TriggerMode(val desc: String) {
+        single("忽略后者"),
+        restart("重新启动"),
+        queued("队列执行"),
+        parallel("并行执行")
     }
 
     private var script : Script? = null
@@ -154,6 +168,16 @@ class ScriptEditActivity : BaseActivity() {
             addAction()
         }
         this.actisetOnTouchListenerHelper = setupRecyclerView(this.actionsView, this.actionsAdatper)
+        act.mode.adapter = ArrayAdapter(act, R.layout.listitem_textview_text1, TriggerMode.values().map { it.desc })
+        act.mode.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+                scriptMode = TriggerMode.values()[position].toString()
+                act.maxPanel.visibility = if (scriptMode == "queued" || scriptMode == "parallel") View.VISIBLE else View.GONE
+                if (scriptMode == "queued") act.maxLabel.text = "队列深度："
+                else if (scriptMode == "parallel") act.maxLabel.text = "并发限制："
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) { }
+        }
     }
 
     @ActivityResult(requestCode = 300)
@@ -243,11 +267,17 @@ class ScriptEditActivity : BaseActivity() {
     }
     private fun load(it: Script) {
         script = it
+        scriptMode = it.mode
         actions.clear()
         actions.addAll(it.sequence)
         actionsAdatper.notifyDataSetChanged()
         act.contentView.visibility = View.VISIBLE
-        act.name.setText(it.alias)
+        act.name.setText(if (it.alias.isBlank()) entityId else it.alias)
+        act.max.setText(it.max.toString())
+        act.mode.setSelection(TriggerMode.values().indexOfFirst { it.toString() == scriptMode })
+        act.maxPanel.visibility = if (it.mode == "queued" || it.mode == "parallel") View.VISIBLE else View.GONE
+        if (it.mode == "queued") act.maxLabel.text = "队列深度："
+        else if (it.mode == "parallel") act.maxLabel.text = "并发限制："
         loadable?.dismissLoading()
     }
     private fun data() {

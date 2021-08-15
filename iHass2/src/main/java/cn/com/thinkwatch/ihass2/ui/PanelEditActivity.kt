@@ -55,6 +55,7 @@ import java.io.FileOutputStream
 class PanelEditActivity : BaseActivity() {
 
     private var backImage: String? = null
+    private var panelIcon: String? = null
     private var panelId: Long = 0L
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +77,7 @@ class PanelEditActivity : BaseActivity() {
         } else {
             db.getPanel(panelId)?.let {
                 it.name = panelName
+                it.icon = panelIcon
                 it.backImage = backImage
                 it.tileAlpha = if (!backImage.isNullOrBlank() and translucence.isChecked) .8f else 1f
                 db.savePanel(it)
@@ -111,6 +113,11 @@ class PanelEditActivity : BaseActivity() {
                 translucence.visibility = View.GONE
             }
         }
+        this.icon.onClick {
+            startActivityForResult(Intent(ctx, MdiListActivity::class.java)
+                    .putExtra("icon", panelIcon)
+                    .putExtra("allowText", true), 108)
+        }
         this.adapter = RecyclerAdapter(entities) {
             view, index, item, holder ->
             val bgColor: Int
@@ -119,7 +126,7 @@ class PanelEditActivity : BaseActivity() {
             when (item.itemType) {
                 ItemType.entity-> {
                     bgColor = 0xffffffff.toInt()
-                    name = if (item.showName.isNullOrBlank()) item.friendlyName else item.showName ?: ""
+                    name = if (item.showName.isNullOrEmpty()) item.friendlyName else item.showName ?: ""
                     icon = if (item.showIcon.isNullOrBlank()) item.mdiIcon else item.showIcon
                 }
                 ItemType.divider-> {
@@ -266,6 +273,7 @@ class PanelEditActivity : BaseActivity() {
         }.nextOnMain {
             loading.visibility = View.GONE
             panelName.setText(panel?.name)
+            MDIFont.get().setIcon(act.icon, panel?.icon)
             translucence.isChecked = panel?.tileAlpha ?: 1f < 0.9f
             panel?.backImage?.let {
                 Glide.with(ctx).load(it).listener(object: RequestListener<Drawable> {
@@ -278,6 +286,7 @@ class PanelEditActivity : BaseActivity() {
                 }).into(containerView)
             }
             this.backImage = panel?.backImage
+            this.panelIcon = panel?.icon
             entities.clear()
             entities.addAll(it)
             adapter.notifyDataSetChanged()
@@ -366,6 +375,11 @@ class PanelEditActivity : BaseActivity() {
             }
         }
         adapter.notifyDataSetChanged()
+    }
+    @ActivityResult(requestCode = 108)
+    private fun afterIcon(data: Intent?) {
+        panelIcon = data?.getStringExtra("icon")
+        MDIFont.get().setIcon(act.icon, panelIcon)
     }
     private fun addGroup(position: Int) {
         createDialog(R.layout.dialog_panel_add_group, object: OnSettingDialogListener {

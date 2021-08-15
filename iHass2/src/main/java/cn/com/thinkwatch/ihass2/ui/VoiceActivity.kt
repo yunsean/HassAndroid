@@ -149,7 +149,7 @@ class VoiceActivity : Activity(), IRecogListener {
         val panel = db.getPanel(dashboard.panelId)
         val entity = db.getEntity(dashboard.entityId)
         if (entity == null) return setResultError("未找到可控制的设备！")
-        val name = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
+        val name = if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName
         result.setText("${action}${panel?.name}的${name}")
         if (entity.isToggleable) {
             RxBus2.getDefault().post(ServiceRequest(entity.domain, "toggle", entity.entityId))

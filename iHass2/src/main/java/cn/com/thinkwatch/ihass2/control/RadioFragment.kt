@@ -28,7 +28,7 @@ class RadioFragment : ControlFragment() {
         val builder = AlertDialog.Builder(activity)
         fragment = activity?.layoutInflater?.inflate(R.layout.control_radio, null)
         builder.setView(fragment)
-        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
+        builder.setTitle(if (entity?.showName.isNullOrEmpty()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     override fun onResume() {
@@ -78,7 +78,7 @@ class RadioFragment : ControlFragment() {
         fragment?.apply {
             volume.progress = entity?.attributes?.volume?.toInt() ?: 50
             volume_value.text = volume.progress.toString()
-            state.text = if (entity?.state == "on") (app.xmlyChannels.get(entity?.attributes?.channel ?: 0)?.name ?: entity?.attributes?.channel?.toString() ?: "off") else "off"
+            state.text = if (entity?.state == "on") (app.xmlyChannels.get(entity?.attributes?.channel?.toInt() ?: 0)?.name ?: entity?.attributes?.channel?.toString() ?: "off") else "off"
         }
     }
     override fun onChange() = refreshUi()

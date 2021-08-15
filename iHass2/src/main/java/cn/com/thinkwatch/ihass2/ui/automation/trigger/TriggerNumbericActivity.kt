@@ -11,6 +11,7 @@ import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.model.automation.*
+import cn.com.thinkwatch.ihass2.ui.AttributeListActivity
 import cn.com.thinkwatch.ihass2.ui.AutomationEditActivity
 import cn.com.thinkwatch.ihass2.ui.EntityListActivity
 import cn.com.thinkwatch.ihass2.utils.Gsons
@@ -18,6 +19,14 @@ import com.dylan.dyn3rdparts.pickerview.DateTimePicker
 import com.dylan.uiparts.activity.ActivityResult
 import com.yunsean.dynkotlins.extensions.*
 import kotlinx.android.synthetic.main.activity_hass_automation_trigger_numberic.*
+import kotlinx.android.synthetic.main.activity_hass_automation_trigger_numberic.*
+import kotlinx.android.synthetic.main.activity_hass_automation_trigger_numberic.above
+import kotlinx.android.synthetic.main.activity_hass_automation_trigger_numberic.addAttribute
+import kotlinx.android.synthetic.main.activity_hass_automation_trigger_numberic.attribute
+import kotlinx.android.synthetic.main.activity_hass_automation_trigger_numberic.below
+import kotlinx.android.synthetic.main.activity_hass_automation_trigger_numberic.cleanAttribute
+import kotlinx.android.synthetic.main.activity_hass_automation_trigger_numberic.entity
+import kotlinx.android.synthetic.main.activity_hass_automation_trigger_numberic.valueTemplate
 import org.jetbrains.anko.act
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.sdk25.coroutines.onClick
@@ -72,6 +81,16 @@ class TriggerNumbericActivity : BaseActivity() {
                 }
             })
         }
+        act.addAttribute.setOnClickListener {
+            if (trigger.entityId.isBlank()) return@setOnClickListener
+            startActivityForResult(Intent(ctx, AttributeListActivity::class.java)
+                    .putExtra("entityId", trigger.entityId), 205)
+        }
+        act.cleanAttribute.setOnClickListener {
+            trigger.attribute = null
+            act.attribute.text = ""
+            act.cleanAttribute.visibility = View.GONE
+        }
     }
     private fun data() {
         if (trigger.entityId.isNotBlank()) {
@@ -79,10 +98,21 @@ class TriggerNumbericActivity : BaseActivity() {
                 act.entity.text = it.friendlyName
             }
         }
+        act.attribute.text = trigger.attribute
         act.above.setText(trigger.above?.toString() ?: "")
         act.below.setText(trigger.below?.toString() ?: "")
         act.valueTemplate.setText(trigger.valueTemplate)
         act.lasted.setText(trigger.lasted)
+    }
+
+    @ActivityResult(requestCode = 205)
+    private fun afterAttribibute(data: Intent?) {
+        val entityId = data?.getStringExtra("entityId")
+        val attribute = data?.getStringExtra("attribute")
+        if (entityId.isNullOrBlank() || attribute.isNullOrBlank()) return
+        trigger.attribute = attribute
+        act.attribute.text = attribute
+        act.cleanAttribute.visibility = View.VISIBLE
     }
 
     @ActivityResult(requestCode = 105)
@@ -92,6 +122,7 @@ class TriggerNumbericActivity : BaseActivity() {
         db.getEntity(entityIds.get(0))?.let {
             trigger.entityId = it.entityId
             act.entity.text = it.friendlyName
+            act.addAttribute.visibility = View.VISIBLE
         }
     }
 
@@ -99,6 +130,7 @@ class TriggerNumbericActivity : BaseActivity() {
         fun desc(trigger: NumericStateTrigger): String {
             val result = StringBuilder()
             result.append(HassApplication.application.db.getEntity(trigger.entityId)?.friendlyName ?: trigger.entityId)
+            if (!trigger.attribute.isNullOrBlank()) result.append(".${trigger.attribute}")
             if (trigger.valueTemplate.isNullOrBlank()) result.append("的状态")
             else result.append("的值")
             if (trigger.above != null) result.append("高于${trigger.above}")

@@ -71,7 +71,7 @@
             android:textSize="16sp"
             android:tint="@color/md_grey_500"/>
     </LinearLayout>
-    <lecho.lib.hellocharts.view.LineChartView
+    <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -88,15 +88,40 @@
         android:visibility="gone"
         app:layout_heightPercent="80%w"
         app:mpb_progressStyle="circular"/>
-    <Button
-        android:id="@+id/btnClose"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
-        android:minWidth="72dp"
-        android:text="关闭"
-        android:textColor="@color/md_blue_500"
-        app:layout_columnWeight="1"/>
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="8dp"
+        tools:ignore="RtlHardcoded">
+        <Button
+            android:id="@+id/btnFull"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_ffffff_eeeeee"
+            android:minWidth="72dp"
+            android:text="更多"
+            android:textColor="@color/md_blue_500"
+            app:layout_columnWeight="1"/>
+        <View
+            android:layout_width="0dip"
+            android:layout_height="1dip"
+            android:layout_weight="1" />
+        <Button
+            android:id="@+id/btnClose"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_ffffff_eeeeee"
+            android:minWidth="72dp"
+            android:text="关闭"
+            android:textColor="@color/md_blue_500"
+            app:layout_columnWeight="1"/>
+    </LinearLayout>
 </com.zhy.android.percent.support.PercentLinearLayout>
 

@@ -26,7 +26,7 @@ class PanelAdapter(val context: Context,
     override fun onBindSectionFooterViewHolder(holder: HeaderViewHolder, section: Int) {
     }
     override fun onBindSectionHeaderViewHolder(holder: HeaderViewHolder, section: Int) {
-        holder.itemView?.headerName?.visibility = if (groups?.get(section)?.group?.showName.isNullOrBlank()) View.GONE else View.VISIBLE
+        holder.itemView?.headerName?.visibility = if (groups?.get(section)?.group?.showName.isNullOrEmpty()) View.GONE else View.VISIBLE
         holder.itemView?.headerName?.text = groups?.get(section)?.group?.showName ?: ""
     }
     override fun getColumnCountForItem(section: Int, position: Int): Int {

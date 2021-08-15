@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/transparent"
+    android:gravity="center"
+    android:orientation="vertical" >
+    <LinearLayout
+        android:id="@+id/LinearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dip"
+        android:minWidth="160dip"
+        android:minHeight="160dip"
+        android:background="@drawable/waiting_dialog_bg"
+        android:gravity="center"
+        android:orientation="vertical" >
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleInverse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent" />
+        <TextView
+            android:id="@+id/tips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dip"
+            android:text="正在执行，请耐心等待..."
+            android:textColor="#ffffffff" />
+
+        <com.dylan.uiparts.button.SmartButton
+            android:id="@+id/cancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dip"
+            android:gravity="center"
+            android:paddingTop="10dip"
+            android:paddingBottom="1dip"
+            android:visibility="gone"
+            android:textSize="14sp"
+            android:text="@string/dialog_waiting_cancel"
+            app:sv_bgcolor_normal="@color/transparent"
+            app:sv_bgcolor_pressed="@color/transparent"
+            app:sv_txcolor_normal="#ffcccccc"
+            app:sv_txcolor_pressed="#ffaaaaaa"/>
+    </LinearLayout>
+</LinearLayout>

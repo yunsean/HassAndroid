@@ -133,13 +133,25 @@
             app:fontFamily="@font/mdi"
             tools:ignore="HardcodedText,MissingPrefix,SpUsage"/>
     </LinearLayout>
-    <android.support.v7.widget.AppCompatSpinner
-        android:id="@+id/spinner_speed"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        tools:listitem="@android:layout/simple_list_item_activated_1"/>
+        android:gravity="center"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginRight="4sp"
+            android:text="运行模式："/>
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/spinner_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            tools:listitem="@android:layout/simple_list_item_activated_1"/>
+    </LinearLayout>
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

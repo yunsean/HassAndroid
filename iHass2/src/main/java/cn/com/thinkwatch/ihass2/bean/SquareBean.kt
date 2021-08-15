@@ -35,7 +35,7 @@ class SquareBean(entity: JsonEntity, val translucence: Boolean): BaseBean(entity
             MDIFont.get().setIcon(itemView.icon, if (entity.showIcon.isNullOrBlank()) entity.friendlyStateRow else entity.showIcon)
             itemView.icon.isActivated = entity.isActivated
         }
-        itemView.name.setText(if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName)
+        itemView.name.setText(if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName)
         itemView.name.isActivated = entity.isActivated
         itemView.contentView.onClick {
             if ((entity.isSwitch && entity.isStateful) || entity.isInputBoolean) {

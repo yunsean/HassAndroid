@@ -36,7 +36,7 @@ class BroadcastFragment : ControlFragment() {
         val builder = AlertDialog.Builder(activity)
         fragment = activity?.layoutInflater?.inflate(R.layout.control_broadcast, null)
         builder.setView(fragment)
-        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
+        builder.setTitle(if (entity?.showName.isNullOrEmpty()) entity?.friendlyName else entity?.showName)
         disposable = RxBus2.getDefault().register(FavoriteChanged::class.java, {
             adapter?.items = db.getXmlyFavorite(entity?.entityId ?: "")
         }, disposable)

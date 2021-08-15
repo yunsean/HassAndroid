@@ -7,7 +7,7 @@ import java.io.IOException
 
 
 class FileRequestBody(private val requestBody: RequestBody,
-                         private val callback: (total: Long, progress: Long)-> Unit) : RequestBody() {
+                         private val callback: (total: Long, progress: Long, percent: Int)-> Unit) : RequestBody() {
     @Throws(IOException::class)
     override fun contentLength(): Long {
         return requestBody.contentLength()
@@ -22,13 +22,17 @@ class FileRequestBody(private val requestBody: RequestBody,
         requestBody.writeTo(bufferedSink)
         bufferedSink.flush()
     }
-    protected inner class CountingSink(delegate: Sink) : ForwardingSink(delegate) {
+    private inner class CountingSink(delegate: Sink) : ForwardingSink(delegate) {
         private var bytesWritten: Long = 0
+        private var lastPercent = 0
         @Throws(IOException::class)
         override fun write(source: Buffer, byteCount: Long) {
             super.write(source, byteCount)
             bytesWritten += byteCount
-            callback.invoke(contentLength(), bytesWritten)
+            val percent = (bytesWritten * 100 / contentLength()).toInt()
+            if (percent == lastPercent) return
+            lastPercent = percent
+            callback.invoke(contentLength(), bytesWritten, percent)
         }
     }
 }

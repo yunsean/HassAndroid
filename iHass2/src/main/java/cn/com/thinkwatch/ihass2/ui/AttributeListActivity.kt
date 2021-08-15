@@ -28,15 +28,16 @@ class AttributeListActivity : BaseActivity() {
         setTitle("属性选择", true)
         setAutoHideSoftInput(AutoHideSoftInputMode.WhenClick)
 
+        ui()
         val entityId = intent.getStringExtra("entityId")
         if (entityId.isNullOrBlank()) {
             startActivityForResult(Intent(ctx, EntityListActivity::class.java)
                     .putExtra("singleOnly", true), 105)
         } else {
             loadAttribute(entityId)
+            act.entity.setOnClickListener(null)
+            act.entity.isClickable = false
         }
-
-        ui()
     }
 
     private data class Attribute(val name: String,

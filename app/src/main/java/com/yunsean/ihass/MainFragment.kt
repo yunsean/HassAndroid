@@ -1,13 +1,11 @@
 package com.yunsean.ihass
 
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Toast
-import cn.com.thinkwatch.ihass2.base.BaseActivity
+import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.bus.*
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.enums.ItemType
@@ -29,22 +27,21 @@ import com.yunsean.ihass.db.ShortcutChanged
 import com.yunsean.ihass.db.db
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.listitem_shortcut.view.*
-import org.jetbrains.anko.dip
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.support.v4.act
+import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.dip
 
 
-
-class MainActivity : BaseActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentViewNoTitlebar(R.layout.fragment_main)
-        setTitle("智能家居", false)
-        setAutoHideSoftInput(AutoHideSoftInputMode.WhenClick)
-        supportActionBar?.elevation = 0F
-        supportFragmentManager.beginTransaction()
+class MainFragment : BaseFragment() {
+    override val layoutResId: Int = R.layout.fragment_main
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (cfg.getBoolean(HassConfig.Ui_HomePanels)) setTitle("智能家居", false, "", R.drawable.ic_action_panels)
+        else setTitle("智能家居", false)
+        childFragmentManager.beginTransaction()
                 .add(R.id.fragment_container, HassFragment())
                 .commit()
-
         ui()
         shortcut()
         disposable = RxBus2.getDefault().register(ShortcutChanged::class.java, {
@@ -56,15 +53,12 @@ class MainActivity : BaseActivity() {
             else setTitle("智能家居", false)
         }, disposable)))
     }
-    override fun onResume() {
-        super.onResume()
-    }
     override fun onPause() {
         ball.clearAnimation()
         super.onPause()
     }
     override fun doRight() {
-        if (cfg.getBoolean(HassConfig.Ui_HomePanels)) activity(PanelListActivity::class.java)
+        if (cfg.getBoolean(HassConfig.Ui_HomePanels)) ctx.activity(PanelListActivity::class.java)
     }
 
     private var latestPressedTab0: Long = 0
@@ -72,14 +66,14 @@ class MainActivity : BaseActivity() {
     private val statusBarTask = object: Runnable {
         override fun run() {
             if (statusBar.visibility == View.GONE) {
-                savePref("showShortcut", "true")
+                act.savePref("showShortcut", "true")
                 statusBar.visibility = View.VISIBLE
-                Animations.MarginAnimation(statusBar, MarginAnimation.Margin.Right, screenWidth(), 0)
+                Animations.MarginAnimation(statusBar, MarginAnimation.Margin.Right, ctx.screenWidth(), 0)
                         .duration(300)
                         .start()
             } else {
-                savePref("showShortcut", "false")
-                Animations.MarginAnimation(statusBar, MarginAnimation.Margin.Right, 0, screenWidth())
+                act.savePref("showShortcut", "false")
+                Animations.MarginAnimation(statusBar, MarginAnimation.Margin.Right, 0, ctx.screenWidth())
                         .duration(300)
                         .animationListener { statusBar.visibility = View.GONE }
                         .start()
@@ -99,7 +93,7 @@ class MainActivity : BaseActivity() {
             override fun onSingleTapUp(motionEvent: MotionEvent): Boolean {
                 if (isFliping) return false
                 if (buttonGuide.visibility == View.VISIBLE) {
-                    savePref("hiddenButtonGuide1", "true", "DEFAULT")
+                    ctx.savePref("hiddenButtonGuide1", "true", "DEFAULT")
                     buttonGuide.visibility = View.GONE
                     shortcut.visibility = View.VISIBLE
                 }
@@ -135,7 +129,7 @@ class MainActivity : BaseActivity() {
                 return false
             }
         }
-        val detector = GestureDetector(this@MainActivity, listener)
+        val detector = GestureDetector(ctx, listener)
         ball.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 RxBus2.getDefault().post(motionEvent)
@@ -143,7 +137,7 @@ class MainActivity : BaseActivity() {
             }
         })
         setting.onClick {
-            activity(MoreActivity::class.java)
+            ctx.activity(MoreFragment::class.java)
         }
         shortcutAdapter = RecyclerAdapter(R.layout.listitem_shortcut, null) {
             view, _, item ->
@@ -169,32 +163,21 @@ class MainActivity : BaseActivity() {
             }
         }
         shortcut.adapter = shortcutAdapter
-        shortcut.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        shortcut.layoutManager = LinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL, false)
     }
 
     private fun shortcut() {
-        val shortcuts = db.readShortcut()
-        shortcutAdapter.items = shortcuts
-        if (cfg.getBoolean(HassConfig.Ui_HomePanels)) setTitle("智能家居", false, "", R.drawable.ic_action_panels)
-        else setTitle("智能家居", false)
-        if (readPref("hiddenButtonGuide1", "false", "DEFAULT")?.toBoolean() ?: false) {
-            if (!(readPref("showShortcut")?.toBoolean() ?: false)) statusBar.visibility = View.GONE
-            buttonGuide.visibility = View.GONE
-            shortcut.visibility = View.VISIBLE
-        }
-    }
-
-    internal var waitTime: Long = 2000
-    internal var touchTime: Long = 0
-    override fun onBackPressed() {
-        val currentTime = System.currentTimeMillis()
-        if (currentTime - touchTime >= waitTime) {
-            Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT).show()
-            touchTime = currentTime
-        } else {
-            val launcherIntent = Intent(Intent.ACTION_MAIN)
-            launcherIntent.addCategory(Intent.CATEGORY_HOME)
-            startActivity(launcherIntent)
+        if (false) {
+            val shortcuts = db.readShortcut()
+            shortcutAdapter.items = shortcuts
+            if (cfg.getBoolean(HassConfig.Ui_HomePanels)) setTitle("智能家居", false, "", R.drawable.ic_action_panels)
+            else setTitle("智能家居", false)
+            if (ctx.readPref("hiddenButtonGuide1", "false", "DEFAULT")?.toBoolean() ?: false) {
+                if (!(ctx.readPref("showShortcut")?.toBoolean()
+                                ?: false)) statusBar.visibility = View.GONE
+                buttonGuide.visibility = View.GONE
+                shortcut.visibility = View.VISIBLE
+            }
         }
     }
 }

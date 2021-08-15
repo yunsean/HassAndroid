@@ -17,7 +17,7 @@ class Attribute(@SerializedName("entity_id") @JsonAdapter(AlwaysListTypeAdapterF
                 @SerializedName("last_triggered") @Metadata(name = "上次触发", display = "cn.com.thinkwatch.ihass2.utils.ZonedDateAsTime") var lastTriggered: String? = null,
                 @SerializedName("space_free") @Metadata(name = "剩余空间", display = "cn.com.thinkwatch.ihass2.utils.SpaceArrayFormat") var spaceFree: List<Long>? = null,
                 @SerializedName("volume") @Metadata(name = "音量", unit = "%") var volume: Float? = null,
-                @SerializedName("channel") @Metadata(name = "频道") var channel: Int? = null,
+                @SerializedName("channel") @Metadata(name = "频道") var channel: String? = null,
                 @SerializedName("speed_list") var speedList: ArrayList<String>? = null,
                 @SerializedName("speed") @Metadata(name = "风速") var speed: String? = null,
                 @SerializedName("oscillating") @Metadata(name = "摇头") var oscillating: Boolean? = null,

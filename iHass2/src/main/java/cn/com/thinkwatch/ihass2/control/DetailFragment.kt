@@ -3,6 +3,7 @@ package cn.com.thinkwatch.ihass2.control
 import android.annotation.TargetApi
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -18,6 +19,7 @@ import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.model.Attribute
 import cn.com.thinkwatch.ihass2.model.AttributeRender
 import cn.com.thinkwatch.ihass2.model.Metadata
+import cn.com.thinkwatch.ihass2.ui.ImageViewActivity
 import cn.com.thinkwatch.ihass2.utils.ZonedDateAsTime
 import com.baidu.mapapi.model.LatLng
 import com.baidu.mapapi.search.geocode.*
@@ -28,6 +30,7 @@ import kotlinx.android.synthetic.main.control_detail.view.*
 import kotlinx.android.synthetic.main.listitem_sensor_attribute.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.sp
+import org.jetbrains.anko.support.v4.ctx
 import org.json.JSONObject
 import java.util.*
 
@@ -39,7 +42,7 @@ class DetailFragment : ControlFragment() {
         val builder = AlertDialog.Builder(activity)
         fragment = activity?.layoutInflater?.inflate(R.layout.control_detail, null)
         builder.setView(fragment)
-        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
+        builder.setTitle(if (entity?.showName.isNullOrEmpty()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     private var adatper: RecyclerAdapter<AttributeItem>? = null
@@ -63,6 +66,9 @@ class DetailFragment : ControlFragment() {
             recyclerView.layoutManager = LinearLayoutManager(context)
             btnClose.onClick {
                 dismiss()
+            }
+            btnImage.onClick {
+                startActivity(Intent(ctx, ImageViewActivity::class.java).putExtra("url", entity?.attributes?.entityPicture))
             }
             refreshUi()
             val calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"))
@@ -124,11 +130,16 @@ class DetailFragment : ControlFragment() {
                 AttributeItem("最后变更", ZonedDateAsTime().render(entity?.lastChanged, "yyyy-MM-dd HH:mm:ss")))
         totalItems?.forEach { (t, u) -> items.add(AttributeItem(t, u)) }
         if (address != null) items.add(AttributeItem("当前位置", address!!))
+        fragment?.btnImage?.visibility = if (entity?.attributes?.entityPicture.isNullOrBlank()) View.GONE else View.VISIBLE
         if (attributes?.ihassDetail != null && !attributes.ihassDetail.isNullOrBlank()) {
             db.getDbEntity(entity?.entityId!!)?.let {
                 try {
                     JSONObject(it.rawJson).optJSONObject("attributes")?.let { attr->
-                        attributes.ihassDetail.toString().trim('"').split(',').forEach {
+                        val details = attributes.ihassDetail.toString().trim('"').split(',')
+                        val showAll = details.find { it.trim() == "*" } != null
+                        val attrValues = mutableMapOf<String, String>()
+                        if (showAll) attr.keys().forEach { if (!it.startsWith("ihass")) attrValues.set(it, attr.optString(it) ?: "") }
+                        details.forEach {
                             it.trim().let {
                                 if (it.isBlank()) return@let
                                 val parts = it.split('!')
@@ -140,8 +151,10 @@ class DetailFragment : ControlFragment() {
                                     3-> items.add(AttributeItem(parts[1], value + parts[2]))
                                     else-> return@let
                                 }
+                                if (showAll) attrValues.remove(parts[0])
                             }
                         }
+                        if (showAll) items.addAll(attrValues.map { AttributeItem(it.key, it.value) })
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace()

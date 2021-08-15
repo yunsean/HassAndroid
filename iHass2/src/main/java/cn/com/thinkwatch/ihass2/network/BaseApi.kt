@@ -54,9 +54,9 @@ object BaseApi {
                     .readTimeout(readTimeoutInSec.toLong(), TimeUnit.SECONDS)
                     .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
                     .hostnameVerifier { hostname, session -> true }
-            if (BuildConfig.BUILD_TYPE != "release") {
+            if (addInterceptor && BuildConfig.BUILD_TYPE != "release") {
                 val interceptor = HttpLoggingInterceptor()
-                interceptor.level = HttpLoggingInterceptor.Level.BODY
+                interceptor.level = HttpLoggingInterceptor.Level.HEADERS
                 builder.addInterceptor(interceptor)
             }
             if (addInterceptor) builder.addInterceptor { chain ->
@@ -96,4 +96,13 @@ object BaseApi {
     }
     fun <T> jsonApi(baseUrl: String, clazz: Class<T>): T = build(clazz, baseUrl, GsonConverterFactory.create(Gsons.gson))
     fun <T> rawApi(baseUrl: String, clazz: Class<T>): T = build(clazz, baseUrl, ScalarsConverterFactory.create())
+    fun <T> fileApi(baseUrl: String, clazz: Class<T>): T {
+        return Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .client(getOkHttpClientInstance(DEFAULT_READ_TIMEOUT_IN_SEC, DEFAULT_READ_TIMEOUT_IN_SEC, false))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(io.reactivex.schedulers.Schedulers.io()))
+                .build()
+                .create(clazz)
+    }
 }

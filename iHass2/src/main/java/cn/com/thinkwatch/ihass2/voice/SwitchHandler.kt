@@ -197,7 +197,7 @@ class SwitchHandler: VoiceHandler {
     private fun showChoice(candicates: List<Candicate>) {
         if (blindly) return doConfirm(candicates.get(0))
         val items = candicates.map {
-            val name = if (it.dashboard.showName.isNullOrBlank()) it.entity?.friendlyName else it.dashboard.showName
+            val name = if (it.dashboard.showName.isNullOrEmpty()) it.entity?.friendlyName else it.dashboard.showName
             val display = if (it.panel?.name.isNullOrBlank()) "${action}${name}" else "${action}${it.panel?.name}的${name}"
             DetailItem(display, it)
         }
@@ -212,7 +212,7 @@ class SwitchHandler: VoiceHandler {
         this.controller.setInput("共${candicates.size}个设备，是要全部${action}吗？", this)
         val list = mutableListOf(DetailItem("是", true), DetailItem("否", false))
         list.addAll(candicates.map {
-            val name = if (it.dashboard.showName.isNullOrBlank()) it.entity?.friendlyName else it.dashboard.showName
+            val name = if (it.dashboard.showName.isNullOrEmpty()) it.entity?.friendlyName else it.dashboard.showName
             val display = if (it.panel?.name.isNullOrBlank()) "${action}${name}" else "${action}${it.panel?.name}的${name}"
             DetailItem(display, it)
         })
@@ -221,7 +221,7 @@ class SwitchHandler: VoiceHandler {
     private fun doConfirm(candicate: Candicate) {
         val entity = candicate.entity
         if (entity == null) return controller.finish(FinishAction.reset, "未找到可控制的设备！")
-        val name = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
+        val name = if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName
         val command = if (candicate.panel?.name.isNullOrBlank()) "你是要${action}${name}吗？"
         else "你是要${action}${candicate.panel?.name}的${name}吗？"
         this.confirm = candicate
@@ -232,7 +232,7 @@ class SwitchHandler: VoiceHandler {
         if (candicate == null) return controller.finish(FinishAction.reset, "数据处理错误！")
         val entity = candicate.entity
         if (entity == null) return controller.finish(FinishAction.reset, "未找到可控制的设备！")
-        val name = if (candicate.dashboard.showName.isNullOrBlank()) entity.friendlyName else candicate.dashboard.showName
+        val name = if (candicate.dashboard.showName.isNullOrEmpty()) entity.friendlyName else candicate.dashboard.showName
         val method = if (candicate.panel?.name.isNullOrBlank()) "${action}${name}"
         else "${action}${candicate.panel?.name}的${name}"
         this.controller.setStatus(method)
@@ -274,7 +274,7 @@ class SwitchHandler: VoiceHandler {
                 else if (action == "关闭") "turn_off"
                 else if (action == "切换") "toggle"
                 else "turn_on"
-                val name = if (it.dashboard.showName.isNullOrBlank()) entity.friendlyName else it.dashboard.showName
+                val name = if (it.dashboard.showName.isNullOrEmpty()) entity.friendlyName else it.dashboard.showName
                 val method = if (it.panel?.name.isNullOrBlank()) "${this.action}${name}"
                 else "${this.action}${it.panel?.name}的${name}"
                 emitter.onNext(method)

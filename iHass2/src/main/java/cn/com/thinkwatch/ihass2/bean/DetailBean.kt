@@ -25,7 +25,7 @@ class DetailBean(entity: JsonEntity, val translucence: Boolean): BaseBean(entity
             itemView.cardView.cardElevation = context.dip2px(2f).toFloat()
             itemView.cardView.setCardBackgroundColor(0xffffffff.toInt())
         }
-        itemView.name.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
+        itemView.name.text = if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName
         MDIFont.get().setIcon(itemView.icon, if (entity.showIcon.isNullOrBlank()) entity.mdiIcon else entity.showIcon)
         if (entity.isPersistentNotification) {
             itemView.state.text = entity.attributes?.message

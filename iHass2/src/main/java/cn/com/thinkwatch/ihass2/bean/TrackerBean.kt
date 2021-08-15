@@ -25,7 +25,7 @@ class TrackerBean(entity: JsonEntity, val translucence: Boolean): BaseBean(entit
             itemView.cardView.cardElevation = context.dip2px(2f).toFloat()
             itemView.cardView.setCardBackgroundColor(0xFF29B6FC.toInt())
         }
-        itemView.friendlyName.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
+        itemView.friendlyName.text = if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName
         if (entity.attributes?.entityPicture.isNullOrBlank()) {
             MDIFont.get().setIcon(itemView.state, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)
             itemView.state.visibility = View.VISIBLE

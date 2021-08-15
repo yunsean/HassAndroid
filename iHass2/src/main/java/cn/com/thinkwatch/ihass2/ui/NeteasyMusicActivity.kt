@@ -95,8 +95,8 @@ class NeteasyMusicActivity : BaseActivity() {
                     view.alias.visibility = if (it.isBlank()) View.GONE else View.VISIBLE
                 }
                 item.album?.name?.let {
-                    view.alumb.text = it
-                    view.alumb.visibility = if (it.isBlank()) View.GONE else View.VISIBLE
+                    view.album.text = it
+                    view.album.visibility = if (it.isBlank()) View.GONE else View.VISIBLE
                 }
                 view.artist.text = if (item.artists.isEmpty()) "未知艺术家" else item.artists.map { it.name }.reduce { acc, s -> acc + " " + s }
                 if (!item.album?.picUrl.isNullOrBlank()) {
@@ -111,8 +111,8 @@ class NeteasyMusicActivity : BaseActivity() {
             } else if (item is Mv) {
                 view.name.text = item.name
                 view.alias.visibility = View.GONE
-                view.alumb.text = item.artistName
-                view.alumb.visibility = if (item.artistName.isBlank()) View.GONE else View.VISIBLE
+                view.album.text = item.artistName
+                view.album.visibility = if (item.artistName.isBlank()) View.GONE else View.VISIBLE
                 view.artist.text = if (item.artistName.isEmpty()) "未知艺术家" else item.artistName
                 if (!item.cover.isBlank()) {
                     Glide.with(act)

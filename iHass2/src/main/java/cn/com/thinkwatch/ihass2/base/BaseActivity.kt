@@ -2,6 +2,7 @@ package cn.com.thinkwatch.ihass2.base
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -20,6 +21,7 @@ import android.widget.TextView
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.global.GlobalConfig
+import cn.com.thinkwatch.ihass2.utils.BackHandlerHelper
 
 import com.dylan.common.application.SwipeToBackActivity
 import com.dylan.common.data.StrUtil
@@ -29,6 +31,7 @@ import com.dylan.uiparts.activity.ActivityResultDispatch
 import com.dylan.uiparts.activity.RequestPermissionResultDispatch
 import com.dylan.uiparts.layout.LoadableLayout
 import io.reactivex.disposables.CompositeDisposable
+import org.jetbrains.anko.dip
 
 open class BaseActivity : SwipeToBackActivity() {
 
@@ -73,6 +76,15 @@ open class BaseActivity : SwipeToBackActivity() {
     }
     override fun setContentView(layoutResID: Int) {
         setContentView(layoutResID, R.layout.layout_hass_titlebar)
+    }
+    override fun getResources(): Resources {
+        val resources = super.getResources()
+        if (resources != null && resources.configuration.fontScale != app.fontScale) {
+            val configuration = resources.configuration
+            configuration.fontScale = app.fontScale
+            resources.updateConfiguration(configuration, resources.displayMetrics)
+        }
+        return resources
     }
     fun setContentView(layoutResID: Int, titlebarResId: Int) {
         super.setContentView(layoutResID)
@@ -165,9 +177,14 @@ open class BaseActivity : SwipeToBackActivity() {
     }
     protected open fun doRight() {
     }
-    override open fun onBackPressed() {
+    protected fun doBackpressed() {
         super.onBackPressed()
         overridePendingTransition(R.anim.push_left_in, R.anim.push_right_out)
+    }
+    override fun onBackPressed() {
+        if (!BackHandlerHelper.handleBackPress(this)) {
+            doBackpressed()
+        }
     }
     override fun startActivity(intent: Intent) {
         super.startActivity(intent)

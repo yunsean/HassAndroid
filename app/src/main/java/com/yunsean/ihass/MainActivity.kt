@@ -13,16 +13,15 @@ import android.widget.Toast
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.bus.ChoosePanel
-import cn.com.thinkwatch.ihass2.bus.ConfigChanged
 import cn.com.thinkwatch.ihass2.bus.DisplayPanel
 import cn.com.thinkwatch.ihass2.bus.RefreshEvent
 import cn.com.thinkwatch.ihass2.fragment.AutomationFragment
+import cn.com.thinkwatch.ihass2.fragment.album.AlbumMainFragment
 import cn.com.thinkwatch.ihass2.utils.HassConfig
 import cn.com.thinkwatch.ihass2.utils.cfg
 import com.dylan.common.rx.RxBus2
 import com.dylan.common.utils.Utility
 import com.dylan.uiparts.tabhost.TabHost
-import com.yunsean.dynkotlins.extensions.toastex
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.startActivity
@@ -45,6 +44,9 @@ class MainActivity : BaseActivity(), TabHost.OnTabChangeListener {
             finish()
             startActivity<MainActivity>()
         }
+        if (useAlbum != cfg.getBoolean(HassConfig.Album_Used)) {
+            initTabs()
+        }
     }
 
     private lateinit var mTabResId: Array<String>
@@ -52,11 +54,20 @@ class MainActivity : BaseActivity(), TabHost.OnTabChangeListener {
     private lateinit var mTabIds: IntArray
     private var latestPressedTab0: Long = 0
     private var latestRefreshed: Long = 0
+    private var useAlbum = false
     private fun initTabs() {
-        mTabResId = arrayOf("\uf0f5", "\uf59f", "\uf276", "\uf8ba")
-        mTabTitle = arrayOf("HOME", "HASS", "智能", "更多")
-        mTabIds = intArrayOf(R.id.hass, R.id.web, R.id.flow, R.id.more)
+        useAlbum = cfg.getBoolean(HassConfig.Album_Used)
+        if (useAlbum) {
+            mTabResId = arrayOf("\uf0f5", "\uf59f", "\uf276", "\uf2ec", "\uf8ba")
+            mTabTitle = arrayOf("HOME", "HASS", "智能", "同步", "更多")
+            mTabIds = intArrayOf(R.id.hass, R.id.web, R.id.flow, R.id.album, R.id.more)
+        } else {
+            mTabResId = arrayOf("\uf0f5", "\uf59f", "\uf276", "\uf8ba")
+            mTabTitle = arrayOf("HOME", "HASS", "智能", "更多")
+            mTabIds = intArrayOf(R.id.hass, R.id.web, R.id.flow, R.id.more)
+        }
         this.tabhost.setup()
+        this.tabhost.clearAllTabs()
         val inflater = LayoutInflater.from(ctx)
         for (i in mTabTitle.indices) {
             val item = inflater.inflate(R.layout.tabitem_main, null)
@@ -70,6 +81,7 @@ class MainActivity : BaseActivity(), TabHost.OnTabChangeListener {
             }
             tabhost.addTab(tabhost.newTabSpec(mTabTitle[i]).setIndicator(item).setContent(mTabIds[i]))
         }
+        this.tabhost.currentTab = 0
         val listener = object : GestureDetector.OnGestureListener {
             private var isFliping = false
             override fun onDown(motionEvent: MotionEvent): Boolean {
@@ -140,6 +152,7 @@ class MainActivity : BaseActivity(), TabHost.OnTabChangeListener {
                 R.id.hass-> MainFragment()
                 R.id.web-> WebFragment()
                 R.id.flow-> AutomationFragment()
+                R.id.album-> AlbumMainFragment()
                 R.id.more-> MoreFragment()
                 else-> null
             }

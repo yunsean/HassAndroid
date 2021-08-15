@@ -48,6 +48,9 @@ class MoreFragment : BaseFragment() {
         this.shortcuts.onClick {
             ctx.activity(ShortcutEditActivity::class.java)
         }
+        this.album.onClick {
+            ctx.activity(SettingAlbumActivity::class.java)
+        }
         this.widgets.onClick {
             ctx.activity(WidgetListActivity::class.java)
         }

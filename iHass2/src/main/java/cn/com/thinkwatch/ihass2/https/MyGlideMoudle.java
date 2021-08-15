@@ -3,6 +3,7 @@ package cn.com.thinkwatch.ihass2.https;
 import android.content.Context;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader;
@@ -23,18 +24,22 @@ import javax.net.ssl.X509TrustManager;
 import okhttp3.OkHttpClient;
 
 @GlideModule
-public class MyGlideMoudle extends AppGlideModule {
+public class MyGlideMoudle implements com.bumptech.glide.module.GlideModule {
 
-    @Override
-    public boolean isManifestParsingEnabled() {
-        return false;
-    }
+//    @Override
+//    public boolean isManifestParsingEnabled() {
+//        return false;
+//    }
 
     @Override
     public void registerComponents(Context context, Glide glide, Registry registry) {
-        super.registerComponents(context, glide, registry);
         OkHttpClient client = UnsafeOkHttpClient.getUnsafeOkHttpClient();
         registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(client));
+    }
+
+    @Override
+    public void applyOptions(Context context, GlideBuilder builder) {
+
     }
 
     public static class UnsafeOkHttpClient {
@@ -68,10 +73,9 @@ public class MyGlideMoudle extends AppGlideModule {
                         return true;
                     }
                 });
-                builder.connectTimeout(20, TimeUnit.SECONDS);
-                builder.readTimeout(20,TimeUnit.SECONDS);
-                OkHttpClient okHttpClient = builder.build();
-                return okHttpClient;
+                builder.connectTimeout(120, TimeUnit.SECONDS);
+                builder.readTimeout(120,TimeUnit.SECONDS);
+                return builder.build();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

@@ -302,7 +302,7 @@ class DetailConfigActivity : BaseActivity() {
             state.textColor = if (it.isActivated) activeColorValue else normalColorValue
             icon.imageBitmap = MDIFont.get().drawIcon(ctx, iconText, if (it.isActivated) activeColorValue else normalColorValue, dip(imageSizeValue))
             detail.textColor = normalColorValue
-            name.text = if (it.showName.isNullOrBlank()) it.friendlyName else it.showName
+            name.text = if (it.showName.isNullOrEmpty()) it.friendlyName else it.showName
             state.text = it.friendlyStateRow
             detail.text = sb.toString()
             detail.visibility = if (sb.isEmpty()) View.GONE else View.VISIBLE

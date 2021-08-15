@@ -25,6 +25,7 @@
                 <FrameLayout android:id="@+id/hass" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
                 <FrameLayout android:id="@+id/web" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
                 <FrameLayout android:id="@+id/flow" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
+                <FrameLayout android:id="@+id/album" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
                 <FrameLayout android:id="@+id/more" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
             </FrameLayout>
 

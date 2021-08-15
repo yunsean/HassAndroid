@@ -20,7 +20,7 @@ interface Api {
     fun callService(domain: String?, service: String?, json: String?): Observable<String>
     fun callService(domain: String?, service: String?, json: ServiceRequest?): Observable<String>
     fun getHistory(timestamp: String?, entityId: String?, endTime: String? = null): Observable<String>
-    fun gpsLogger(latitude: Double, longitude: Double, altitude: Double, address: String?, device: String, accuracy: String, provider: String, battery: Float, batteryTemperature: Float, isCharging: Boolean, isInteractive: Boolean, wifi: String?, currentApp: String?, gpsPassword: String?): Observable<String>
+    fun gpsLogger(password: String?, token: String?, latitude: Double, longitude: Double, altitude: Double, address: String?, device: String, accuracy: String, provider: String, battery: Float, batteryTemperature: Float, isCharging: Boolean, isInteractive: Boolean, wifi: String?, currentApp: String?, gpsPassword: String?): Observable<String>
     fun gpsLogger2(webHookId: String?, latitude: Double, longitude: Double, altitude: Double, device: String, accuracy: String, provider: String, battery: Float, currentApp: String?): Observable<String>
     fun dispose()
 

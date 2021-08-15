@@ -3,8 +3,7 @@ package cn.com.thinkwatch.ihass2.model.automation
 import cn.com.thinkwatch.ihass2.HassApplication
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.model.JsonEntity
-import cn.com.thinkwatch.ihass2.ui.automation.action.ActionDelayActivity
-import cn.com.thinkwatch.ihass2.ui.automation.action.ActionWaitActivity
+import cn.com.thinkwatch.ihass2.ui.automation.action.*
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
@@ -15,6 +14,8 @@ enum class ActionType(var desc: String) {
     delay("延时"),
     wait("等待"),
     event("事件触发"),
+    choose("选择"),
+    repeat("循环"),
     unknown("不支持")
 }
 open class Action(@Transient var action: ActionType = ActionType.service) {
@@ -79,6 +80,37 @@ data class FireEventAction(
 ) : Action(ActionType.service) {
     override fun desc(): String = "发送${event}事件"
     override fun icon(): String = "mdi:undo-variant"
+}
+
+data class ChooseItem(
+        @SerializedName("conditions") val conditions: List<Condition>? = null,
+        @SerializedName("sequence") val sequence: List<Action>? = null) {
+    fun desc() : String = ActionChooseItemActivity.desc(this)
+    fun icon() : String = "mdi:dots-horizontal"
+}
+
+data class ChooseAction(
+        @SerializedName("choose") val choose: List<ChooseItem>? = null,
+        @SerializedName("default") val default: List<Action>? = null
+) : Action(ActionType.choose) {
+    override fun desc(): String = ActionChooseActivity.desc(this)
+    override fun icon(): String = "mdi:format-list-checks"
+}
+
+data class RepeatItem(
+        @SerializedName("while") val whiles: List<Condition>? = null,
+        @SerializedName("until") val until: List<Condition>? = null,
+        @SerializedName("count") val count: Int? = null,
+        @SerializedName("sequence") val sequence: List<Action>? = null) {
+    fun desc(): String = ActionRepeatActivity.desc(this)
+    fun icon(): String = "mdi:repeat"
+}
+
+data class RepeatAction(
+        @SerializedName("repeat") val repeat: RepeatItem? = null
+) : Action(ActionType.repeat) {
+    override fun desc(): String = repeat?.let { ActionRepeatActivity.desc(it) } ?: "未知循环"
+    override fun icon(): String = "mdi:repeat"
 }
 
 data class UnknownAction(

@@ -29,8 +29,8 @@ class MdiListActivity : BaseActivity() {
         setTitle("图标选择", true)
         setAutoHideSoftInput(AutoHideSoftInputMode.WhenClick)
 
-        mdis.add("")
-        mdis.add("T")
+        if (intent.getBooleanExtra("allowEmpty", true)) mdis.add("")
+        if (intent.getBooleanExtra("allowText", true)) mdis.add("T")
         mdis.addAll(MDIFont.get().icons.keys)
         ui()
     }

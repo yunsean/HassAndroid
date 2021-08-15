@@ -52,6 +52,7 @@ class HttpFragment : BaseFragment() {
         this.hostUrl.setText(cfg.getString(HassConfig.Hass_HostUrl, ""))
         this.lanHostUrl.setText(cfg.getString(HassConfig.Hass_LocalUrl, ""))
         this.bssids = cfg.get(HassConfig.Hass_LocalBssid)?.split(",")?.filter { it.isNotEmpty() }
+        this.lanBssid.visibility = if (this.bssids?.isEmpty() ?: true) View.GONE else View.VISIBLE
         this.lanBssid.setText(bssids?.fold(StringBuilder(), { r, i-> r.append(i).append(" ")}))
         this.lanHostUrl.visibility = if (this.bssids?.size ?: 0 > 0) View.VISIBLE else View.GONE
         this.password.setText(cfg.getString(HassConfig.Hass_Password, ""))
@@ -187,7 +188,7 @@ class HttpFragment : BaseFragment() {
                     Observable.just(it)
                 }
                 .flatMap {
-                    db.import(config)
+                    db.import(ctx, config)
                     Observable.just(it)
                 }
                 .withNext {

@@ -7,4 +7,5 @@
     <string name="hass_connect_connect">连接</string>
     <string name="hass_panel_empty">你的仪表板是空的</string>
     <string name="hass_panel_edit">编辑面板</string>
+    <string name="accessibility_des">获取当前前台APP</string>
 </resources>

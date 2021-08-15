@@ -3,6 +3,7 @@ package cn.com.thinkwatch.ihass2.control
 import android.annotation.TargetApi
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
@@ -11,6 +12,7 @@ import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.Period
+import cn.com.thinkwatch.ihass2.ui.ImageViewActivity
 import cn.com.thinkwatch.ihass2.view.UseRatioView
 import com.dylan.common.rx.RxBus2
 import com.yunsean.dynkotlins.extensions.kdate
@@ -18,6 +20,7 @@ import com.yunsean.dynkotlins.extensions.kdateTime
 import com.yunsean.dynkotlins.extensions.nextOnMain
 import kotlinx.android.synthetic.main.control_switch.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.textColor
 import java.util.*
 
@@ -37,7 +40,7 @@ class SwitchFragment : ControlFragment() {
         val builder = AlertDialog.Builder(activity)
         fragment = activity?.layoutInflater?.inflate(R.layout.control_switch, null)
         builder.setView(fragment)
-        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
+        builder.setTitle(if (entity?.showName.isNullOrEmpty()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     override fun onResume() {
@@ -53,6 +56,7 @@ class SwitchFragment : ControlFragment() {
             useRatioDate.visibility = View.GONE
             textOn.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "turn_on", entity?.entityId)) }
             textOff.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "turn_off", entity?.entityId)) }
+            btnImage.onClick { startActivity(Intent(ctx, ImageViewActivity::class.java).putExtra("url", entity?.attributes?.entityPicture)) }
             btnClose.onClick { dismiss() }
             if (entity?.attributes?.isStateful ?: false) {
                 app.getHistory(calendar.kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"), entity?.entityId, Calendar.getInstance().kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"))
@@ -101,6 +105,7 @@ class SwitchFragment : ControlFragment() {
             val isActive = entity?.isCurrentStateActive ?: false
             textOn.textColor = ResourcesCompat.getColor(resources, if (isActive) R.color.primary else R.color.md_grey_500, null)
             textOff.textColor = ResourcesCompat.getColor(resources, if (isActive) R.color.md_grey_500 else R.color.primary, null)
+            btnImage.visibility = if (entity?.attributes?.entityPicture.isNullOrBlank()) View.GONE else View.VISIBLE
         }
     }
     override fun onChange() = refreshUi()

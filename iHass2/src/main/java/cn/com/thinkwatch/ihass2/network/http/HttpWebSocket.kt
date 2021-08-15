@@ -58,7 +58,7 @@ class HttpWebSocket(private val hostUrl: String): Websocket {
     override fun stop() {
         webSocket?.let {
             webSocket = null
-            try { it.cancel() } catch (ex: Exception) {  }
+            try { it.close(1000, "Closed") } catch (ex: Exception) {  }
         }
     }
     override fun callService(domain: String, service: String, request: ServiceRequest?): Observable<String> {
@@ -117,17 +117,19 @@ class HttpWebSocket(private val hostUrl: String): Websocket {
             latestSend = System.currentTimeMillis()
         }
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
-            connected = false
+            if (webSocket == this@HttpWebSocket.webSocket) connected = false
             webSocket.close(NORMAL_CLOSURE_STATUS, null)
-            stop()
+            if (webSocket == this@HttpWebSocket.webSocket) stop()
         }
         override fun onClosed(webSocket: WebSocket?, code: Int, reason: String?) {
-            connected = false
+            if (webSocket == this@HttpWebSocket.webSocket) connected = false
             super.onClosed(webSocket, code, reason)
         }
         override fun onFailure(webSocket: WebSocket?, t: Throwable, response: Response?) {
-            connected = false
-            if (this@HttpWebSocket.webSocket == webSocket) Observable.timer(3, TimeUnit.SECONDS).next { start() }
+            if (webSocket == this@HttpWebSocket.webSocket) {
+                connected = false
+                Observable.timer(3, TimeUnit.SECONDS).next { start() }
+            }
         }
     }
 

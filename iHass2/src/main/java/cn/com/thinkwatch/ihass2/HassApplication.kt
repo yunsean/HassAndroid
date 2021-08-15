@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.DeadObjectException
 import android.os.IBinder
@@ -63,7 +64,7 @@ open class HassApplication: Application() {
         application = this
 
         toastGravity = Gravity.BOTTOM
-        SDKInitializer.initialize(this)
+        try { SDKInitializer.initialize(this) } catch (_: Exception) {}
         SDKInitializer.setCoordType(CoordType.GCJ02)
         RxJavaPlugins.setErrorHandler { logws("unhandled rx error: ${it.localizedMessage}") }
 
@@ -97,6 +98,16 @@ open class HassApplication: Application() {
         Stetho.initialize(Stetho.newInitializerBuilder(this)
                 .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
                 .build())
+    }
+    val fontScale by lazy { cfg.getInt(HassConfig.Ui_FontScale, 85) / 100f }
+    override fun getResources(): Resources {
+        val resources = super.getResources()
+        if (resources != null && resources.configuration.fontScale != fontScale) {
+            val configuration = resources.configuration
+            configuration.fontScale = fontScale
+            resources.updateConfiguration(configuration, resources.displayMetrics)
+        }
+        return resources
     }
 
     private fun migratePreference() {
@@ -168,6 +179,9 @@ open class HassApplication: Application() {
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
+    }
+    fun protectEye(use: Boolean, color: Int, save: Boolean) {
+        syncService?.protectEye(use, color, save)
     }
 
     private var tipsToast: Toast? = null
@@ -346,6 +360,18 @@ open class HassApplication: Application() {
         }
         channels
     }
+
+
+    var relayLauncher: String? = null
+        get() {
+            if (field == null) field = readPref("RelayLauncher")
+            return field
+        }
+        set(value) {
+            savePref("RelayLauncher", value ?: "")
+            field = value
+        }
+
     companion object {
         lateinit var application: HassApplication
             private set

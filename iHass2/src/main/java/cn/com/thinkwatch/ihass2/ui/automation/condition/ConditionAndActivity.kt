@@ -19,6 +19,7 @@ import cn.com.thinkwatch.ihass2.utils.Gsons
 import cn.com.thinkwatch.ihass2.utils.SimpleItemTouchHelperCallback
 import com.dylan.uiparts.activity.ActivityResult
 import com.dylan.uiparts.recyclerview.RecyclerViewDivider
+import com.dylan.uiparts.recyclerview.SwipeItemLayout
 import com.yunsean.dynkotlins.extensions.*
 import com.yunsean.dynkotlins.ui.RecyclerAdapter
 import com.yunsean.dynkotlins.ui.RecyclerAdapterWrapper
@@ -90,6 +91,7 @@ class ConditionAndActivity : BaseActivity() {
         }
         act.conditions.adapter = this.adatper
         act.conditions.layoutManager = LinearLayoutManager(ctx)
+        act.conditions.addOnItemTouchListener(SwipeItemLayout.OnSwipeItemTouchListener(this))
         act.conditions.addItemDecoration(RecyclerViewDivider()
                 .setColor(0xfff2f2f2.toInt())
                 .setSize(dip2px(1f)))

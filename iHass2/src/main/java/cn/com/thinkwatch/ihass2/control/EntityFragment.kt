@@ -11,11 +11,11 @@ import android.view.View
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.model.Period
-import cn.com.thinkwatch.ihass2.ui.MapActivity
+import cn.com.thinkwatch.ihass2.ui.ImageViewActivity
 import cn.com.thinkwatch.ihass2.view.UseRatioView
 import com.yunsean.dynkotlins.extensions.*
 import com.yunsean.dynkotlins.ui.RecyclerAdapter
-import kotlinx.android.synthetic.main.control_tracker.view.*
+import kotlinx.android.synthetic.main.control_entity.view.*
 import kotlinx.android.synthetic.main.listitem_entity_period.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
@@ -36,7 +36,7 @@ class EntityFragment : ControlFragment() {
         val builder = AlertDialog.Builder(activity)
         fragment = activity?.layoutInflater?.inflate(R.layout.control_entity, null)
         builder.setView(fragment)
-        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
+        builder.setTitle(if (entity?.showName.isNullOrEmpty()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     private lateinit var adatper: RecyclerAdapter<Period>
@@ -63,6 +63,9 @@ class EntityFragment : ControlFragment() {
                 calendar.add(Calendar.DATE, 1)
                 updateHistory()
             }
+            btnImage.onClick {
+                startActivity(Intent(ctx, ImageViewActivity::class.java).putExtra("url", entity?.attributes?.entityPicture))
+            }
             btnClose.onClick {
                 dismiss()
             }
@@ -77,6 +80,7 @@ class EntityFragment : ControlFragment() {
             loading.visibility = View.VISIBLE
             content.visibility = View.GONE
             totalView.visibility = View.GONE
+            btnImage.visibility = if (entity?.attributes?.entityPicture.isNullOrBlank()) View.GONE else View.VISIBLE
             app.getHistory(calendar.kdateTime("yyyy-MM-dd'T'HH:mm:ssZZZZZ"), entity?.entityId)
                     .nextOnMain {
                         val totals = entity?.attributes?.ihassTotal?.split("|")

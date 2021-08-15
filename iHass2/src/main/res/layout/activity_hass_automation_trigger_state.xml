@@ -14,11 +14,67 @@
         android:textColor="#ff111111"
         android:textSize="14sp"
         android:text="对象"/>
-    <com.dylan.uiparts.recyclerview.InnerRecyclerView
-        android:id="@+id/entityIdView"
+    <TextView
+        android:id="@+id/entity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dip" />
+        android:drawableRight="@drawable/calendar_rightarrow"
+        android:drawablePadding="10dip"
+        android:background="@drawable/selector_ffffff_eeeeee"
+        android:paddingTop="10dip"
+        android:paddingBottom="10dip"
+        android:paddingRight="10dip"
+        android:paddingLeft="30dip"
+        android:textColor="#ff555555"
+        android:textColorHint="#ff999999"
+        android:textSize="14sp"
+        android:hint="请选择对象"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dip"
+        android:background="#fff2f2f2" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:textColor="#ff111111"
+        android:textSize="14sp"
+        android:text="属性"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/attribute"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="10dip"
+            android:paddingBottom="10dip"
+            android:paddingRight="30dip"
+            android:paddingLeft="30dip"
+            android:textColor="#ff555555"
+            android:textColorHint="#ff999999"
+            android:textSize="14sp"
+            android:hint="请选择属性（可选）"/>
+        <ImageView
+            android:id="@+id/cleanAttribute"
+            android:layout_width="44dip"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:scaleType="center"
+            android:src="@drawable/ic_close_blue_24dp"
+            android:contentDescription="@null" />
+        <ImageView
+            android:id="@+id/addAttribute"
+            android:layout_width="44dip"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:scaleType="center"
+            android:src="@drawable/ic_baseline_more_horiz_blue_24"
+            android:contentDescription="@null" />
+    </LinearLayout>
     <View
         android:layout_width="match_parent"
         android:layout_height="10dip"

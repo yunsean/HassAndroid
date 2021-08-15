@@ -28,7 +28,6 @@ class EmptyActivity : BaseActivity() {
         when (event) {
             "widgetClicked"-> onWidgetClicked(entity)
             "observedClicked"-> onObservedClicked(entity)
-            "voiceControl"-> onVoiceControl()
             else-> return finish()
         }
         disposable = RxBus2.getDefault().register(ControlDismissed::class.java, {
@@ -52,7 +51,6 @@ class EmptyActivity : BaseActivity() {
             when (event) {
                 "widgetClicked" -> onWidgetClicked(entity)
                 "observedClicked" -> onObservedClicked(entity)
-                "voiceControl" -> onVoiceControl()
                 else -> return finish()
             }
         }
@@ -64,11 +62,6 @@ class EmptyActivity : BaseActivity() {
     override fun finish() {
         this.finished = true
         super.finish()
-    }
-
-    private fun onVoiceControl() {
-        startActivity(Intent(this, VoiceActivity::class.java))
-        finish()
     }
 
     private fun onWidgetClicked(entity: JsonEntity) {

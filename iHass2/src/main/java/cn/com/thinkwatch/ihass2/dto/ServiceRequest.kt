@@ -45,7 +45,9 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
                           @SerializedName("shuffle") var shuffle: Boolean? = null,
                           @SerializedName("tilt_position") var tiltPosition: String? = null,
                           @SerializedName("effect") var effect: String? = null,
-                          @SerializedName("mode") var mode: String? = null) : Parcelable {
+                          @SerializedName("mode") var mode: String? = null,
+                          @SerializedName("move_mode") var moveMode: String? = null,
+                          @SerializedName("continuous_duration") var continuousDuration: Float? = null) : Parcelable {
     constructor(source: Parcel) : this(
             source.readString(),
             source.readString(),
@@ -87,7 +89,9 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
             source.readString()?.toBoolean(),
             source.readString(),
             source.readString(),
-            source.readString()
+            source.readString(),
+            source.readString(),
+            source.readValue(Float::class.java.classLoader) as Float?
     )
 
     override fun describeContents() = 0
@@ -134,6 +138,8 @@ data class ServiceRequest(@Transient var domain: String? = "homeassistant",
         writeString(tiltPosition)
         writeString(effect)
         writeString(mode)
+        writeString(moveMode)
+        writeValue(continuousDuration)
     }
 
     companion object {

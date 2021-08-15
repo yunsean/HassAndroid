@@ -29,6 +29,7 @@
      	<item name="android:windowTitleBackgroundStyle">@style/TitleBarBackground</item>
     </style>
     <style name="MyAppTheme" parent="@style/BaseTheme">
+        <item name="actionBarStyle">@style/MyActionBarTheme</item>
     </style>
     <style name="MyPreviewAppTheme" parent="@style/BaseTheme">
         <item name="android:windowBackground">@color/gray</item>
@@ -119,6 +120,11 @@
     <style name="MyBlueFullScreenTheme" parent="@style/BaseFullscreenTheme">
         <item name="android:windowBackground">@color/colorPrimary</item>
         <item name="android:windowIsTranslucent">false</item>
+    </style>
+
+    <style name="HomeActivity" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/transparent</item>
     </style>
 
     <style name="YellowTheme">

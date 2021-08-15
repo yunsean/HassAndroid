@@ -6,7 +6,6 @@
 	android:background="#00000000"
   	android:orientation="vertical">
 	<TextView
-	    android:id="@+id/文本替换"
 		android:layout_width="match_parent"
   		android:layout_height="44dip"
   		android:background="@drawable/shape_round_ffffff_10dip_lt_rt"

@@ -106,10 +106,29 @@
             <TextView
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:drawableTop="@drawable/ic_play_arrow_white_36dp"
+                android:drawableTop="@drawable/ic_play_circle_outline_white_24dp"
+                android:paddingTop="5dip"
                 android:gravity="center"
                 android:background="@null"
                 android:text="执行"
+                android:textColor="@color/white"
+                android:textSize="16sp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/copy"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:background="@drawable/selector_orange"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:drawableTop="@drawable/ic_content_copy_white_24dp"
+                android:paddingTop="5dip"
+                android:gravity="center"
+                android:background="@null"
+                android:text="复制"
                 android:textColor="@color/white"
                 android:textSize="16sp"/>
         </LinearLayout>

@@ -126,7 +126,7 @@ class DetailWidgetProvider : AppWidgetProvider() {
             val remoteViews = RemoteViews(context.packageName, R.layout.widget_detail)
             remoteViews.setViewVisibility(R.id.detail, if (sb.isEmpty()) View.GONE else View.VISIBLE)
             remoteViews.setTextViewText(R.id.detail, sb.toString())
-            remoteViews.setTextViewText(R.id.name, if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName)
+            remoteViews.setTextViewText(R.id.name, if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName)
             remoteViews.setTextViewText(R.id.state, entity.friendlyStateRow)
             remoteViews.setTextColor(R.id.name, iconColor)
             remoteViews.setTextColor(R.id.state, iconColor)

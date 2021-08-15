@@ -11,6 +11,7 @@ import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.model.automation.*
+import cn.com.thinkwatch.ihass2.ui.AttributeListActivity
 import cn.com.thinkwatch.ihass2.ui.AutomationEditActivity
 import cn.com.thinkwatch.ihass2.ui.EntityListActivity
 import cn.com.thinkwatch.ihass2.utils.Gsons
@@ -71,6 +72,16 @@ class ConditionStateActivity : BaseActivity() {
             startActivityForResult(Intent(ctx, EntityListActivity::class.java)
                     .putExtra("singleOnly", true), 105)
         }
+        act.addAttribute.setOnClickListener {
+            if (condition.entityId.isBlank()) return@setOnClickListener
+            startActivityForResult(Intent(ctx, AttributeListActivity::class.java)
+                    .putExtra("entityId", condition.entityId), 205)
+        }
+        act.cleanAttribute.setOnClickListener {
+            condition.attribute = null
+            act.attribute.text = ""
+            act.cleanAttribute.visibility = View.GONE
+        }
     }
     private fun data() {
         if (condition.entityId.isNotBlank()) {
@@ -78,35 +89,48 @@ class ConditionStateActivity : BaseActivity() {
                 act.entity.text = it.friendlyName
             }
         }
+        act.attribute.text = condition.attribute
         act.state.setText(condition.state)
         act.lasted.setText(condition.lasted?.toString() ?: "")
+    }
+
+    @ActivityResult(requestCode = 205)
+    private fun afterAttribibute(data: Intent?) {
+        val entityId = data?.getStringExtra("entityId")
+        val attribute = data?.getStringExtra("attribute")
+        if (entityId.isNullOrBlank() || attribute.isNullOrBlank()) return
+        condition.attribute = attribute
+        act.attribute.text = attribute
+        act.cleanAttribute.visibility = View.VISIBLE
     }
 
     @ActivityResult(requestCode = 105)
     private fun afterAddEntity(data: Intent?) {
         val entityIds = data?.getStringArrayExtra("entityIds")
-        if (entityIds == null || entityIds.size < 1) return
-        db.getEntity(entityIds.get(0))?.let {
+        if (entityIds == null || entityIds.isEmpty()) return
+        db.getEntity(entityIds[0])?.let {
             condition.entityId = it.entityId
             act.entity.text = it.friendlyName
             act.state.setText(it.state)
+            act.addAttribute.visibility = View.VISIBLE
         }
     }
 
     companion object {
-        fun desc(trigger: StateCondition): String {
+        fun desc(condition: StateCondition): String {
             val result = StringBuilder()
             var from: String? = null
-            trigger.entityId?.let {
+            condition.entityId?.let {
                 HassApplication.application.db.getEntity(it)?.let {
                     if (result.isNotBlank()) result.append(" ")
-                    trigger.state.let {t-> from = it.getFriendlyState(t) }
+                    condition.state.let { t-> from = it.getFriendlyState(t) }
                     result.append(it.friendlyName)
                 }
             }
+            if (!condition.attribute.isNullOrBlank()) result.append(".${condition.attribute}")
             result.append("状态为")
             from?.let { result.append("$it") }
-            trigger.lasted?.let { result.append("，持续$it") }
+            condition.lasted?.let { result.append("，持续$it") }
             return result.toString()
         }
     }

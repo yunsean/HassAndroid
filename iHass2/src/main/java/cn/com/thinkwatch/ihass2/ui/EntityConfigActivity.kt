@@ -215,7 +215,7 @@ class EntityConfigActivity : BaseActivity() {
                     datas.clear()
                     it.global?.forEach { datas.add(ParamItem(it.key, it.value)) }
                     var has = datas.map { it.key }
-                    it.global?.filter { !has.contains(it.key) }?.forEach { datas.add(ParamItem(it.key, it.value)) }
+                    it.local?.filter { !has.contains(it.key) }?.forEach { datas.add(ParamItem(it.key, it.value)) }
                     dataAdapter.notifyDataSetChanged()
                     loadable?.dismissLoading()
                 }

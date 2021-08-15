@@ -25,7 +25,7 @@ class SwitchBean(entity: JsonEntity, val translucence: Boolean): BaseBean(entity
         if (entity.isStateful || entity.isInputBoolean) {
             itemView.stateful.visibility = View.VISIBLE
             itemView.stateless.visibility = View.GONE
-            itemView.friendlyName.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
+            itemView.friendlyName.text = if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName
             itemView.group.text = entity.groupName
             MDIFont.get().setIcon(itemView.state, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)
             itemView.isActivated = entity.isActivated
@@ -43,7 +43,7 @@ class SwitchBean(entity: JsonEntity, val translucence: Boolean): BaseBean(entity
             itemView.stateless.visibility = View.VISIBLE
             itemView.stateless.alpha = if (translucence) 0.8f else 1f
             itemView.friendlyName1.isActivated = false
-            itemView.friendlyName1.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
+            itemView.friendlyName1.text = if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName
             itemView.turnOn.onClick { RxBus2.getDefault().post(ServiceRequest(entity.domain, "turn_on", entity.entityId)) }
             itemView.turnOff.onClick { RxBus2.getDefault().post(ServiceRequest(entity.domain, "turn_off", entity.entityId)) }
             itemView.turnOn.setOnLongClickListener {

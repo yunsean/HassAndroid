@@ -1,9 +1,10 @@
 package cn.com.thinkwatch.ihass2.network.http
 
-import cn.com.thinkwatch.ihass2.dto.ConfigEntityResult
 import io.reactivex.Observable
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.*
 
 interface HttpRawApi {
@@ -25,6 +26,12 @@ interface HttpRawApi {
     @POST("/api/broadcast/voice")
     fun sendVoice(@Header("x-ha-access") password: String?, @Header("Authorization") token: String?, @Body body: RequestBody, @Query("volume") volume: Int? = null): Observable<String>
 
+    @Streaming
+    @GET("/api/alumb/download")
+    fun albumDownload(@Header("x-ha-access") password: String?,
+                      @Header("Authorization") token: String?,
+                      @Query("user") user: String,
+                      @Query("path") path: String): Observable<Response<ResponseBody>>
 
 }
 

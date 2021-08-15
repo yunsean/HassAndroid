@@ -361,8 +361,8 @@ class MapActivity : BaseActivity() {
         super.onPause()
     }
     override fun onResume() {
-        bmapView.onResume()
         super.onResume()
+        bmapView.onResume()
     }
     override fun onDestroy() {
         bmapView.onDestroy()

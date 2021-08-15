@@ -4,28 +4,21 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.View
 import android.widget.TextView
 import cn.com.thinkwatch.ihass2.HassApplication
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.db.db
-import cn.com.thinkwatch.ihass2.model.JsonEntity
-import cn.com.thinkwatch.ihass2.model.MDIFont
 import cn.com.thinkwatch.ihass2.model.automation.*
+import cn.com.thinkwatch.ihass2.ui.AttributeListActivity
 import cn.com.thinkwatch.ihass2.ui.AutomationEditActivity
 import cn.com.thinkwatch.ihass2.ui.EntityListActivity
-import cn.com.thinkwatch.ihass2.utils.AddableRecylerAdapter
 import cn.com.thinkwatch.ihass2.utils.Gsons
-import cn.com.thinkwatch.ihass2.utils.SimpleItemTouchHelperCallback
 import com.dylan.dyn3rdparts.pickerview.DateTimePicker
 import com.dylan.uiparts.activity.ActivityResult
-import com.dylan.uiparts.recyclerview.RecyclerViewDivider
 import com.yunsean.dynkotlins.extensions.*
 import kotlinx.android.synthetic.main.activity_hass_automation_trigger_state.*
-import kotlinx.android.synthetic.main.listitem_automation_entity_item.view.*
 import org.jetbrains.anko.act
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.sdk25.coroutines.onClick
@@ -49,8 +42,7 @@ class TriggerStateActivity : BaseActivity() {
         data()
     }
     override fun doRight() {
-        if (entities.size < 1) return toastex("请选择需要观察的目标")
-        trigger.entityId = entities.map { it.entityId }.joinToString(",")
+        if (trigger.entityId.isBlank()) return showError("请选择观察的目标！")
         trigger.from = act.from.text().let { if (it.isBlank()) null else it }
         trigger.to = act.to.text().let { if (it.isBlank()) null else it }
         trigger.lasted = act.lasted.text().let { if (it.isBlank()) null else it }
@@ -58,8 +50,6 @@ class TriggerStateActivity : BaseActivity() {
         finish()
     }
 
-    private val entities = mutableListOf<JsonEntity>()
-    private lateinit var touchHelper: ItemTouchHelper
     private fun ui() {
         act.lasted.onClick {
             showDialog(R.layout.dialog_choice_time, object : OnSettingDialogListener {
@@ -80,44 +70,53 @@ class TriggerStateActivity : BaseActivity() {
                 }
             })
         }
-        val adapter = AddableRecylerAdapter(R.layout.listitem_automation_entity_item, entities) {
-            view, index, item, viewHolder ->
-            view.name.text = item.friendlyName
-            MDIFont.get().setIcon(view.icon, item.mdiIcon)
-            view.entityId.text = item.entityId
-            view.delete.onClick {
-                entities.remove(item)
-                act.entityIdView.adapter?.notifyDataSetChanged()
-            }
+        act.entity.onClick {
+            startActivityForResult(Intent(ctx, EntityListActivity::class.java)
+                    .putExtra("singleOnly", true), 105)
         }
-        adapter.setOnCreateClicked(R.layout.listitem_automation_entity_add) {
-            startActivityForResult(Intent(ctx, EntityListActivity::class.java), 105)
+        act.addAttribute.setOnClickListener {
+            if (trigger.entityId.isBlank()) return@setOnClickListener
+            startActivityForResult(Intent(ctx, AttributeListActivity::class.java)
+                    .putExtra("entityId", trigger.entityId), 205)
         }
-        act.entityIdView.adapter = adapter
-        act.entityIdView.layoutManager = LinearLayoutManager(ctx)
-        act.entityIdView.addItemDecoration(RecyclerViewDivider()
-                .setColor(0xfff2f2f2.toInt())
-                .setSize(dip2px(1f)))
-        val callback = SimpleItemTouchHelperCallback(adapter, false)
-        touchHelper = ItemTouchHelper(callback)
-        touchHelper.attachToRecyclerView(entityIdView)
+        act.cleanAttribute.setOnClickListener {
+            trigger.attribute = null
+            act.attribute.text = ""
+            act.cleanAttribute.visibility = View.GONE
+        }
     }
     private fun data() {
+        if (trigger.entityId.isNotBlank()) {
+            db.getEntity(trigger.entityId)?.let {
+                act.entity.text = it.friendlyName
+            }
+        }
+        act.attribute.text = trigger.attribute
         act.from.setText(trigger.from)
         act.to.setText(trigger.to)
         act.lasted.setText(trigger.lasted)
-        entities.clear()
-        entities.addAll(trigger.entityId.split(",").map { db.getEntity(it) }.filterNotNull())
-        act.entityIdView.adapter?.notifyDataSetChanged()
+    }
+
+    @ActivityResult(requestCode = 205)
+    private fun afterAttribibute(data: Intent?) {
+        val entityId = data?.getStringExtra("entityId")
+        val attribute = data?.getStringExtra("attribute")
+        if (entityId.isNullOrBlank() || attribute.isNullOrBlank()) return
+        trigger.attribute = attribute
+        act.attribute.text = attribute
+        act.cleanAttribute.visibility = View.VISIBLE
     }
 
     @ActivityResult(requestCode = 105)
     private fun afterAddEntity(data: Intent?) {
         val entityIds = data?.getStringArrayExtra("entityIds")
-        var position = data?.getIntExtra("position", -1) ?: -1
-        if (entityIds == null || entityIds.size < 1) return
-        entities.addAll(entityIds.map { db.getEntity(it) }.filterNotNull())
-        act.entityIdView.adapter?.notifyDataSetChanged()
+        if (entityIds == null || entityIds.isEmpty()) return
+        db.getEntity(entityIds[0])?.let {
+            trigger.entityId = it.entityId
+            act.entity.text = it.friendlyName
+            act.to.setText(it.state)
+            act.addAttribute.visibility = View.VISIBLE
+        }
     }
 
     companion object {
@@ -133,6 +132,7 @@ class TriggerStateActivity : BaseActivity() {
                     result.append(it.friendlyName)
                 }
             }
+            if (!trigger.attribute.isNullOrBlank()) result.append(".${trigger.attribute}")
             result.append("状态")
             from?.let { result.append("从$it") }
             to?.let { result.append("变更为$it") }

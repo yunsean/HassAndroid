@@ -183,7 +183,7 @@ class RowConfigActivity : BaseActivity() {
             val iconText = if (entity.showIcon.isNullOrBlank()) if (entity.isSensor && entity.attributes?.unitOfMeasurement != null) entity.state else entity.iconState else entity.showIcon
             view.findViewById<TextView>(R.id.name).apply {
                 textColor = iconColor
-                text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
+                text = if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName
                 textSize = textSizeValue.toFloat()
             }
             view.findViewById<ImageView>(R.id.icon).apply {

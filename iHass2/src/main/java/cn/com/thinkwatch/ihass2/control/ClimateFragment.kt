@@ -42,28 +42,32 @@ class ClimateFragment : ControlFragment() {
         val builder = AlertDialog.Builder(getActivity())
         fragment = act.layoutInflater.inflate(R.layout.control_climate, null, false)
         builder.setView(fragment)
-        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
+        builder.setTitle(if (entity?.showName.isNullOrEmpty()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     override fun onResume() {
         super.onResume()
         ui()
     }
-    private fun spinner(spinner: AppCompatSpinner, list: List<String>, selected: String?, changed: (value: String)->Unit) {
+    private fun spinner(spinner: AppCompatSpinner, list: List<String>, nameMap: Map<String, String>?, selected: String?, changed: (value: String)->Unit) {
         val adapter = ArrayAdapter(getActivity(), R.layout.spinner_edittext_lookalike, list.map {
-            val text = StringBuilder()
-            var newString = true
-            for (i in 0 until it.length) {
-                val ch = it.get(i)
-                if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch >= '0' && ch <= '9') {
-                    if (newString) text.append(ch.toUpperCase())
-                    else text.append(ch)
-                    newString = false
-                } else {
-                    newString = true
+            if (nameMap != null && nameMap.containsKey(it.toLowerCase())) {
+                nameMap.get(it.toLowerCase())
+            } else {
+                val text = StringBuilder()
+                var newString = true
+                for (i in 0 until it.length) {
+                    val ch = it.get(i)
+                    if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch >= '0' && ch <= '9') {
+                        if (newString) text.append(ch.toUpperCase())
+                        else text.append(ch)
+                        newString = false
+                    } else {
+                        newString = true
+                    }
                 }
+                text.toString()
             }
-            text.toString()
         })
         spinner.adapter = adapter
         spinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
@@ -76,16 +80,15 @@ class ClimateFragment : ControlFragment() {
         fragment?.apply {
             useRatio.colorMap = mapOf("off" to R.color.climateOff, "unavailable" to R.color.climateUnvaliable, "Cool" to R.color.climateCool,
                     "Heat" to R.color.climateHeat, "Dehumidify" to R.color.climateDehumidify, "Ventilate" to R.color.climateVentilate)
-            useRatio.textMap = mapOf("off" to "关闭", "unavailable" to "未知", "Cool" to "制冷",
-                    "Heat" to "制热", "Dehumidify" to "除湿", "Ventilate" to "通风")
+            useRatio.textMap = WorkModeMap
             button_close.onClick { dismiss() }
-            spinner(fan_speed, entity?.attributes?.fanModes ?: listOf(), entity?.attributes?.fanMode) {
+            spinner(fan_speed, entity?.attributes?.fanModes ?: listOf(), FanModeMap, entity?.attributes?.fanMode) {
                 if (it != entity?.attributes?.fanMode) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_fan_mode", entity?.entityId, fanMode = it))
             }
-            spinner(work_mode, entity?.attributes?.hvacModes ?: listOf(), entity?.attributes?.hvacMode) {
+            spinner(work_mode, entity?.attributes?.hvacModes ?: listOf(), WorkModeMap, entity?.attributes?.hvacMode) {
                 if (it != entity?.attributes?.hvacMode) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_hvac_mode", entity?.entityId, hvacMode = it))
             }
-            spinner(swing_mode, entity?.attributes?.swingModes ?: listOf(), entity?.attributes?.swingMode) {
+            spinner(swing_mode, entity?.attributes?.swingModes ?: listOf(), null, entity?.attributes?.swingMode) {
                 if (it != entity?.attributes?.swingMode) RxBus2.getDefault().post(ServiceRequest(entity?.domain, "set_swing_mode", entity?.entityId, swingMode = it))
             }
             text_minus.onClick {
@@ -163,5 +166,15 @@ class ClimateFragment : ControlFragment() {
     }
     override fun onChange() {
         refreshUi()
+    }
+
+    companion object {
+        private val WorkModeMap = mapOf("off" to "关闭", "heat" to "制热", "cool" to "制冷", "heat_cool" to "冷热自动",
+                "unavailable" to "未知", "auto" to "自动", "dry" to "除湿", "fan_only" to "送风",
+                "dehumidify" to "除湿", "ventilate" to "通风", "heating" to "制热", "cooling" to "制冷",
+                "drying" to "除湿", "idle" to "空闲", "fan" to "送风")
+        private val FanModeMap = mapOf("auto" to "自动", "low" to "低速", "mediumlow" to "中低速", "medium" to "中速",
+                "mediumhigh" to "中高速", "high" to "高速", "quiet" to "静音")
+
     }
 }

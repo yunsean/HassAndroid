@@ -8,6 +8,9 @@ import cn.com.thinkwatch.ihass2.adapter.PanelGroup
 import cn.com.thinkwatch.ihass2.bean.BlankBean
 import cn.com.thinkwatch.ihass2.enums.*
 import cn.com.thinkwatch.ihass2.model.*
+import cn.com.thinkwatch.ihass2.model.album.AlbumDownloadItem
+import cn.com.thinkwatch.ihass2.model.album.AlbumLocalItem
+import cn.com.thinkwatch.ihass2.model.album.AlbumRemoteItem
 import cn.com.thinkwatch.ihass2.model.broadcast.Cached
 import cn.com.thinkwatch.ihass2.model.broadcast.Favorite
 import cn.com.thinkwatch.ihass2.model.deprecated.V3DbEntity
@@ -27,6 +30,7 @@ import io.reactivex.schedulers.Schedulers
 import org.json.JSONArray
 import org.json.JSONObject
 import org.xutils.DbManager
+import org.xutils.common.util.KeyValue
 import org.xutils.db.annotation.Column
 import org.xutils.db.converter.ColumnConverter
 import org.xutils.db.converter.ColumnConverterFactory
@@ -52,7 +56,7 @@ open class LocalStorage(dbDir: String? = null) {
         var currentVersion = 0
         val daoConfig = DbManager.DaoConfig()
                 .setDbName("hass")
-                .setDbVersion(10)
+                .setDbVersion(11)
                 .setAllowTransaction(false)
                 .setDbUpgradeListener { db, oldVersion, newVersion ->
                     if (oldVersion < 4) {
@@ -79,6 +83,9 @@ open class LocalStorage(dbDir: String? = null) {
                         try { db.execNonQuery("DELETE FROM XMLY_FAVORITES") } catch (_: Exception) {}
                         try { db.execNonQuery("ALTER TABLE XMLY_FAVORITES ADD TYPE INTEGER default 0") } catch (_: Exception) {}
                     }
+                    if (oldVersion < 11) {
+                        try { db.execNonQuery("ALTER TABLE HASS_PANELS ADD PANEL_ICON TEXT") } catch (_: Exception) {}
+                    }
                     currentVersion = oldVersion
                 }
         if (dbDir != null) daoConfig.setDbDir(File(dbDir))
@@ -96,7 +103,7 @@ open class LocalStorage(dbDir: String? = null) {
             }
             listDashborad().forEach { dashboard->
                 getEntity(dashboard.entityId)?.let { entity->
-                    val name = if (dashboard.showName.isNullOrBlank()) entity.friendlyName else dashboard.showName
+                    val name = if (dashboard.showName.isNullOrEmpty()) entity.friendlyName else dashboard.showName
                     dashboard.spell = Pinyin.toPinyin(name, "`").toLowerCase()
                     dashboard.similar = getSimilar(dashboard.spell)
                     dbManager.update(dashboard)
@@ -303,7 +310,7 @@ open class LocalStorage(dbDir: String? = null) {
     fun saveDashboard(panelId: Long, entities: List<JsonEntity>) {
         try { dbManager.delete(Dashboard::class.java, WhereBuilder.b("PANEL_ID", "=", panelId)) } catch (_: Exception) {}
         entities.forEach {
-            val name = if (it.showName.isNullOrBlank()) it.friendlyName else it.showName
+            val name = if (it.showName.isNullOrEmpty()) it.friendlyName else it.showName
             val spell = Pinyin.toPinyin(name, "`").toLowerCase()
             val similar = getSimilar(spell)
             dbManager.save(Dashboard(panelId, it.entityId, it.displayOrder, it.showName, it.showIcon, it.columnCount, it.itemType, it.tileType, spell, similar))
@@ -455,6 +462,192 @@ open class LocalStorage(dbDir: String? = null) {
         dbManager.delete(TriggerHistory::class.java, WhereBuilder.b("ID", "<", history.id))
     }
 
+    fun addDownloadItems(items: List<AlbumRemoteItem>, userStub: String, currentPath: (path: String)-> String): Boolean {
+        var hasNew = false
+        dbManager.database.beginTransaction()
+        try {
+            items.forEach { remote->
+                val path = currentPath(remote.name)
+                val old = dbManager.selector(AlbumDownloadItem::class.java).where("PATH", "=", path).findFirst()
+                if (old == null) {
+                    dbManager.save(AlbumDownloadItem(remote.name, path, userStub, remote.size))
+                    hasNew = true
+                }
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+        dbManager.database.setTransactionSuccessful()
+        dbManager.database.endTransaction()
+        return hasNew
+    }
+    fun getDownloadItem(id: Long) = try { dbManager.findById(AlbumDownloadItem::class.java, id) } catch (_: Exception) { null }
+    fun getDownloadItems(pageIndex: Int, desc: Boolean = false) : List<AlbumDownloadItem> {
+        return try {
+            dbManager.selector(AlbumDownloadItem::class.java).orderBy("TIME", desc).offset(pageIndex * 100).limit(100).findAll()
+        } catch (_: Exception) {
+            listOf()
+        }
+    }
+    fun getDownloadItemsCount() = try { dbManager.selector(AlbumDownloadItem::class.java).count() } catch (_: Exception) { 0L }
+    fun deleteDownloadItems(ids: List<Long>) {
+        dbManager.database.beginTransaction()
+        try {
+            ids.forEach { dbManager.deleteById(AlbumDownloadItem::class.java, it) }
+        }  catch (_: Exception) {
+        }
+        dbManager.database.setTransactionSuccessful()
+        dbManager.database.endTransaction()
+    }
+    fun resetDownloadItems(ids: List<Long>) {
+        dbManager.database.beginTransaction()
+        try {
+            ids.forEach {
+                dbManager.update(AlbumDownloadItem::class.java, WhereBuilder.b("ID", "=", it.toString()), KeyValue("FAILED", false))
+            }
+        } catch (_: Exception) {
+        }
+        dbManager.database.setTransactionSuccessful()
+        dbManager.database.endTransaction()
+    }
+    fun cleanDownloadItems() = try { dbManager.delete(AlbumDownloadItem::class.java) } catch (_: Exception) {}
+    fun getAlbumFirstDownload(): AlbumDownloadItem? {
+        return try {
+            dbManager.selector(AlbumDownloadItem::class.java)
+                    .where("FAILED", "=", 0)
+                    .orderBy("TIME")
+                    .findFirst()
+        } catch (_: Exception) {
+            null
+        }
+    }
+    fun updateDownloadItem(item: AlbumDownloadItem) = try { dbManager.update(item) } catch (_: Exception) {}
+
+    fun addAlbumDownloadedItem(path: String) {
+        val file = File(path)
+        val old = dbManager.selector(AlbumLocalItem::class.java).where("PATH", "=", path).findFirst()
+        if (old != null) {
+            old.status = AlbumSyncStatus.download
+            old.mtime = file.lastModified()
+            dbManager.update(old)
+        } else {
+            val item = AlbumLocalItem(file.name, path, file.length(), file.lastModified(), AlbumSyncStatus.download)
+            dbManager.save(item)
+        }
+    }
+    fun addAlbumItems(items: List<String>, reupload: Boolean): Boolean {
+        var hasNew = false
+        dbManager.database.beginTransaction()
+        try {
+            items.forEach { path->
+                val file = File(path)
+                if (!file.exists() || !file.isFile) return@forEach
+                val old = dbManager.selector(AlbumLocalItem::class.java).where("PATH", "=", path).findFirst()
+                if (old != null) {
+                    if (reupload || file.lastModified() > old.mtime) {
+                        old.status = AlbumSyncStatus.waiting
+                        old.mtime = file.lastModified()
+                        dbManager.update(old)
+                        hasNew = true
+                    }
+                } else {
+                    dbManager.save(AlbumLocalItem(file.name, path, file.length(), file.lastModified()))
+                    hasNew = true
+                }
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+        dbManager.database.setTransactionSuccessful()
+        dbManager.database.endTransaction()
+        return hasNew
+    }
+    fun getAlbumItems(pageIndex: Int, statuses: List<AlbumSyncStatus>? = null, desc: Boolean = false) : List<AlbumLocalItem> {
+        return try {
+            val selector = dbManager.selector(AlbumLocalItem::class.java)
+            if (statuses != null && statuses.isNotEmpty()) {
+                selector.where(statuses.fold(WhereBuilder.b()) {wb, it-> wb.or(WhereBuilder.b("STATUS", "=", it.toString())) })
+            }
+            selector.orderBy("MTIME", desc).offset(pageIndex * 100).limit(100).findAll()
+        } catch (_: Exception) {
+            listOf()
+        }
+    }
+    fun getAlbumUnsyncCount(): Long {
+        return try {
+            dbManager.selector(AlbumLocalItem::class.java)
+                    .where("STATUS", "=", "waiting")
+                    .count()
+        } catch (_: Exception) {
+            0
+        }
+    }
+    fun getAlbumFirstWaiting(): AlbumLocalItem? {
+        return try {
+            dbManager.selector(AlbumLocalItem::class.java)
+                    .where("STATUS", "=", "waiting")
+                    .orderBy("RETRIED")
+                    .orderBy("MTIME")
+                    .findFirst()
+        } catch (_: Exception) {
+            null
+        }
+    }
+    fun getAlbumFailedCount(): Long {
+        return try {
+            dbManager.selector(AlbumLocalItem::class.java)
+                    .where("STATUS", "=", "failed")
+                    .count()
+        } catch (_: Exception) {
+            0
+        }
+    }
+    fun resetAlbumFailedItems() {
+        try {
+            dbManager.update(AlbumLocalItem::class.java, WhereBuilder.b("STATUS", "=", "failed"), KeyValue("STATUS", "waiting"))
+        } catch (_: Exception) {
+        }
+    }
+    fun resetAlbumFailedItems(ids: List<Long>) {
+        dbManager.database.beginTransaction()
+        try {
+            ids.forEach {
+                dbManager.update(AlbumLocalItem::class.java, WhereBuilder.b("ID", "=", it.toString()), KeyValue("STATUS", "waiting"))
+            }
+        } catch (_: Exception) {
+        }
+        dbManager.database.setTransactionSuccessful()
+        dbManager.database.endTransaction()
+    }
+    fun getAlbumItemsCount(statuses: List<AlbumSyncStatus>? = null) : Long {
+        return try {
+            val selector = dbManager.selector(AlbumLocalItem::class.java)
+            if (statuses != null && statuses.isNotEmpty()) {
+                selector.where(statuses.fold(WhereBuilder.b()) {wb, it-> wb.or(WhereBuilder.b("STATUS", "=", it.toString())) })
+            }
+            selector.count()
+        } catch (_: Exception) {
+            0L
+        }
+    }
+    fun cleanAlbumSucceed(): Long? {
+        val latest = try { dbManager.selector(AlbumLocalItem::class.java).where("STATUS", "=", "succeed").orderBy("MTIME", true).findFirst() } catch (_: Exception) { null }
+        try { dbManager.delete(AlbumLocalItem::class.java, WhereBuilder.b("STATUS", "=", "succeed")) } catch (_: Exception) {}
+        return latest?.mtime
+    }
+    fun updateAlbumItem(item: AlbumLocalItem) = try { dbManager.update(item) } catch (_: Exception) {}
+    fun deleteAlbumItem(id: Long) = try { dbManager.deleteById(AlbumLocalItem::class.java, id) } catch (_: Exception) {}
+    fun deleteAlbumItems(ids: List<Long>) {
+        dbManager.database.beginTransaction()
+        try {
+            ids.forEach { dbManager.deleteById(AlbumLocalItem::class.java, it) }
+        }  catch (_: Exception) {
+        }
+        dbManager.database.setTransactionSuccessful()
+        dbManager.database.endTransaction()
+    }
+    fun clearAlbumItem() = try {dbManager.delete(AlbumLocalItem::class.java) } catch (_: Exception) { }
+
     fun addXmlyFavorite(favorite: Favorite) = try { dbManager.saveOrUpdate(favorite) } catch (ex: Exception) { ex.printStackTrace() }
     fun delXmlyFavorite(id: Int) = try { dbManager.deleteById(Favorite::class.java, id) } catch (_: Exception) {}
     fun getXmlyFavorite(entityId: String, type: Int): List<Favorite> = try { dbManager.selector(Favorite::class.java).where(WhereBuilder.b("TYPE", "=", type).and("ENTITY_ID", "=", entityId)).findAll() } catch (_: Exception) { listOf() }
@@ -548,6 +741,7 @@ open class LocalStorage(dbDir: String? = null) {
         registerEnum(ConditionType::class.java)
         registerEnum(AlarmSoundType::class.java)
         registerEnum(AlarmVibrateType::class.java)
+        registerEnum(AlbumSyncStatus::class.java)
     }
     private fun <T> modelConvert(model: DbModel, clazz: Class<T>): T? {
         try {
@@ -595,27 +789,72 @@ open class LocalStorage(dbDir: String? = null) {
                           @Expose val token: String?)
     data class HassPanel(@Expose val name: String?,
                          @Expose val order: Int,
+                         @Expose val icon: String?,
                          @Expose val dashboards: List<Dashboard>)
     data class HassConfig(@Expose val server: HassServer,
                           @Expose val panels: List<HassPanel>?,
                           @Expose val widgets: List<Widget>?,
                           @Expose val widgetEntities: List<WidgetEntity>?,
                           @Expose val triggers: List<EventTrigger>?,
-                          @Expose val observeds: List<Observed>?)
+                          @Expose val observeds: List<Observed>?,
+                          @Expose val notifications: List<Notification>?,
+                          @Expose val configs: Map<String, String>)
     fun export(context: Context): String? {
+        val allConfigNames = arrayOf(
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Connect_ScreenOff,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Hass_HostUrl,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Hass_Password,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Hass_Token,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Hass_LocalUrl,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Hass_LocalBssid,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_PullRefresh,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_HomePanels,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_WebFrist,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_ShowTopbar,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Ui_ShowSidebar,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Gps_Logger,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Gps_DeviceName,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Gps_DeviceId,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Gps_Password,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Gps_AppLogger,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Gps_WebHookId,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Probe_NfcCard,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Probe_BluetoothBle,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Probe_Wifi,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Probe_Gps,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_DoubleHomeKey,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_TripleHomeKey,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_Notification,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_ShowWakeup,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_ScreenOnMode,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_ScreenOnWifi,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_ScreenOnBluetooth,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_ScreenOnCharging,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_ScreenOffMode,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_ScreenOffWifi,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_ScreenOffBluetooth,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_ScreenOffCharging,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_FromBluetooth,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_HeadsetWakeup,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_NoWakeupLock,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_VoiceOpenApp,
+                cn.com.thinkwatch.ihass2.utils.HassConfig.Speech_VoiceContact)
+        val allConfigs = mutableMapOf<String, String>()
+        allConfigNames.forEach { allConfigs.put(it, context.cfg.getString(it)) }
         val hostUrl = context.cfg.getString(cn.com.thinkwatch.ihass2.utils.HassConfig.Hass_HostUrl, "")
         val password = context.cfg.getString(cn.com.thinkwatch.ihass2.utils.HassConfig.Hass_Password, "")
         val token = context.cfg.getString(cn.com.thinkwatch.ihass2.utils.HassConfig.Hass_Token, "")
         val server = HassServer(hostUrl, password, token)
         val panels = listPanel().map {
             val dashborads = listDashborad(it.id)
-            HassPanel(it.name, it.order, dashborads)
+            HassPanel(it.name, it.order, it.icon, dashborads)
         }
-        val widgets = dbManager.findAll(Widget::class.java)
-        val widgetEntities = dbManager.findAll(WidgetEntity::class.java)
-        val triggers = dbManager.findAll(EventTrigger::class.java)
-        val observeds = dbManager.findAll(Observed::class.java)
-        val config = HassConfig(server, panels, widgets, widgetEntities, triggers, observeds)
+        val widgets = try { dbManager.findAll(Widget::class.java) } catch (_: Exception) { null }
+        val widgetEntities = try { dbManager.findAll(WidgetEntity::class.java) } catch (_: Exception) { null }
+        val triggers = try { dbManager.findAll(EventTrigger::class.java) } catch (_: Exception) { null }
+        val observeds = try { dbManager.findAll(Observed::class.java) } catch (_: Exception) { null }
+        val notifications = try { dbManager.findAll(Notification::class.java) } catch (_: Exception) { null }
+        val config = HassConfig(server, panels, widgets, widgetEntities, triggers, observeds, notifications, allConfigs)
         val gson = GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
                 .registerTypeAdapter(TileType::class.java, JsonSerializer<TileType> {
@@ -658,7 +897,8 @@ open class LocalStorage(dbDir: String? = null) {
             return null
         }
     }
-    fun import(config: HassConfig) {
+    fun import(context: Context, config: HassConfig) {
+        config.configs.forEach { context.cfg.set(it.key, it.value) }
         dbManager.database.beginTransaction()
         try { dbManager.delete(Dashboard::class.java) } catch (ex: Exception) { }
         try { dbManager.delete(Panel::class.java) } catch (ex: Exception) { }
@@ -666,8 +906,9 @@ open class LocalStorage(dbDir: String? = null) {
         try { dbManager.delete(WidgetEntity::class.java) } catch (ex: Exception) { }
         try { dbManager.delete(EventTrigger::class.java) } catch (ex: Exception) { }
         try { dbManager.delete(Observed::class.java) } catch (ex: Exception) { }
+        try { dbManager.delete(Notification::class.java) } catch (ex: Exception) { }
         config.panels?.forEach {
-            dbManager.save(Panel(it.name ?: "", it.order))
+            dbManager.save(Panel(it.name ?: "", it.order, icon = it.icon))
             val panelId = autoGenId()
             it.dashboards.forEach {
                 it.panelId = panelId
@@ -678,6 +919,7 @@ open class LocalStorage(dbDir: String? = null) {
         config.widgetEntities?.forEach { dbManager.save(it) }
         config.triggers?.forEach { dbManager.save(it) }
         config.observeds?.forEach { dbManager.save(it) }
+        config.notifications?.forEach { dbManager.save(it) }
         dbManager.database.setTransactionSuccessful()
         dbManager.database.endTransaction()
     }

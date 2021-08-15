@@ -17,12 +17,13 @@ android {
         applicationId "com.yunsean.ihass"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 218
-        versionName "2.1.8"
+        versionCode 222
+        versionName "2.2.2"
 
-        ndk {
-            abiFilters 'armeabi-v7a'
-        }
+        ndk { abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'armeabi' }
+//        ndk {
+//            abiFilters 'armeabi-v7a'
+//        }
         javaCompileOptions {
             annotationProcessorOptions {
                 includeCompileClasspath = true

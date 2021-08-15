@@ -126,7 +126,7 @@ class MessageHandler: VoiceHandler {
     private fun showChoice(candicates: List<Candicate>) {
         if (blindly) return doConfirm(candicates.get(0))
         val items = candicates.map {
-            val name = if (it.dashboard.showName.isNullOrBlank()) it.entity?.friendlyName else it.dashboard.showName
+            val name = if (it.dashboard.showName.isNullOrEmpty()) it.entity?.friendlyName else it.dashboard.showName
             val display = if (it.panel?.name.isNullOrBlank()) "查询${name}" else "查询${it.panel?.name}的${name}"
             DetailItem(display, it)
         }
@@ -137,7 +137,7 @@ class MessageHandler: VoiceHandler {
     private fun doConfirm(candicate: Candicate) {
         val entity = candicate.entity
         if (entity == null) return controller.finish(FinishAction.reset, "未找到可控制的设备！")
-        val name = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
+        val name = if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName
         val command = if (candicate.panel?.name.isNullOrBlank()) "你是要发送消息到${name}吗？"
         else "你是要发送消息到${candicate.panel?.name}的${name}吗？"
         this.confirm = candicate
@@ -148,7 +148,7 @@ class MessageHandler: VoiceHandler {
     private fun sendMessage(command: String) {
         val entity = confirm?.entity
         if (entity == null) return controller.finish(FinishAction.reset, "发送消息错误！")
-        val name = if (confirm?.dashboard?.showName.isNullOrBlank()) entity.friendlyName else confirm?.dashboard?.showName
+        val name = if (confirm?.dashboard?.showName.isNullOrEmpty()) entity.friendlyName else confirm?.dashboard?.showName
         val method = if (confirm?.panel?.name.isNullOrBlank()) "发送消息到${name}"
         else "发送消息到${confirm?.panel?.name}的${name}"
         HassApplication.application.ws.callService(entity.domain, "set_value", ServiceRequest(entity.domain, "set_value", entity.entityId, value = command))

@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.global.GlobalConfig
+import cn.com.thinkwatch.ihass2.utils.BackHandlerHelper
 import com.dylan.common.sketch.Sketch
 import com.dylan.uiparts.activity.ActivityResultDispatch
 import com.dylan.uiparts.activity.RequestPermissionResultDispatch
@@ -21,17 +22,27 @@ import kotlinx.android.synthetic.main.layout_hass_titlebar.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 
-abstract class BaseFragment : Fragment() {
+abstract class BaseFragment : Fragment(), BackHandlerHelper.FragmentBackHandler {
 
     protected abstract val layoutResId: Int
     protected lateinit var fragment: View
     protected var disposable: CompositeDisposable? = null
+    private var rootView: View? = null
 
-    protected fun loadable(): Boolean = false
+    protected open fun loadable(): Boolean = false
+    protected open fun viewCreated() = Unit
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        fragment = if (loadable()) LoadableLayout(ctx, layoutResId).showLoading(GlobalConfig.LoadingConfig())
-        else inflater.inflate(layoutResId, container, false)
+        if (rootView == null) {
+            fragment = if (loadable()) LoadableLayout(ctx, layoutResId).showLoading(GlobalConfig.LoadingConfig())
+            else inflater.inflate(layoutResId, container, false)
+            rootView = fragment
+            viewCreated()
+        }
         return fragment
+    }
+    override fun onDestroyView() {
+        (rootView?.parent as ViewGroup?)?.removeView(rootView)
+        super.onDestroyView()
     }
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -48,6 +59,7 @@ abstract class BaseFragment : Fragment() {
         disposable?.dispose()
         super.onDestroy()
     }
+    override fun onBackPressed(): Boolean = BackHandlerHelper.handleBackPress(this)
 
     protected fun setTitle(title: String) {
         setTitle(title, false)

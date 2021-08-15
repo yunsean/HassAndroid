@@ -50,7 +50,7 @@ class VoiceFragment : ControlFragment() {
         val builder = AlertDialog.Builder(activity)
         fragment = activity?.layoutInflater?.inflate(R.layout.control_voice, null)
         builder.setView(fragment)
-        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
+        builder.setTitle(if (entity?.showName.isNullOrEmpty()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     fun calcViewScreenLocation(view: View?): Rect {
@@ -127,7 +127,7 @@ class VoiceFragment : ControlFragment() {
         fragment?.file?.isEnabled = false
         fragment?.uploading?.progress = 0
         val body = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded"), filePath)
-        val fileBody = FileRequestBody(body) {total, progress ->
+        val fileBody = FileRequestBody(body) {total, progress, percent ->
             act.runOnUiThread { fragment?.uploading?.progress = (progress * 100 / total).toInt() }
         }
         BaseApi.rawApi(cfg.haHostUrl, HttpRawApi::class.java)

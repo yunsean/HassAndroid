@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.support.v7.app.AppCompatActivity
 import com.yunsean.dynkotlins.extensions.logis
 import com.yunsean.dynkotlins.extensions.toastex
+import org.jetbrains.anko.ctx
 
 class LauncherActivity : AppCompatActivity() {
 
@@ -38,7 +39,7 @@ class LauncherActivity : AppCompatActivity() {
                 ex.printStackTrace()
             }
         }
-        openService(packageName, "cn.com.thinkwatch.ihass2.service.DataSyncService", "cn.com.thinkwatch.ihass2.service.DataSyncService")
+        openService(ctx.packageName, "cn.com.thinkwatch.ihass2.service.DataSyncService", "cn.com.thinkwatch.ihass2.service.DataSyncService")
         finish()
     }
     private fun openService(packageName: String, className: String, actionName: String? = null) {

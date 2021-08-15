@@ -1,0 +1,5 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_album_item_disable_24dp" android:state_enabled="false" />
+    <item android:drawable="@drawable/ic_album_item_checked_24dp" android:state_selected="true" />
+    <item android:drawable="@drawable/ic_album_item_uncheck_24dp" />
+</selector>

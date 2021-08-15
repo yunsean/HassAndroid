@@ -35,7 +35,9 @@ class TriggerMqttActivity : BaseActivity() {
         if (topic.isBlank()) return toastex("请填写MQTT主题！")
         trigger.topic = topic
         trigger.payload = act.payload.text()
-        trigger.encoding = act.encoding.text()
+        if (trigger.payload.isNullOrBlank()) trigger.payload = null
+        trigger.encoding = act.encoding.text().trim()
+        if (trigger.encoding.isNullOrBlank()) trigger.encoding = null
         setResult(Activity.RESULT_OK, Intent().putExtra("trigger", AutomationEditActivity.gsonBuilder.toJson(trigger)))
         finish()
     }

@@ -8,11 +8,9 @@ import android.app.usage.UsageStatsManager
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Color
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
@@ -26,6 +24,7 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.TaskStackBuilder
 import android.support.v4.content.ContextCompat
 import android.util.TypedValue
+import android.view.Display
 import android.view.View
 import android.widget.RemoteViews
 import cn.com.thinkwatch.ihass2.R
@@ -33,6 +32,7 @@ import cn.com.thinkwatch.ihass2.aidl.IDataSyncCallback
 import cn.com.thinkwatch.ihass2.aidl.IDataSyncService
 import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.bus.AllowWakeupChanged
+import cn.com.thinkwatch.ihass2.bus.RunningAppEvent
 import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.enums.*
@@ -67,14 +67,12 @@ import com.dylan.common.rx.RxBus2
 import com.dylan.common.utils.Utility
 import com.google.gson.reflect.TypeToken
 import com.yunsean.dynkotlins.extensions.*
+import com.yunsean.ihasslauncher.ILauncher
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.internal.util.HalfSerializer.onNext
 import io.reactivex.schedulers.Schedulers
-import org.jetbrains.anko.alarmManager
-import org.jetbrains.anko.audioManager
-import org.jetbrains.anko.ctx
-import org.jetbrains.anko.dip
+import org.jetbrains.anko.*
 import org.json.JSONArray
 import java.lang.reflect.Method
 import java.text.SimpleDateFormat
@@ -262,6 +260,8 @@ class DataSyncService : Service() {
                 gpsWebHookId = cfg.getString(HassConfig.Gps_WebHookId)
                 requestLocation()
             }
+            password = cfg.getString(HassConfig.Hass_Password)
+            token = cfg.optString(HassConfig.Hass_Token)
             startWebSocket()
         }
 
@@ -360,7 +360,20 @@ class DataSyncService : Service() {
         }
         override fun getHistory(index: Long, timestamp: String?, entityId: String?, endTime: String?) {
             api.getHistory(timestamp, entityId, endTime).subscribeOn(Schedulers.computation()).next {
-                onCallResult(index, it, null)
+                try {
+                    val jsonArray = JSONArray(it)
+                    if (jsonArray.length() > 0) {
+                        val subArray = jsonArray.getJSONArray(0)
+                        for (i in 0 until subArray.length()){
+                            val jsonObject = subArray.getJSONObject(i)
+                            jsonObject.remove("attributes")
+                            jsonObject.remove("context")
+                        }
+                    }
+                    onCallResult(index, jsonArray.toString(), null)
+                } catch (_: Exception) {
+                    onCallResult(index, it, null)
+                }
             }.error {
                 onCallResult(index, null, it.getMessage() ?: "未知错误")
             }
@@ -390,6 +403,8 @@ class DataSyncService : Service() {
                 gpsWebHookId = ""
                 stopLocate()
             }
+            password = cfg.getString(HassConfig.Hass_Password)
+            token = cfg.optString(HassConfig.Hass_Token)
             if (cfg.getBoolean(HassConfig.Probe_BluetoothBle)) startBleScan()
             else stopBleScan()
             if (cfg.getBoolean(HassConfig.Probe_Wifi)) startWifiScan()
@@ -410,6 +425,18 @@ class DataSyncService : Service() {
         override fun notificationChanged() {
             loadNotification()
             setupNotification()
+        }
+        override fun protectEye(use: Boolean, color: Int, save: Boolean) {
+            var color = color
+            if (((color shr 24) and 0xff) > 160) color = (0xAA000000.toInt() or (color and 0x00ffffff))
+            if (save) {
+                cfg.set(HassConfig.Aux_ProtectEye, use)
+                cfg.set(HassConfig.Aux_ProtectEye_Color, color)
+            }
+            runOnUiThread {
+                eyeWindow.setColor(color)
+                if (use) eyeWindow.show() else eyeWindow.dismiss()
+            }
         }
         private val locationOptions by lazy {
             val option = LocationClientOption()
@@ -540,27 +567,37 @@ class DataSyncService : Service() {
         private var latestLongitude = .0
         private var latestUploadGps = 0L
         private var gpsDeviceId = ""
+        private var password: String? = null
+        private var token: String? = null
         private var gpsPassword = ""
         private var gpsWebHookId = ""
         @Synchronized private fun uploadGps(latitude: Double, longitude: Double, altitude: Double, address: String?, radius: Float, coorType: String, force: Boolean) {
             if (gpsDeviceId.isBlank()) return
-            if (Math.abs(latitude - latestLatitude) < 0.0002 && Math.abs(longitude - latestLongitude) < 0.0002 && System.currentTimeMillis() - latestUploadGps < 60_000) return
+            if (!force && Math.abs(latitude - latestLatitude) < 0.0002 && Math.abs(longitude - latestLongitude) < 0.0002 && System.currentTimeMillis() - latestUploadGps < 60_000) return
             latestLongitude = longitude
             latestLatitude = latitude
             latestUploadGps = System.currentTimeMillis()
             val batteryChanged = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
             val wgs = GpsUtil.GCJ2WGS(GpsUtil.LatLng(latitude, longitude))
-            val app: String? = if (cfg.getBoolean(HassConfig.Gps_AppLogger)) currentApp() else null
+            val app: String? = if (cfg.getBoolean(HassConfig.Gps_AppLogger)) if (currentApp.isNullOrBlank()) currentApp() else currentApp else null
             if (gpsWebHookId.isNotBlank()) {
                 api.gpsLogger2(gpsWebHookId, wgs.latitude, wgs.longitude, altitude, gpsDeviceId, radius.toString(), coorType, batteryLevel(batteryChanged), app)
                         .error {  }
             } else {
                 val wifi = (if (connectiveManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)?.isConnected ?: false) wifiManager.connectionInfo?.ssid?.trim('"') else null) ?: "未连接"
-                val isInteractive = powerManager.isInteractive
-                api.gpsLogger(wgs.latitude, wgs.longitude, altitude, address, gpsDeviceId, radius.toString(), coorType, batteryLevel(batteryChanged) * 100F, batteryTemperature(batteryChanged),
+                val isInteractive = isScreenOn() && !keyguardManager.isKeyguardLocked
+                val token = if (gpsPassword.isEmpty()) token else null
+                val password = if (gpsPassword.isEmpty()) password else null
+                api.gpsLogger(password, token, wgs.latitude, wgs.longitude, altitude, address, gpsDeviceId, radius.toString(), coorType, batteryLevel(batteryChanged) * 100F, batteryTemperature(batteryChanged),
                         isCharging(batteryChanged), isInteractive, wifi, app, if (gpsPassword.isBlank()) null else gpsPassword)
                         .error { }
             }
+        }
+        private fun isScreenOn(): Boolean {
+            displayManager.displays.forEach {
+                if (it.state == Display.STATE_ON || it.state == Display.STATE_UNKNOWN) return true
+            }
+            return false
         }
 
         private fun batteryTemperature(batteryChanged: Intent): Float = try { batteryChanged.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1).toFloat() / 10 } catch (_: Exception) { -1F }
@@ -594,6 +631,7 @@ class DataSyncService : Service() {
         }
     }
 
+    private val eyeWindow by lazy { EyeWindow() }
     private var messageReceiver: MessageReceiver? = null
     override fun onCreate() {
         super.onCreate()
@@ -614,7 +652,19 @@ class DataSyncService : Service() {
         setupNotification()
         setupRxBus()
         setupVoiceWakeup()
+        startService(Intent(ctx, AlbumSyncService::class.java))
         messageReceiver = MessageReceiver(this)
+        openService()
+        if (cfg.getBoolean(HassConfig.Aux_ProtectEye)) {
+            var color = cfg.getInt(HassConfig.Aux_ProtectEye_Color)
+            if (((color shr 24) and 0xff) > 160) color = (0xAA000000.toInt() or (color and 0x00ffffff))
+            eyeWindow.setColor(color)
+            eyeWindow.show()
+        }
+    }
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        eyeWindow.update()
     }
 
     private fun isWiredHeadsetOn(): Boolean {
@@ -754,12 +804,23 @@ class DataSyncService : Service() {
     }
 
     private var disposable: CompositeDisposable? = null
+    private var currentApp: String? = null
+    private var currentPackage: String? = null
     private fun setupRxBus() {
         disposable = RxBus2.getDefault().register(AllowWakeupChanged::class.java, {
             if (it.allow) startupWakeup()
             else shutdownWakeup()
             setupNotification()
-        }, disposable)
+        }, RxBus2.getDefault().register(RunningAppEvent::class.java, {
+            if (it.packageName == "com.android.systemui") return@register
+            if (it.packageName == currentPackage) return@register
+            currentPackage = it.packageName
+            val info = packageManager.getApplicationInfo(it.packageName, PackageManager.GET_META_DATA)
+            val name = info.loadLabel(packageManager)?.toString()
+            if (name.isNullOrBlank()) return@register
+            currentApp = name
+            binder.uploadInfo()
+        }, disposable))
     }
     private fun setupNotificationChannel() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -973,7 +1034,7 @@ class DataSyncService : Service() {
             override fun onReceive(context: Context, intent: Intent?) {
                 db.async {
                     when (intent?.action) {
-                        "android.intent.action.SCREEN_OFF"-> {
+                        Intent.ACTION_SCREEN_OFF-> {
                             VoiceWindow.dismiss()
                             setupVoiceWakeup()
                             handleScreenOffTrigger()
@@ -981,7 +1042,8 @@ class DataSyncService : Service() {
                             if (cfg.getBoolean(HassConfig.Gps_Logger)) stopBleScan()
                             if (!cfg.getBoolean(HassConfig.Connect_ScreenOff)) binder.stopWebSocket()
                         }
-                        "android.intent.action.SCREEN_ON"-> {
+                        Intent.ACTION_SCREEN_ON,
+                        Intent.ACTION_USER_PRESENT-> {
                             setupVoiceWakeup()
                             binder.startWebSocket()
                             if (cfg.getBoolean(HassConfig.Probe_Wifi)) wifiManager.startScan()
@@ -1024,8 +1086,9 @@ class DataSyncService : Service() {
         }
         val filter = IntentFilter()
         filter.priority = IntentFilter.SYSTEM_HIGH_PRIORITY - 9
-        filter.addAction("android.intent.action.SCREEN_OFF")
-        filter.addAction("android.intent.action.SCREEN_ON")
+        filter.addAction(Intent.ACTION_SCREEN_OFF)
+        filter.addAction(Intent.ACTION_SCREEN_ON)
+        filter.addAction(Intent.ACTION_USER_PRESENT)
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
@@ -1076,16 +1139,56 @@ class DataSyncService : Service() {
                 setupNotification()
             }
         }, IntentFilter("cn.com.thinkwatch.ihass2.Wakeup"))
+
+        registerReceiver(object: BroadcastReceiver() {
+            override fun onReceive(p0: Context?, p1: Intent?) {
+                if (eyeWindow.isShown()) eyeWindow.dismiss()
+                else eyeWindow.show()
+                setupNotification()
+            }
+        }, IntentFilter("cn.com.thinkwatch.ihass2.ProtectEye"))
     }
     override fun onDestroy() {
-        super.onDestroy()
         try { myWakeup?.release() } catch (_: Exception) {}
         disposable?.dispose()
         broadcastReceiver?.let { unregisterReceiver(it) }
         binder.stopWebSocket()
+        super.onDestroy()
         val localIntent = Intent()
         localIntent.setClass(this, DataSyncServiceStub()::class.java)
         this.startService(localIntent)
+    }
+    override fun onLowMemory() {
+        openService()
+        super.onLowMemory()
+    }
+    override fun onTrimMemory(level: Int) {
+        openService()
+        super.onTrimMemory(level)
+    }
+
+    private val hander = Handler()
+    private var launcherServiceConnection: ServiceConnection? = null
+    private fun openService() {
+        try {
+            val intent = Intent()
+            intent.component = ComponentName("com.yunsean.ihasslauncher", "com.yunsean.ihasslauncher.LauncherService")
+            val serviceConnection = launcherServiceConnection ?: object : ServiceConnection {
+                override fun onServiceConnected(className: ComponentName, service: IBinder) {
+                    ILauncher.Stub.asInterface(service)?.let {
+                        it.startup("cn.com.thinkwatch.isaw", "cn.com.thinkwatch.ihass2.service.DataSyncService", "cn.com.thinkwatch.ihass2.service.DataSyncService")
+                    }
+                }
+                override fun onServiceDisconnected(arg0: ComponentName) {
+                    hander.postDelayed({openService()}, 3000)
+                }
+            }
+            val result = applicationContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+            if (!result) hander.postDelayed({openService()}, 3000)
+            launcherServiceConnection = serviceConnection
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
     }
 
     private fun setupNotification() {
@@ -1094,27 +1197,34 @@ class DataSyncService : Service() {
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_APP)
         val parentView = RemoteViews(packageName, R.layout.notification_row)
         parentView.removeAllViews(R.id.contentView)
-        if (!cfg.getBoolean(HassConfig.Speech_Notification)) {
-            parentView.setViewVisibility(R.id.voice, View.GONE)
-            parentView.setViewVisibility(R.id.divider, View.GONE)
-        } else {
-            parentView.setViewVisibility(R.id.voice, View.VISIBLE)
-            parentView.setViewVisibility(R.id.divider, View.VISIBLE)
-            parentView.setOnClickPendingIntent(R.id.voice, PendingIntent.getBroadcast(ctx, 100, Intent("cn.com.thinkwatch.ihass2.Voice"), 0))
+
+        if (cfg.getBoolean(HassConfig.Speech_Notification)) {
+            val remoteView = RemoteViews(packageName, R.layout.listitem_notification)
+            val iconColor = ContextCompat.getColor(ctx, R.color.xiaomiPrimaryTextSelected)
+            val iconMdi = "mdi:microphone"
+            remoteView.setOnClickPendingIntent(R.id.itemView, PendingIntent.getBroadcast(ctx, 101, Intent("cn.com.thinkwatch.ihass2.Voice"), 0))
+            remoteView.setTextViewText(R.id.name, "语控")
+            remoteView.setImageViewBitmap(R.id.icon, MDIFont.get().drawIcon(ctx, iconMdi, iconColor, ctx.dip(24), ctx.dip(24)))
+            remoteView.setTextViewTextSize(R.id.name, TypedValue.COMPLEX_UNIT_SP, 10F)
+            remoteView.setTextColor(R.id.name, iconColor)
+            parentView.addView(R.id.contentView, remoteView)
         }
-        if (!cfg.getBoolean(HassConfig.Speech_ShowWakeup)) {
-            parentView.setViewVisibility(R.id.wakeup, View.GONE)
-            parentView.setViewVisibility(R.id.divider2, View.GONE)
-        } else {
-            val icon = if (enableWakeup != null && enableWakeup!!) R.drawable.icon_wakeup
-                else if (enableWakeup != null && !enableWakeup!!) R.drawable.icon_wakeup_disabled
-                else if (wakeupWorking) R.drawable.icon_wakeup_if_enable
-                else R.drawable.icon_wakeup_if_disabled
-            parentView.setViewVisibility(R.id.wakeup, View.VISIBLE)
-            parentView.setViewVisibility(R.id.divider2, View.VISIBLE)
-            parentView.setImageViewResource(R.id.wakeup, icon)
-            parentView.setOnClickPendingIntent(R.id.wakeup, PendingIntent.getBroadcast(ctx, 101, Intent("cn.com.thinkwatch.ihass2.Wakeup"), 0))
+
+        if (cfg.getBoolean(HassConfig.Speech_ShowWakeup)) {
+            val remoteView = RemoteViews(packageName, R.layout.listitem_notification)
+            val iconColor = if ((enableWakeup != null && enableWakeup!!) || wakeupWorking) ContextCompat.getColor(ctx, R.color.xiaomiPrimaryTextSelected) else 0xffaaaaaa.toInt()
+            val iconMdi = "mdi:ear-hearing"
+            val title = if (enableWakeup != null && enableWakeup!!) "开启"
+            else if (enableWakeup != null && !enableWakeup!!) "关闭"
+            else "条件"
+            remoteView.setOnClickPendingIntent(R.id.itemView, PendingIntent.getBroadcast(ctx, 101, Intent("cn.com.thinkwatch.ihass2.Wakeup"), 0))
+            remoteView.setTextViewText(R.id.name, title)
+            remoteView.setImageViewBitmap(R.id.icon, MDIFont.get().drawIcon(ctx, iconMdi, iconColor, ctx.dip(24), ctx.dip(24)))
+            remoteView.setTextViewTextSize(R.id.name, TypedValue.COMPLEX_UNIT_SP, 10F)
+            remoteView.setTextColor(R.id.name, iconColor)
+            parentView.addView(R.id.contentView, remoteView)
         }
+
         entities.forEachIndexed { index, entity->
             if (index >= RowWidgetProvider.actions.size) return@forEachIndexed
             val remoteView = RemoteViews(packageName, R.layout.listitem_notification)
@@ -1125,13 +1235,24 @@ class DataSyncService : Service() {
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     .putExtra("entityId", entity.entityId)
                     .putExtra("event", "widgetClicked"), PendingIntent.FLAG_CANCEL_CURRENT))
-            remoteView.setTextViewText(R.id.name, if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName)
+            remoteView.setTextViewText(R.id.name, if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName)
             remoteView.setImageViewBitmap(R.id.icon, MDIFont.get().drawIcon(ctx, iconText, iconColor, ctx.dip(if (iconText?.startsWith("mdi:") ?: false) 24 else 14), ctx.dip(24)))
             remoteView.setTextViewTextSize(R.id.name, TypedValue.COMPLEX_UNIT_SP, 10F)
             remoteView.setTextColor(R.id.name, iconColor)
             parentView.addView(R.id.contentView, remoteView)
         }
-        builder.setSmallIcon(R.drawable.shell8)
+        if (cfg.getBoolean(HassConfig.Aux_ProtectEye)) {
+            val remoteView = RemoteViews(packageName, R.layout.listitem_notification)
+            val iconColor = if (eyeWindow.isShown()) ContextCompat.getColor(ctx, R.color.xiaomiPrimaryTextSelected) else 0xffaaaaaa.toInt()
+            val iconMdi = if (eyeWindow.isShown()) "mdi:eye-outline" else "mdi:eye"
+            remoteView.setOnClickPendingIntent(R.id.itemView, PendingIntent.getBroadcast(ctx, 101, Intent("cn.com.thinkwatch.ihass2.ProtectEye"), 0))
+            remoteView.setTextViewText(R.id.name, "护眼")
+            remoteView.setImageViewBitmap(R.id.icon, MDIFont.get().drawIcon(ctx, iconMdi, iconColor, ctx.dip(24), ctx.dip(24)))
+            remoteView.setTextViewTextSize(R.id.name, TypedValue.COMPLEX_UNIT_SP, 10F)
+            remoteView.setTextColor(R.id.name, iconColor)
+            parentView.addView(R.id.contentView, remoteView)
+        }
+        builder.setSmallIcon(R.mipmap.ic_launcher)
                 .setDefaults(0)
                 .setPriority(NotificationCompat.PRIORITY_MIN)
                 .setAutoCancel(false)

@@ -76,6 +76,13 @@ class AutomationFragment : BaseFragment() {
                 RxBus2.getDefault().post(ServiceRequest(item.domain, "trigger", item?.entityId))
                 showInfo("已执行")
             }
+            view.copy.setOnClickListener {
+                Intent(act, AutomationEditActivity::class.java)
+                        .putExtra("entityId", item.entityId)
+                        .putExtra("automationId", item.attributes?.id)
+                        .putExtra("forAdd", true)
+                        .start(act)
+            }
             view.contentView.onClick {
                 Intent(act, AutomationEditActivity::class.java)
                         .putExtra("entityId", item.entityId)
@@ -125,7 +132,7 @@ class AutomationFragment : BaseFragment() {
         this.adapter.items = null
         adapter.notifyDataSetChanged()
         db.async {
-            db.listEntity("automation.%").sortedBy { it.friendlyName }
+            db.listEntity("automation.%").sortedByDescending { it.attributes?.lastTriggered }
         }.withNext {
             allEntities = it.toMutableList()
             this.loading.visibility = View.GONE

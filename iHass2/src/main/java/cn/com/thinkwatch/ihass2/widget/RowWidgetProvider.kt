@@ -90,7 +90,7 @@ class RowWidgetProvider : AppWidgetProvider() {
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                         .putExtra("entityId", entity.entityId)
                         .putExtra("event", "widgetClicked"), PendingIntent.FLAG_CANCEL_CURRENT))
-                remoteView.setTextViewText(R.id.name, if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName)
+                remoteView.setTextViewText(R.id.name, if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName)
                 remoteView.setImageViewBitmap(R.id.icon, MDIFont.get().drawIcon(context, iconText, iconColor, context.dip(if (iconText?.startsWith("mdi:") ?: false) widget.imageSize else widget.imageSize * 2 / 3), context.dip(widget.imageSize)))
                 remoteView.setTextColor(R.id.name, iconColor)
                 remoteView.setTextViewTextSize(R.id.name, TypedValue.COMPLEX_UNIT_SP, widget.textSize.toFloat())

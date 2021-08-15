@@ -24,6 +24,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import cn.com.thinkwatch.ihass2.R
+import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseFragment
 import cn.com.thinkwatch.ihass2.bus.ConfigChanged
 import cn.com.thinkwatch.ihass2.db.db
@@ -31,6 +32,8 @@ import cn.com.thinkwatch.ihass2.model.MDIFont
 import cn.com.thinkwatch.ihass2.ui.LauncherActivity
 import cn.com.thinkwatch.ihass2.utils.HassConfig
 import cn.com.thinkwatch.ihass2.utils.cfg
+import cn.forward.androids.base.BaseApplication
+import com.dylan.common.application.SplashActivity
 import com.dylan.common.rx.RxBus2
 import com.dylan.common.sketch.Animations
 import com.dylan.common.sketch.Dialogs
@@ -41,10 +44,14 @@ import com.dylan.uiparts.recyclerview.RecyclerViewDivider
 import com.yunsean.dynkotlins.extensions.*
 import com.yunsean.dynkotlins.ui.RecyclerAdapter
 import com.yunsean.dynkotlins.ui.RecyclerAdapterWrapper
+import kotlinx.android.synthetic.main.dialog_color_picker.view.*
 import kotlinx.android.synthetic.main.dialog_hass_prompt.view.*
 import kotlinx.android.synthetic.main.dialog_list_view.view.*
+import kotlinx.android.synthetic.main.fragment_hass_http.*
 import kotlinx.android.synthetic.main.fragment_hass_setting.*
 import kotlinx.android.synthetic.main.listitem_entity_item.view.*
+import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
+import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.image
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.act
@@ -84,6 +91,43 @@ class SettingFragment : BaseFragment() {
         this.webFirst.setOnCheckedChangeListener { buttonView, isChecked ->
             set(HassConfig.Ui_WebFrist, isChecked)
         }
+        this.showTopbar.isChecked = cfg.getBoolean(HassConfig.Ui_ShowTopbar)
+        this.showTopbar.setOnCheckedChangeListener { buttonView, isChecked ->
+            set(HassConfig.Ui_ShowTopbar, isChecked)
+        }
+        this.showSidebar.isChecked = cfg.getBoolean(HassConfig.Ui_ShowSidebar)
+        this.showSidebar.setOnCheckedChangeListener { buttonView, isChecked ->
+            set(HassConfig.Ui_ShowSidebar, isChecked)
+        }
+        this.fontScale.progress = cfg.getInt(HassConfig.Ui_FontScale, 85)
+        this.fontScale.setOnProgressChangeListener(object : DiscreteSeekBar.OnProgressChangeListener {
+            override fun onProgressChanged(seekBar: DiscreteSeekBar, value: Int, fromUser: Boolean) {}
+            override fun onStartTrackingTouch(seekBar: DiscreteSeekBar) {}
+            override fun onStopTrackingTouch(seekBar: DiscreteSeekBar) {
+                set(HassConfig.Ui_FontScale, seekBar.progress)
+                ctx.showDialog(R.layout.dialog_hass_confirm, object : OnSettingDialogListener {
+                    override fun onSettingDialog(dialog: Dialog, contentView: View) {
+                      Sketch.set_tv(contentView, R.id.title, "需要重启")
+                        Sketch.set_tv(contentView, R.id.content, "修改字体大小需要重启应用才能生效，是否立即重启？")
+                        Sketch.set_tv(contentView, R.id.cancel, "暂不重启")
+                        Sketch.set_tv(contentView, R.id.ok, "立即重启")
+                    }
+                }, intArrayOf(R.id.ok, R.id.cancel), object : OnDialogItemClickedListener {
+                    override fun onClick(dialog: Dialog, contentView: View, clickedView: View) {
+                        dialog.dismiss()
+                        if (clickedView.id == R.id.ok) {
+                            ctx.packageManager.getLaunchIntentForPackage(ctx.packageName)?.let {
+                                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                ctx.startActivity(it)
+                                android.os.Process.killProcess(android.os.Process.myPid())
+                            }
+                        } else {
+                            ctx.toastex("请稍后自行重启手机让配置生效！")
+                        }
+                    }
+                })
+            }
+        })
         this.gpsLogger.isChecked = cfg.getBoolean(HassConfig.Gps_Logger)
         this.gpsLoggerPanel.setVisibility(if (gpsLogger.isChecked) View.VISIBLE else View.GONE)
         this.gpsLogger.onClick {
@@ -236,6 +280,41 @@ class SettingFragment : BaseFragment() {
 
         this.shortcut.onClick {
             doShortcut()
+        }
+
+        this.protectEye.isChecked = cfg.getBoolean(HassConfig.Aux_ProtectEye)
+        this.protectEyePanel.visibility = if (this.protectEye.isChecked) View.VISIBLE else View.GONE
+        this.overlayColor.backgroundColor = cfg.getInt(HassConfig.Aux_ProtectEye_Color, 0x33FFFF00)
+        this.protectEye.onClick {
+            if (act.protectEye.isChecked) {
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + ctx.packageName))
+                startActivityForResult(intent, 1000)
+            }
+            act.protectEyePanel.visibility = if (act.protectEye.isChecked) View.VISIBLE else View.GONE
+            app.protectEye(act.protectEye.isChecked, cfg.getInt(HassConfig.Aux_ProtectEye_Color, 0x33FFFF00), true)
+        }
+        this.protectEyePanel.onClick {
+            ctx.showDialog(R.layout.dialog_color_picker, object: OnSettingDialogListener {
+                override fun onSettingDialog(dialog: Dialog, contentView: View) {
+                    contentView.colorPicker.addSVBar(contentView.svbarPicker)
+                    contentView.colorPicker.addOpacityBar(contentView.opacityPicker)
+                    contentView.colorPicker.color = cfg.getInt(HassConfig.Aux_ProtectEye_Color, 0x33FFFF00)
+                    contentView.colorPicker.setOnColorSelectedListener { app.protectEye(true, it, false) }
+                    contentView.opacityPicker.setOnOpacityChangedListener { app.protectEye(true, contentView.colorPicker.color, false) }
+                    contentView.svbarPickerPanel.visibility = View.GONE
+                }
+            }, intArrayOf(R.id.cancel, R.id.ok), object : OnDialogItemClickedListener {
+                override fun onClick(dialog: Dialog, contentView: View, clickedView: View) {
+                    dialog.dismiss()
+                    if (clickedView.id == R.id.ok) {
+                        cfg.set(HassConfig.Aux_ProtectEye_Color, contentView.colorPicker.color)
+                        act.overlayColor.backgroundColor = contentView.colorPicker.color
+                        app.protectEye(true, contentView.colorPicker.color, true)
+                    } else {
+                        app.protectEye(true, cfg.getInt(HassConfig.Aux_ProtectEye_Color, 0x33FFFF00), false)
+                    }
+                }
+            })
         }
     }
     private fun hasNfc() = try { (ctx.getSystemService(Context.NFC_SERVICE) as NfcManager?)?.defaultAdapter?.isEnabled ?: false } catch (_: Exception) { false }

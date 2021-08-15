@@ -25,7 +25,7 @@ class NormalBean(entity: JsonEntity, val translucence: Boolean): BaseBean(entity
             itemView.cardView.cardElevation = context.dip2px(2f).toFloat()
             itemView.cardView.setCardBackgroundColor(0xffffffff.toInt())
         }
-        itemView.friendlyName.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
+        itemView.friendlyName.text = if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName
         itemView.group.text = try { SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ").parse(entity.attributes?.lastTriggered)?.ktime() } catch (_: Exception) { entity.attributes?.lastTriggered } ?: "无"
         itemView.state.typeface = ResourcesCompat.getFont(context, if (entity.hasStateIcon) R.font.mdi else R.font.dincond)
         MDIFont.get().setIcon(itemView.state, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)

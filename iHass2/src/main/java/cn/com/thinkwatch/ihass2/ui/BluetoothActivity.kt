@@ -1,10 +1,15 @@
 package cn.com.thinkwatch.ihass2.ui
 
 import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -40,12 +45,17 @@ class BluetoothActivity : BaseActivity() {
 
         ui()
         data()
+
+        val filter = IntentFilter()
+        filter.addAction(BluetoothDevice.ACTION_FOUND)
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+        registerReceiver(scanReceiver, filter)
     }
-    override fun onDestroy() {
-        bluetoothScanCallback?.let {
-            bluetoothAdapter?.bluetoothLeScanner?.stopScan(it)
-        }
-        super.onDestroy()
+    override fun onPause() {
+        bluetoothAdapter.bluetoothLeScanner?.stopScan(bluetoothScanCallback)
+        unregisterReceiver(scanReceiver)
+        super.onPause()
     }
     override fun doRight() {
         val data = Intent().putExtra("addresses", checkedAddresses.filter { it.isNotBlank() }.toTypedArray())
@@ -61,8 +71,8 @@ class BluetoothActivity : BaseActivity() {
     private fun ui() {
         this.adapter = RecyclerAdapter(R.layout.listitem_hass_bluetooth, bluetoothDevices) {
             view, index, item ->
-            view.name.setText(item.name)
-            view.address.setText(item.address)
+            view.name.text = item.name
+            view.address.text = item.address
             view.checked.visibility = if (checkedAddresses.contains(item.address)) View.VISIBLE else View.GONE
             view.icon.text = if (item.connected) "\uf0b1" else "\uf0af"
             view.onClick {
@@ -94,8 +104,63 @@ class BluetoothActivity : BaseActivity() {
         }
     }
 
-    private val bluetoothAdapter by lazy { bluetoothManager.getAdapter() }
-    private var bluetoothScanCallback: ScanCallback? = null
+    private val bluetoothAdapter by lazy { bluetoothManager.adapter }
+    private val bluetoothScanCallback by lazy {
+        object: ScanCallback() {
+            override fun onScanResult(callbackType: Int, result: ScanResult?) {
+                super.onScanResult(callbackType, result)
+                result?.device?.let { d->
+                    var found = bluetoothDevices.find { it.address == d.address }
+                    if (found == null) {
+                        bluetoothDevices.add(d.let { BluetoothItem(it.address, it.name ?: result.scanRecord?.deviceName) })
+                        adapter.notifyDataSetChanged()
+                        loading?.visibility = View.GONE
+                    } else if (!d.name.isNullOrBlank()) {
+                        found.name = d.name
+                    }
+                }
+            }
+            override fun onBatchScanResults(results: MutableList<ScanResult>?) {
+                results?.forEach {r->
+                    val found = bluetoothDevices.find { it.address == r.device.address }
+                    if (found == null) {
+                        bluetoothDevices.add(r.device.let { BluetoothItem(it.address, it.name ?: r.scanRecord?.deviceName) })
+                    } else if (!r.device.name.isNullOrBlank()) {
+                        found.name = r.device.name
+                    }
+                }
+                adapter.notifyDataSetChanged()
+                if (bluetoothDevices.size > 0) loading?.visibility = View.GONE
+            }
+            override fun onScanFailed(errorCode: Int) {
+                super.onScanFailed(errorCode)
+                if (errorCode != ScanCallback.SCAN_FAILED_ALREADY_STARTED && bluetoothDevices.size < 1) {
+                    error("查找蓝牙设备失败：${errorCode}")
+                }
+            }
+        }
+    }
+    private val scanReceiver by lazy {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val action = intent.action
+                when {
+                    action.equals(BluetoothDevice.ACTION_FOUND, ignoreCase = true) -> intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)?.let { device->
+                        if (bluetoothDevices.find { device.address == it.address } == null) {
+                            bluetoothDevices.add(BluetoothItem(device.address, device.name))
+                            adapter.notifyDataSetChanged()
+                        }
+                    }
+                    action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED, ignoreCase = true) -> {
+                        loading?.visibility = View.GONE
+                    }
+                    action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED, ignoreCase = true) -> {
+                        loading?.visibility = View.VISIBLE
+                    }
+                }
+            }
+        }
+    }
     private fun data() {
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) return error()
         if (bluetoothAdapter == null) return error()
@@ -112,45 +177,15 @@ class BluetoothActivity : BaseActivity() {
                adapter.notifyDataSetChanged()
            }
         }
-        bluetoothScanCallback = object: ScanCallback() {
-            override fun onScanResult(callbackType: Int, result: ScanResult?) {
-                super.onScanResult(callbackType, result)
-                result?.device?.let { d->
-                    var found = bluetoothDevices.find { it.address == d.address }
-                    if (found == null) {
-                        bluetoothDevices.add(d.let { BluetoothItem(it.address, it.name) })
-                        adapter.notifyDataSetChanged()
-                        loading?.visibility = View.GONE
-                    } else if (!d.name.isNullOrBlank()) {
-                        found.name = d.name
-                    }
-                }
-            }
-            override fun onBatchScanResults(results: MutableList<ScanResult>?) {
-                results?.forEach {r->
-                    val found = bluetoothDevices.find { it.address == r.device.address }
-                    if (found == null) {
-                        bluetoothDevices.add(r.device.let { BluetoothItem(it.address, it.name) })
-                    } else if (!r.device.name.isNullOrBlank()) {
-                        found.name = r.device.name
-                    }
-                }
-                adapter.notifyDataSetChanged()
-                if (bluetoothDevices.size > 0) loading?.visibility = View.GONE
-            }
-            override fun onScanFailed(errorCode: Int) {
-                super.onScanFailed(errorCode)
-                if (errorCode != ScanCallback.SCAN_FAILED_ALREADY_STARTED && bluetoothDevices.size < 1) {
-                    error("查找蓝牙设备失败：${errorCode}")
-                }
-            }
-        }
-        bluetoothScanCallback?.let {
-            bluetoothAdapter?.bluetoothLeScanner?.stopScan(it)
-            bluetoothAdapter?.bluetoothLeScanner?.startScan(null, ScanSettings.Builder()
+        if (true) {
+            bluetoothAdapter.cancelDiscovery()
+            bluetoothAdapter.startDiscovery()
+        } else {
+            bluetoothAdapter.bluetoothLeScanner?.stopScan(bluetoothScanCallback)
+            bluetoothAdapter.bluetoothLeScanner?.startScan(null, ScanSettings.Builder()
                     .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                    .setReportDelay(if (bluetoothAdapter?.isOffloadedScanBatchingSupported ?: false) 1_000 else 0)
-                    .build(), it)
+                    .setReportDelay(if (bluetoothAdapter?.isOffloadedScanBatchingSupported == true) 1_000 else 0)
+                    .build(), bluetoothScanCallback)
         }
     }
     private fun error(message: String = "您的设备不支持蓝牙") {

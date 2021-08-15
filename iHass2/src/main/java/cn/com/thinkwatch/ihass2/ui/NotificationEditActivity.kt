@@ -56,7 +56,7 @@ class NotificationEditActivity : BaseActivity() {
             view, _, item, holder ->
             view.backgroundColor = 0xffffffff.toInt()
             MDIFont.get().setIcon(view.icon, if (item.showIcon.isNullOrBlank()) item.mdiIcon else item.showIcon)
-            view.name.text = if (item.showName.isNullOrBlank()) item.friendlyName else item.showName ?: ""
+            view.name.text = if (item.showName.isNullOrEmpty()) item.friendlyName else item.showName ?: ""
             view.order.setOnTouchListener { _, event ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN) touchHelper.startDrag(holder)
                 true

@@ -10,6 +10,8 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.base.BaseActivity
 import cn.com.thinkwatch.ihass2.dto.AutomationResponse
@@ -17,10 +19,7 @@ import cn.com.thinkwatch.ihass2.model.MDIFont
 import cn.com.thinkwatch.ihass2.model.automation.*
 import cn.com.thinkwatch.ihass2.network.BaseApi
 import cn.com.thinkwatch.ihass2.network.http.HttpRestApi
-import cn.com.thinkwatch.ihass2.ui.automation.action.ActionDelayActivity
-import cn.com.thinkwatch.ihass2.ui.automation.action.ActionFireEventActivity
-import cn.com.thinkwatch.ihass2.ui.automation.action.ActionServiceActivity
-import cn.com.thinkwatch.ihass2.ui.automation.action.ActionWaitActivity
+import cn.com.thinkwatch.ihass2.ui.automation.action.*
 import cn.com.thinkwatch.ihass2.ui.automation.condition.*
 import cn.com.thinkwatch.ihass2.ui.automation.trigger.*
 import cn.com.thinkwatch.ihass2.utils.Gsons
@@ -46,6 +45,7 @@ import org.jetbrains.anko.ctx
 import org.jetbrains.anko.layoutInflater
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import retrofit2.HttpException
+import java.lang.StringBuilder
 import java.lang.reflect.Type
 
 class AutomationEditActivity : BaseActivity() {
@@ -72,7 +72,11 @@ class AutomationEditActivity : BaseActivity() {
         val id = if (this.automationId.isBlank()) System.currentTimeMillis().toString() else this.automationId
         val name = act.name.text()
         if (name.isBlank()) return showError("请输入自动化名称")
-        val automation = Automation(id, name, triggers, conditions, actions)
+        val max = act.max.text().toIntOrNull() ?: 0
+        val mode = automation?.mode ?: "single"
+        if (mode == "queued" && max < 1) return showError("请输入1~10之间的队列深度")
+        if (mode == "parallel" && max < 1) return showError("请输入1~10之间的并行限额")
+        val automation = Automation(id, name, triggers, conditions, actions, mode, max)
         val json = gsonBuilder.toJson(automation)
         val waiting = Dialogs.showWait(ctx)
         val body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json)
@@ -101,6 +105,13 @@ class AutomationEditActivity : BaseActivity() {
                     if (disposable == null) disposable = CompositeDisposable(it)
                     else disposable?.add(it)
                 }
+    }
+
+    private enum class TriggerMode(val desc: String) {
+        single("忽略后者"),
+        restart("重新启动"),
+        queued("队列执行"),
+        parallel("并行执行")
     }
 
     private var automation : Automation? = null
@@ -210,6 +221,8 @@ class AutomationEditActivity : BaseActivity() {
                     ActionType.delay-> ActionDelayActivity::class.java
                     ActionType.wait-> ActionWaitActivity::class.java
                     ActionType.event-> ActionFireEventActivity::class.java
+                    ActionType.choose-> ActionChooseActivity::class.java
+                    ActionType.repeat-> ActionRepeatActivity::class.java
                     ActionType.condition-> {
                         when ((item as ConditionAction).condition?.condition) {
                             ConditionType.or -> ConditionOrActivity::class.java
@@ -237,6 +250,17 @@ class AutomationEditActivity : BaseActivity() {
             addAction()
         }
         this.actisetOnTouchListenerHelper = setupRecyclerView(this.actionsView, this.actionsAdatper)
+        act.mode.adapter = ArrayAdapter(act, R.layout.listitem_textview_text1, TriggerMode.values().map { it.desc })
+        act.mode.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+                val mode = TriggerMode.values()[position].toString()
+                automation?.let { it.mode = mode }
+                act.maxPanel.visibility = if (mode == "queued" || mode == "parallel") View.VISIBLE else View.GONE
+                if (mode == "queued") act.maxLabel.text = "队列深度："
+                else if (mode == "parallel") act.maxLabel.text = "并发限制："
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) { }
+        }
     }
     @ActivityResult(requestCode = 100)
     private fun afterTrigger(data: Intent?) {
@@ -363,6 +387,8 @@ class AutomationEditActivity : BaseActivity() {
             "延迟" to ActionDelayActivity::class.java,
             "等待" to ActionWaitActivity::class.java,
             "发送事件" to ActionFireEventActivity::class.java,
+            "选择" to ActionChooseActivity::class.java,
+            "循环" to ActionRepeatActivity::class.java,
             "任一满足条件" to ConditionOrActivity::class.java,
             "同时满足条件" to ConditionAndActivity::class.java,
             "数字量条件" to ConditionNumbericActivity::class.java,
@@ -380,7 +406,7 @@ class AutomationEditActivity : BaseActivity() {
                     view, index, item ->
                     view.text.text = item
                     view.onClick {
-                        if (index < 4) startActivityForResult(Intent(ctx, actionTypes.get(item)), 301)
+                        if (index < 6) startActivityForResult(Intent(ctx, actionTypes.get(item)), 301)
                         else startActivityForResult(Intent(ctx, actionTypes.get(item)), 305)
                         dialog.dismiss()
                     }
@@ -438,12 +464,23 @@ class AutomationEditActivity : BaseActivity() {
         actionsAdatper.notifyDataSetChanged()
         act.contentView.visibility = View.VISIBLE
         act.name.setText(it.alias)
+        act.max.setText(it.max.toString())
+        act.mode.setSelection(TriggerMode.values().indexOfFirst { it.toString() == automation?.mode ?: "single" })
+        act.maxPanel.visibility = if (it.mode == "queued" || it.mode == "parallel") View.VISIBLE else View.GONE
+        if (it.mode == "queued") act.maxLabel.text = "队列深度："
+        else if (it.mode == "parallel") act.maxLabel.text = "并发限制："
         loadable?.dismissLoading()
     }
     private fun data() {
         BaseApi.jsonApi(cfg.haHostUrl, HttpRestApi::class.java)
                 .getAutomation(cfg.haPassword, cfg.haToken, this.automationId)
                 .withNext {
+                    if (intent.getBooleanExtra("forAdd", false)) {
+                        it.alias = ""
+                        it.id = ""
+                        entityId = ""
+                        automationId = ""
+                    }
                     load(it)
                 }
                 .error {

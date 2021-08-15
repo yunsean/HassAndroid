@@ -65,6 +65,10 @@ class HassConfig {
         val Ui_PullRefresh = "ui.pullRefresh"
         val Ui_HomePanels = "ui.homePanels"
         val Ui_WebFrist = "ui.webFirst"
+        val Ui_ShowTopbar = "ui.showTopbar"
+        val Ui_ShowSidebar = "ui.showSidebar"
+        val Ui_FontScale = "ui.fontScale"
+
         val Gps_Logger = "gps.logger"
         val Gps_DeviceName = "gps.deviceName"
         val Gps_DeviceId = "gps.deviceId"
@@ -98,9 +102,27 @@ class HassConfig {
         val Speech_VoiceOpenApp = "speech.voiceOpenApp"
         val Speech_VoiceContact = "speech.voiceContact"
 
+        val Aux_ProtectEye = "aux.protectEye"
+        val Aux_ProtectEye_Color = "aux.protectEyeColor"
+
         val Wakeup_Forbid = 0
         val Wakeup_Condition = 1
         val Wakeup_Always = -1
+
+        val Album_Used = "album.used"
+        val Album_UserStub = "album.userStub"
+        val Album_Folders = "album.folders"
+        val Album_AutoUpload = "album.autoUpload"
+        val Album_UploadWifi = "album.uploadWifi"
+        val Album_ScanInterval = "album.scanInterval"
+        val Album_Override = "album.override"
+        val Album_EarlyTime = "album.earlyTime"
+        val Album_LastScan = "album.lastScan"
+
+        val UploadMode_None = 0
+        val UploadMode_SomeWifi = 1
+        val UploadMode_AllWifi = 2
+        val UploadMode_Always = 3
     }
 }
 

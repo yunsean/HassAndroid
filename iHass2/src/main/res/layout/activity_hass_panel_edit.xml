@@ -44,6 +44,18 @@
                 android:textColor="#ff555555"
                 android:textColorHint="#ff999999"
                 android:hint="请输入5字以内面板名称"/>
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/icon"
+                android:layout_width="44dip"
+                android:layout_height="36dip"
+                android:layout_gravity="center"
+                android:paddingBottom="3dip"
+                android:gravity="center"
+                android:lines="1"
+                android:textColor="@color/colorPrimary"
+                android:textSize="24dp"
+                app:fontFamily="@font/mdi"
+                tools:text="\uf033" />
             <ImageButton
                 android:id="@+id/image"
                 android:layout_width="44dip"

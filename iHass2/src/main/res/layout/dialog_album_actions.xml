@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+  	android:layout_height="wrap_content"
+	android:background="@drawable/shape_round_ffffff_10dip"
+  	android:orientation="vertical">
+	<TextView
+		android:layout_width="match_parent"
+  		android:layout_height="30dip"
+  		android:gravity="center"
+		android:visibility="visible"
+		android:textColor="#ff333333"
+		android:textSize="14sp"
+		android:text="立即扫描" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/increment"
+		android:clickable="true"
+		android:layout_width="match_parent"
+		android:layout_height="36dip"
+		android:gravity="center"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp_lb_rb"
+		android:orientation="vertical"
+		android:textSize="16sp"
+		android:textStyle="bold"
+		android:textColor="@color/colorPrimary"
+		android:text="增量上传" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/afresh"
+		android:clickable="true"
+		android:layout_width="match_parent"
+		android:layout_height="36dip"
+		android:gravity="center"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp_lb_rb"
+		android:orientation="vertical"
+		android:textSize="16sp"
+		android:textColor="@color/colorPrimary"
+		android:text="全部重传" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/addFolder"
+		android:clickable="true"
+		android:layout_width="match_parent"
+		android:layout_height="36dip"
+		android:gravity="center"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp_lb_rb"
+		android:orientation="vertical"
+		android:textSize="16sp"
+		android:textColor="@color/colorPrimary"
+		android:text="添加目录" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/addFile"
+		android:clickable="true"
+		android:layout_width="match_parent"
+		android:layout_height="36dip"
+		android:gravity="center"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp_lb_rb"
+		android:orientation="vertical"
+		android:textSize="16sp"
+		android:textColor="@color/colorPrimary"
+		android:text="添加文件" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="3dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:layout_width="match_parent"
+		android:layout_height="30dip"
+		android:gravity="center"
+		android:visibility="visible"
+		android:textColor="#ff333333"
+		android:textSize="14sp"
+		android:text="删除本地" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/deleteLocal"
+		android:clickable="true"
+		android:layout_width="match_parent"
+		android:layout_height="36dip"
+		android:gravity="center"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp_lb_rb"
+		android:orientation="vertical"
+		android:textSize="16sp"
+		android:textColor="@color/colorPrimary"
+		android:text="已备份项" />
+	<LinearLayout
+		android:id="@+id/downloadPanel"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+		<View
+			android:layout_width="match_parent"
+			android:layout_height="3dip"
+			android:background="#fff2f2f2" />
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="30dip"
+			android:gravity="center"
+			android:visibility="visible"
+			android:textColor="#ff333333"
+			android:textSize="14sp"
+			android:text="下载文件" />
+		<View
+			android:layout_width="match_parent"
+			android:layout_height="1dip"
+			android:background="#fff2f2f2" />
+		<TextView
+			android:id="@+id/downloadItems"
+			android:clickable="true"
+			android:layout_width="match_parent"
+			android:layout_height="36dip"
+			android:gravity="center"
+			android:background="@drawable/selector_ffffff_eeeeee_round_10dp_lb_rb"
+			android:orientation="vertical"
+			android:textSize="16sp"
+			android:textColor="@color/colorPrimary"
+			android:text="下载任务" />
+	</LinearLayout>
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="3dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:layout_width="match_parent"
+		android:layout_height="30dip"
+		android:gravity="center"
+		android:visibility="visible"
+		android:textColor="#ff333333"
+		android:textSize="14sp"
+		android:text="备份设置" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/setting"
+		android:clickable="true"
+		android:layout_width="match_parent"
+		android:layout_height="36dip"
+		android:gravity="center"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp_lb_rb"
+		android:orientation="vertical"
+		android:textSize="16sp"
+		android:textColor="@color/colorPrimary"
+		android:text="同步设置" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="5dip"
+		android:background="#fff2f2f2" />
+	<TextView
+		android:id="@+id/cancel"
+		android:layout_width="match_parent"
+		android:layout_height="36dip"
+		android:paddingLeft="10dip"
+		android:paddingRight="10dip"
+		android:background="@drawable/selector_ffffff_eeeeee_round_10dp"
+		android:gravity="center"
+		android:visibility="visible"
+		android:textColor="#ffaaaaaa"
+		android:textSize="16sp"
+		android:text="取消" />
+</LinearLayout>

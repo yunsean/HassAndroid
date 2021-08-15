@@ -102,7 +102,9 @@ object Gsons {
                             val trigger : List<Trigger> = (if (!jsonObject.has("trigger")) null else jsonObject.get("trigger").let { if (it.isJsonArray) context?.deserialize<List<Trigger>>(it, object: TypeToken<List<Trigger>>(){}.type) else context?.deserialize<Trigger>(it, Trigger::class.java)?.let { listOf(it) } }) ?: listOf()
                             val condition : List<Condition> = (if (!jsonObject.has("condition")) null else jsonObject.get("condition").let { if (it.isJsonArray) context?.deserialize<List<Condition>>(it, object: TypeToken<List<Condition>>(){}.type) else context?.deserialize<Condition>(it, Condition::class.java)?.let { listOf(it) } }) ?: listOf()
                             val action : List<Action> = (if (!jsonObject.has("action")) null else jsonObject.get("action").let { if (it.isJsonArray) context?.deserialize<List<Action>>(it, object: TypeToken<List<Action>>(){}.type) else context?.deserialize<Action>(it, Action::class.java)?.let { listOf(it) } }) ?: listOf()
-                            Automation(id, alias, trigger, condition, action)
+                            val mode = if (jsonObject.has("mode")) jsonObject.get("mode").asString else "single"
+                            val max = if (jsonObject.has("max")) jsonObject.get("max").asInt else 10
+                            Automation(id, alias, trigger, condition, action, mode, max)
                         }
                     }
                 })
@@ -110,6 +112,7 @@ object Gsons {
                     override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Trigger? {
                         json?.let {
                             val jsonObject = it.asJsonObject
+                            if (!jsonObject.has("platform")) return null
                             val platform = jsonObject.get("platform").asString
                             return when (platform) {
                                 "event"-> context?.deserialize(json, EventTrigger::class.java)
@@ -133,6 +136,7 @@ object Gsons {
                     override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Condition? {
                         json?.let {
                             val jsonObject = it.asJsonObject
+                            if (!jsonObject.has("condition")) return null
                             val condition = jsonObject.get("condition").asString
                             return when (condition) {
                                 "and"-> context?.deserialize(json, AndCondition::class.java)
@@ -158,6 +162,8 @@ object Gsons {
                             else if (jsonObject.has("delay")) return context?.deserialize(json, DelayAction::class.java)
                             else if (jsonObject.has("wait_template")) return context?.deserialize(json, WaitAction::class.java)
                             else if (jsonObject.has("event")) return context?.deserialize(json, FireEventAction::class.java)
+                            else if (jsonObject.has("default")) return context?.deserialize(json, ChooseAction::class.java)
+                            else if (jsonObject.has("repeat")) return context?.deserialize(json, RepeatAction::class.java)
                             else return context?.deserialize(json, UnknownAction::class.java)
                         }
                         return null
@@ -203,7 +209,71 @@ object Gsons {
                         return json
                     }
                     override fun serialize(src: UnknownTrigger?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {
-                        if (src == null || src.fields == null) return null
+                        if (src?.fields == null) return null
+                        return writeJsonObject(src.fields)
+                    }
+                })
+                .registerTypeAdapter(UnknownCondition::class.java, object : JsonDeserializer<UnknownCondition> {
+                    private fun parseJsonObject(json: JsonObject?): MutableMap<String, Any?>? {
+                        if (json == null) return null
+                        var map = mutableMapOf<String, Any?>()
+                        for (entry in json.entrySet()) {
+                            val child = entry.value
+                            if (child == null) continue
+                            else if (child.isJsonObject) map.put(entry.key, parseJsonObject(child.asJsonObject))
+                            else if (child.isJsonPrimitive) map.put(entry.key, child.asJsonPrimitive)
+                        }
+                        return map
+                    }
+                    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): UnknownCondition? {
+                        if (json == null || !json.isJsonObject) return null
+                        return UnknownCondition(parseJsonObject(json.asJsonObject))
+                    }
+                })
+                .registerTypeAdapter(UnknownCondition::class.java, object : JsonSerializer<UnknownCondition> {
+                    private fun writeJsonObject(src: Map<String, Any?>?) : JsonObject? {
+                        if (src == null) return null
+                        val json = JsonObject()
+                        for (entry in src.entries) {
+                            if (entry.value == null) continue
+                            else if (entry.value is Map<*, *>) json.add(entry.key, writeJsonObject(entry.value as Map<String, Any?>))
+                        }
+                        return json
+                    }
+                    override fun serialize(src: UnknownCondition?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {
+                        if (src?.fields == null) return null
+                        return writeJsonObject(src.fields)
+                    }
+                })
+                .registerTypeAdapter(UnknownAction::class.java, object : JsonDeserializer<UnknownAction> {
+                    private fun parseJsonObject(json: JsonObject?): MutableMap<String, Any?>? {
+                        if (json == null) return null
+                        var map = mutableMapOf<String, Any?>()
+                        for (entry in json.entrySet()) {
+                            val child = entry.value
+                            if (child == null) continue
+                            else if (child.isJsonObject) map.put(entry.key, parseJsonObject(child.asJsonObject))
+                            else if (child.isJsonPrimitive) map.put(entry.key, child.asJsonPrimitive)
+                        }
+                        return map
+                    }
+                    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): UnknownAction? {
+                        if (json == null || !json.isJsonObject) return null
+                        return UnknownAction(parseJsonObject(json.asJsonObject))
+                    }
+                })
+                .registerTypeAdapter(UnknownAction::class.java, object : JsonSerializer<UnknownAction> {
+                    private fun writeJsonObject(src: Map<String, Any?>?) : JsonObject? {
+                        if (src == null) return null
+                        val json = JsonObject()
+                        for (entry in src.entries) {
+                            if (entry.value == null) continue
+                            else if (entry.value is Map<*, *>) json.add(entry.key, writeJsonObject(entry.value as Map<String, Any?>))
+                        }
+                        return json
+                    }
+                    override fun serialize(src: UnknownAction?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {
+                        if (src?.fields == null) return null
                         return writeJsonObject(src.fields)
                     }
                 })

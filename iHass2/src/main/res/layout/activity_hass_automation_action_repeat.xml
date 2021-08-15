@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffffff">
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/byTimes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:button="@null"
+            android:drawableRight="@drawable/radio_checkbox"
+            android:padding="10dip"
+            android:checked="true"
+            android:textColor="#ff111111"
+            android:textSize="14sp"
+            android:text="循环次数"/>
+        <LinearLayout
+            android:id="@+id/byTimesPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_ffffff_eeeeee"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/count"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:paddingTop="10dip"
+                android:paddingBottom="10dip"
+                android:paddingRight="30dip"
+                android:paddingLeft="30dip"
+                android:inputType="number"
+                android:textColor="#ff555555"
+                android:textSize="14sp"
+                android:hint="请输入执行次数"/>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="#fff2f2f2" />
+
+        <RadioButton
+            android:id="@+id/byWhile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:button="@null"
+            android:drawableRight="@drawable/radio_checkbox"
+            android:padding="10dip"
+            android:textColor="#ff111111"
+            android:textSize="14sp"
+            android:text="当满足条件时循环"/>
+        <com.dylan.uiparts.recyclerview.InnerRecyclerView
+            android:id="@+id/whileConditions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dip" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="#fff2f2f2" />
+
+        <RadioButton
+            android:id="@+id/byUntil"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:button="@null"
+            android:drawableRight="@drawable/radio_checkbox"
+            android:padding="10dip"
+            android:textColor="#ff111111"
+            android:textSize="14sp"
+            android:text="直到满足条件退出"/>
+        <com.dylan.uiparts.recyclerview.InnerRecyclerView
+            android:id="@+id/untilConditions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dip" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="20dip"
+            android:background="#fff2f2f2" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:textColor="#ff111111"
+            android:textSize="14sp"
+            android:text="循环执行"/>
+        <com.dylan.uiparts.recyclerview.InnerRecyclerView
+            android:id="@+id/actions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dip" />
+
+    </RadioGroup>
+</ScrollView>

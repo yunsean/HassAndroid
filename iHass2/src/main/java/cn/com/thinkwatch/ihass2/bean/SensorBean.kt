@@ -22,7 +22,7 @@ class SensorBean(entity: JsonEntity, val translucence: Boolean): BaseBean(entity
             itemView.cardView.cardElevation = context.dip2px(2f).toFloat()
             itemView.cardView.setCardBackgroundColor(0xFF29B6FC.toInt())
         }
-        itemView.friendlyName.text = if (entity.showName.isNullOrBlank()) entity.friendlyName else entity.showName
+        itemView.friendlyName.text = if (entity.showName.isNullOrEmpty()) entity.friendlyName else entity.showName
         itemView.group.text = entity.groupName
         MDIFont.get().setIcon(itemView.state, if (entity.showIcon.isNullOrBlank()) entity.iconState else entity.showIcon)
         itemView.indicator.visibility = if (entity.hasIndicator) View.VISIBLE else View.INVISIBLE

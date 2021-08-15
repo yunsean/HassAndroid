@@ -1,8 +1,10 @@
 package cn.com.thinkwatch.ihass2.view
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.os.Build
 import android.util.DisplayMetrics
@@ -14,6 +16,7 @@ import android.widget.CheckBox
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import cn.com.thinkwatch.ihass2.R
+import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.model.JsonEntity
 import cn.com.thinkwatch.ihass2.ui.CameraViewActivity
@@ -26,9 +29,13 @@ import com.dylan.medias.stream.MxStreamReader
 import com.yunsean.dynkotlins.extensions.loges
 import com.yunsean.dynkotlins.extensions.start
 import com.yunsean.dynkotlins.extensions.toastex
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
-class FloatWindow(val act: Activity) : View.OnTouchListener {
+class FloatWindow(val act: Activity, val ctx: Context) : View.OnTouchListener {
 
     private var windowParams: WindowManager.LayoutParams
     private var windowManager: WindowManager
@@ -44,7 +51,7 @@ class FloatWindow(val act: Activity) : View.OnTouchListener {
         floatLayout = act.layoutInflater.inflate(R.layout.layout_hass_camera_overlay, null) as View
         floatLayout.setOnTouchListener(this)
         windowParams = WindowManager.LayoutParams()
-        windowManager = act.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        windowManager = ctx.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         if (Build.VERSION.SDK_INT >= 26)
             windowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         else
@@ -95,8 +102,7 @@ class FloatWindow(val act: Activity) : View.OnTouchListener {
         }
     }
     fun showFloatWindow(entity: JsonEntity) {
-        val url = entity.attributes?.previewUrl
-        if (url == null) return
+        val url = entity.attributes?.previewUrl ?: return
         if (floatLayout.parent == null) {
             val metrics = DisplayMetrics()
             windowManager.defaultDisplay.getMetrics(metrics)
@@ -104,8 +110,7 @@ class FloatWindow(val act: Activity) : View.OnTouchListener {
             windowParams.y = metrics.heightPixels / 2 - getSysBarHeight(act)
             windowManager.addView(floatLayout, windowParams)
         }
-        val playerView: MxPlayerView? = floatLayout.findViewById(R.id.playerView)
-        if (playerView == null) return
+        val playerView: MxPlayerView = floatLayout.findViewById(R.id.playerView) ?: return
         val mute = floatLayout.findViewById<CheckBox>(R.id.mute)
         val ptz = floatLayout.findViewById<CheckBox>(R.id.ptz)
         val subStreamPanel = floatLayout.findViewById<RadioGroup>(R.id.subStreamPanel)
@@ -121,6 +126,16 @@ class FloatWindow(val act: Activity) : View.OnTouchListener {
             Intent(act, CameraViewActivity::class.java)
                     .putExtra("entity", Gsons.gson.toJson(entity))
                     .start(act)
+        }
+        ctx.db.getDbEntity(entity.entityId)?.let {
+            try {
+                JSONObject(it.rawJson).optJSONObject("attributes")?.let { attr ->
+                    cameraType = attr.optString("type")
+                    if (attr.has("speed")) ptzSpeed = attr.optDouble("speed", 0.1)
+                }
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
         }
         ptz.setOnCheckedChangeListener { _, isChecked->  floatLayout.findViewById<View>(R.id.ptzPanel).visibility = if (isChecked) View.VISIBLE else View.GONE }
         floatLayout.findViewById<RadioButton>(R.id.close).onClick { hideFloatWindow() }
@@ -146,9 +161,21 @@ class FloatWindow(val act: Activity) : View.OnTouchListener {
         }
         play(url)
     }
+
+    private var ptzSpeed: Double? = null
+    private var cameraType: String? = null
+    private var intervalDisposable: Disposable? = null
     private fun callService(entityId: String, pan: String? = null, tilt: String? = null) {
-        loges("callService($pan, $tilt)")
-        RxBus2.getDefault().post(ServiceRequest("camera", "onvif_ptz", entityId = entityId, pan = pan, tilt = tilt))
+        if (cameraType == "hass_old") {
+            RxBus2.getDefault().post(ServiceRequest("camera", "onvif_ptz", entityId = entityId, pan = pan, tilt = tilt))
+        } else if (cameraType == "hass") {
+            RxBus2.getDefault().post(ServiceRequest("onvif", "ptz", entityId = entityId, pan = pan, tilt = tilt, moveMode = "ContinuousMove", speed = ptzSpeed?.toString()))
+        } else {
+            intervalDisposable?.dispose()
+            if (pan != null || tilt != null) intervalDisposable = Observable.interval(0, 500, TimeUnit.MILLISECONDS).doOnNext {
+                RxBus2.getDefault().post(ServiceRequest("onvif", "ptz", entityId = entityId, pan = pan, tilt = tilt, moveMode = "ContinuousMove", continuousDuration = 0.5f, speed = ptzSpeed?.toString()))
+            }.subscribe()
+        }
     }
     private var stopped = true
     private fun play(url: String) {
@@ -191,15 +218,22 @@ class FloatWindow(val act: Activity) : View.OnTouchListener {
                         .setAutoRetry(false)
                         .setTcpOnly(true)
                         .open(url))
+
+        broadcastReceiver = object: BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) = hideFloatWindow()
+        }
+        ctx.registerReceiver(broadcastReceiver, IntentFilter().apply {
+            priority = IntentFilter.SYSTEM_HIGH_PRIORITY - 9
+            addAction(Intent.ACTION_SCREEN_OFF)
+        })
     }
 
+    private var broadcastReceiver: BroadcastReceiver? = null
     fun hideFloatWindow() {
+        broadcastReceiver?.let { ctx.unregisterReceiver(it) }
+        broadcastReceiver = null
         floatLayout.findViewById<MxPlayerView>(R.id.playerView).stop()
         if (floatLayout.parent != null) windowManager.removeView(floatLayout)
-    }
-    fun setFloatLayoutAlpha(alpha: Boolean) {
-        if (alpha) floatLayout.alpha = 0.5.toFloat()
-        else floatLayout.alpha = 1f
     }
 
     private fun getSysBarHeight(contex: Context): Int {

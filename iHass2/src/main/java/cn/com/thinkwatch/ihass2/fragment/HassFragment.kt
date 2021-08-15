@@ -5,9 +5,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.support.design.widget.TabItem
+import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.content.res.ResourcesCompat
+import android.support.v4.view.ViewPager
 import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.LinearLayoutManager
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +27,7 @@ import cn.com.thinkwatch.ihass2.db.db
 import cn.com.thinkwatch.ihass2.dto.ServiceRequest
 import cn.com.thinkwatch.ihass2.getMessage
 import cn.com.thinkwatch.ihass2.model.JsonEntity
+import cn.com.thinkwatch.ihass2.model.MDIFont
 import cn.com.thinkwatch.ihass2.model.Panel
 import cn.com.thinkwatch.ihass2.ui.CameraViewActivity
 import cn.com.thinkwatch.ihass2.utils.Gsons
@@ -38,13 +44,15 @@ import com.yunsean.dynkotlins.ui.RecyclerAdapter
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.fragment_hass_main.*
 import kotlinx.android.synthetic.main.fragment_hass_main.view.*
+import kotlinx.android.synthetic.main.listitem_hass_panel_thumb.view.*
 import kotlinx.android.synthetic.main.listitem_panel_item.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
-import org.jetbrains.anko.support.v4.act
-import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.dip
-import org.jetbrains.anko.support.v4.onRefresh
+import org.jetbrains.anko.support.v4.*
 import org.jetbrains.anko.vibrator
+import q.rorbin.verticaltablayout.VerticalTabLayout
+import q.rorbin.verticaltablayout.adapter.TabAdapter
+import q.rorbin.verticaltablayout.widget.ITabView
+import q.rorbin.verticaltablayout.widget.TabView
 
 
 class HassFragment : BaseFragment() {
@@ -59,21 +67,27 @@ class HassFragment : BaseFragment() {
         ui()
         tabbar()
         group()
+        slider()
         disposable = RxBus2.getDefault().register(PanelChanged::class.java, {
             if (it.isAdd) {
                 panels = db.listPanel()
                 groupAdapter.items = panels
                 adapter.notifyDataSetChanged()
-                this.tabbarPanel.visibility = if (panels.size > 1) View.VISIBLE else View.GONE
+                sliderAdapter.items = panels
+                allGroups.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowSidebar)) View.VISIBLE else View.GONE
+                this.tabbarPanel.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowTopbar, true)) View.VISIBLE else View.GONE
             }
         }, RxBus2.getDefault().register(HassConfiged::class.java, {
             panels = db.listPanel()
             groupAdapter.items = panels
+            sliderAdapter.items = panels
             adapter.notifyDataSetChanged()
         }, RxBus2.getDefault().register(DisplayPanel::class.java, {
             showPanel(it.show, bottomMargin = it.bottomMargin)
         }, RxBus2.getDefault().register(ConfigChanged::class.java, {
             swipeRefresh.isEnabled = cfg.getBoolean(HassConfig.Ui_PullRefresh)
+            allGroups.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowSidebar)) View.VISIBLE else View.GONE
+            tabbarPanel.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowTopbar, true)) View.VISIBLE else View.GONE
         }, RxBus2.getDefault().register(EntityLongClicked::class.java, {
             onLongClicked(it.entity)
         }, RxBus2.getDefault().register(EntityClicked::class.java, {
@@ -96,7 +110,7 @@ class HassFragment : BaseFragment() {
         super.onResume()
     }
     override fun onPause() {
-        floatWindow?.hideFloatWindow()
+        //floatWindow?.hideFloatWindow()
         super.onPause()
     }
     override fun onDestroy() {
@@ -188,7 +202,7 @@ class HassFragment : BaseFragment() {
                 return startActivityForResult(intent, 1000)
             }
         }
-        if (floatWindow == null) floatWindow = FloatWindow(act)
+        if (floatWindow == null) floatWindow = FloatWindow(act, ctx.applicationContext)
         floatWindow?.showFloatWindow(entity)
     }
     @ActivityResult(requestCode = 1000)
@@ -208,11 +222,43 @@ class HassFragment : BaseFragment() {
             override fun getCount(): Int = panels.size
             override fun getItem(position: Int): Fragment = BaseFragment.newInstance(PanelFragment::class.java, Intent().putExtra("panelId", panels.get(position).id))
         }
+        this.tabbarPanel.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowTopbar, true)) View.VISIBLE else View.GONE
+        this.allGroups.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowSidebar)) View.VISIBLE else View.GONE
         this.viewPager.setCanScroll(true)
         this.viewPager.adapter = adapter
         this.tabbar.setupWithViewPager(this.viewPager)
-        this.tabbar.setSelectedTabIndicatorHeight(dip(3))
-        this.tabbarPanel.visibility = if (panels.size > 1) View.VISIBLE else View.GONE
+        this.tabbar.setSelectedTabIndicatorHeight(dip(3F))
+        this.tabbar.setOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(p0: TabLayout.Tab?) {
+                if (p0 == null) return
+                viewPager.setCurrentItem(p0.position, false)
+                sliderAdapter.notifyDataSetChanged()
+                panels[p0.position].apply { RxBus2.getDefault().post(CurrentPanelChanged(id, name)) }
+            }
+            override fun onTabReselected(p0: TabLayout.Tab?) = Unit
+            override fun onTabUnselected(p0: TabLayout.Tab?) = Unit
+        })
+    }
+
+    private lateinit var sliderAdapter: RecyclerAdapter<Panel>
+    private fun slider() {
+        this.sliderAdapter = RecyclerAdapter(R.layout.listitem_hass_panel_thumb, panels) {
+            view, index, item ->
+            if (item.icon.isNullOrBlank()) {
+                view.item.text = item.name
+                view.item.textSize = 14F
+            } else {
+                MDIFont.get().setIcon(view.item, item.icon)
+                view.item.textSize = 28F
+            }
+            view.item.isSelected = index == viewPager.currentItem
+            view.onClick {
+                viewPager.setCurrentItem(index, false)
+                sliderAdapter.notifyDataSetChanged()
+            }
+        }
+        allGroups.adapter = sliderAdapter
+        allGroups.layoutManager = LinearLayoutManager(ctx, LinearLayoutManager.VERTICAL, true)
     }
 
     private lateinit var groupAdapter: RecyclerAdapter<Panel>
@@ -275,6 +321,9 @@ class HassFragment : BaseFragment() {
         this.swipeRefresh.onRefresh { data() }
         this.swipeRefresh.setSwipeableChildren(this.viewPager)
         this.swipeRefresh.isEnabled = cfg.getBoolean(HassConfig.Ui_PullRefresh)
+        allGroups.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowSidebar)) View.VISIBLE else View.GONE
+        tabbarPanel.visibility = if (panels.size > 1 && cfg.getBoolean(HassConfig.Ui_ShowTopbar, true)) View.VISIBLE else View.GONE
+        if (!panels.isEmpty()) panels[0].apply { RxBus2.getDefault().post(CurrentPanelChanged(id, name)) }
         this.refresh.onClick { data() }
     }
     private fun data() {

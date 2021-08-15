@@ -21,4 +21,5 @@ interface IDataSyncService {
     cn.com.thinkwatch.ihass2.model.Location getLocation();
     void registerCallback(IDataSyncCallback cb);
     void unregisterCallback(IDataSyncCallback cb);
+    void protectEye(in boolean use, in int color, in boolean save);
 }

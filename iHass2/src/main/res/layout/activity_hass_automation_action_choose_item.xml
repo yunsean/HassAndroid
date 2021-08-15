@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffffff">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:textColor="#ff111111"
+            android:textSize="14sp"
+            android:text="条件"/>
+        <com.dylan.uiparts.recyclerview.InnerRecyclerView
+            android:id="@+id/conditions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dip" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dip"
+            android:background="#fff2f2f2" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:textColor="#ff111111"
+            android:textSize="14sp"
+            android:text="动作"/>
+        <com.dylan.uiparts.recyclerview.InnerRecyclerView
+            android:id="@+id/actions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dip" />
+
+    </LinearLayout>
+</ScrollView>

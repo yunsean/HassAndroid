@@ -20,6 +20,7 @@ import com.yunsean.dynkotlins.extensions.nextOnMain
 import kotlinx.android.synthetic.main.control_vacuum.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.act
+import java.lang.StringBuilder
 import java.util.*
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -38,7 +39,7 @@ class VacuumFragment : ControlFragment() {
         val builder = AlertDialog.Builder(getActivity())
         fragment = act.layoutInflater.inflate(R.layout.control_vacuum, null)
         builder.setView(fragment)
-        builder.setTitle(if (entity?.showName.isNullOrBlank()) entity?.friendlyName else entity?.showName)
+        builder.setTitle(if (entity?.showName.isNullOrEmpty()) entity?.friendlyName else entity?.showName)
         return builder.create()
     }
     override fun onResume() {
@@ -56,7 +57,25 @@ class VacuumFragment : ControlFragment() {
             text_locate.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "locate", entity?.entityId)) }
             text_home.onClick { RxBus2.getDefault().post(ServiceRequest(entity?.domain, "return_to_base", entity?.entityId)) }
             val speeds: List<String> = entity?.attributes?.fanSpeedList ?: listOf()
-            val adapter = ArrayAdapter(getActivity(), R.layout.spinner_edittext_lookalike, speeds)
+            val adapter = ArrayAdapter(getActivity(), R.layout.spinner_edittext_lookalike, speeds.map {
+                if (SpinnerModeMap.containsKey(it.toLowerCase())) {
+                    SpinnerModeMap.get(it.toLowerCase())
+                } else {
+                    val text = StringBuilder()
+                    var newString = true
+                    for (i in 0 until it.length) {
+                        val ch = it.get(i)
+                        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch >= '0' && ch <= '9') {
+                            if (newString) text.append(ch.toUpperCase())
+                            else text.append(ch)
+                            newString = false
+                        } else {
+                            newString = true
+                        }
+                    }
+                    text.toString()
+                }
+            })
             spinner_speed.adapter = adapter
             spinner_speed.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
@@ -113,5 +132,9 @@ class VacuumFragment : ControlFragment() {
     }
     override fun onChange() {
         refreshUi()
+    }
+
+    companion object {
+        private val SpinnerModeMap = mapOf("silent" to "安静", "standard" to "标准", "medium" to "中速", "turbo" to "加强", "gentle" to "温和")
     }
 }

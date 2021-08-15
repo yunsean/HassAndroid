@@ -1,1 +1,1 @@
-include ':iHass2', ':app', ":core"
+include ':iHass2', ':app', ':core'

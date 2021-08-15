@@ -4,7 +4,9 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.v7.widget.GridLayoutManager
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import cn.com.thinkwatch.ihass2.R
 import cn.com.thinkwatch.ihass2.adapter.PanelAdapter
 import cn.com.thinkwatch.ihass2.adapter.PanelGroup
@@ -162,7 +164,7 @@ class PanelFragment : BaseFragment() {
         this.recyclerView?.layoutManager = layoutManager
         groups = beans
         adapter.groups = groups
-        fragment.emptyView?.visibility = if (adapter.groups?.size ?: 0 > 0) View.GONE else View.VISIBLE
+        fragment?.emptyView?.visibility = if (adapter.groups?.size ?: 0 > 0) View.GONE else View.VISIBLE
     }
 
     fun maxCommonDivisor(m: Int, n: Int): Int {

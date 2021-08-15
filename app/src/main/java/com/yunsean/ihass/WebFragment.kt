@@ -1,43 +1,14 @@
 package com.yunsean.ihass
 
-import android.graphics.Bitmap
 import android.net.http.SslError
 import android.os.Bundle
 import android.os.Message
-import android.support.v7.widget.LinearLayoutManager
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.view.View
 import android.webkit.*
-import cn.com.thinkwatch.ihass2.app
 import cn.com.thinkwatch.ihass2.base.BaseFragment
-import cn.com.thinkwatch.ihass2.bus.*
-import cn.com.thinkwatch.ihass2.dto.ServiceRequest
-import cn.com.thinkwatch.ihass2.enums.ItemType
-import cn.com.thinkwatch.ihass2.fragment.HassFragment
-import cn.com.thinkwatch.ihass2.model.JsonEntity
-import cn.com.thinkwatch.ihass2.model.MDIFont
-import cn.com.thinkwatch.ihass2.ui.PanelListActivity
-import cn.com.thinkwatch.ihass2.utils.HassConfig
 import cn.com.thinkwatch.ihass2.utils.cfg
-import com.dylan.common.rx.RxBus2
-import com.dylan.common.sketch.Animations
-import com.dylan.uiparts.annimation.MarginAnimation
-import com.yunsean.dynkotlins.extensions.activity
-import com.yunsean.dynkotlins.extensions.readPref
-import com.yunsean.dynkotlins.extensions.savePref
-import com.yunsean.dynkotlins.extensions.screenWidth
-import com.yunsean.dynkotlins.ui.RecyclerAdapter
-import com.yunsean.ihass.db.ShortcutChanged
-import com.yunsean.ihass.db.db
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_web.*
-import kotlinx.android.synthetic.main.listitem_shortcut.view.*
-import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.act
-import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.dip
 import org.jetbrains.anko.support.v4.onRefresh
 
 class WebFragment : BaseFragment() {
@@ -117,7 +88,7 @@ class WebFragment : BaseFragment() {
         this.webView.pauseTimers()
         super.onPause()
     }
-    fun onBackPressed(): Boolean {
+    override fun onBackPressed(): Boolean {
         if (this.webView.canGoBack()) {
             this.webView.goBack()
             return true
